@@ -1,5 +1,7 @@
 # Findings
 
+*[日本語版](FINDINGS.ja.md)*
+
 Six things the Tokyo University Football Association's own pages do not show,
 taken from five seasons of its published match records.
 
@@ -51,7 +53,7 @@ relegation averages.
 
 ## 1. Promotion costs a point a game. Relegation gives back half
 
-![Points per game before and after a division change](figures/fig-promotion.png)
+![Points per game before and after a division change](docs/figures/fig-promotion.png)
 
 Promotion and relegation are the one natural experiment this dataset offers: the
 same squad, one season later, against different opposition. Fifty-seven completed
@@ -73,7 +75,7 @@ half of it, and three relegated sides in ten kept falling.
 
 ## 2. Year groups have no structure beyond "fourth years score"
 
-![Minutes share and scoring rate by academic year](figures/fig-grades.png)
+![Minutes share and scoring rate by academic year](docs/figures/fig-grades.png)
 
 Goals per 90 minutes by academic year, first division only. Pooling divisions
 mixes populations, so this stays inside one of them.
@@ -101,7 +103,7 @@ One real change: first years took 9.5% of first-division minutes in 2026, agains
 
 ## 3. League position and shot volume are only loosely related
 
-![League position against shot volume](figures/fig-bubbles.png)
+![League position against shot volume](docs/figures/fig-bubbles.png)
 
 Rank on the x axis, shots per game on the y, total goals as circle area. Five of
 twelve first-division sides in 2026 sit at least three places away from their
@@ -122,7 +124,7 @@ the top half and finish at 0.204.
 
 ## 4. Squad character has a shape
 
-![Team fingerprints](figures/fig-fingerprints.png)
+![Team fingerprints](docs/figures/fig-fingerprints.png)
 
 Six indices per team, each scaled within the season: shot volume, finishing,
 defence, rotation (minutes spread beyond a settled eleven), youth (share of
@@ -148,7 +150,7 @@ Bunka the most rotated in fifth, Musashi the youngest in eighth.
 
 ## 5. Conversion rises as the division falls, except in the second
 
-![Conversion by division over time](figures/fig-conversion.png)
+![Conversion by division over time](docs/figures/fig-conversion.png)
 
 | | 2022 | 2023 | 2024 | 2025 | 2026 |
 |---|---|---|---|---|---|
@@ -169,7 +171,7 @@ suspect, but this dataset cannot show it and the claim is left open.
 
 ## 6. A club can cross three tiers in five years
 
-![Oubirin's trajectory](figures/fig-trajectory.png)
+![Oubirin's trajectory](docs/figures/fig-trajectory.png)
 
 桜美林大学: second division in 2021 (11 points), Challenge League in 2022, then
 **13 wins from 13** in the 2023 Challenge League, second-division champions in
@@ -198,7 +200,7 @@ squad lists the federation already publishes.
 
 So this document contains group statistics only, which is a different legal
 object entirely. Everything player-level runs locally, on a database this
-repository does not ship. [docs/DATA_POLICY.md](DATA_POLICY.md) has the full
+repository does not ship. [docs/DATA_POLICY.md](docs/DATA_POLICY.md) has the full
 reasoning and the measurements.
 
 ## Reproducing
@@ -209,6 +211,8 @@ togakuren ingest                                 # about 40 seconds
 togakuren trends                                 # sections 1, 2, 5, 6
 togakuren dashboard --series "2026 1部"          # sections 3, 4
 togakuren privacy-check --series "2026 1部"      # the last section
+togakuren profiles --series "2026 1部"           # docs/TEAM_PROFILES.md
+togakuren sample                                 # docs/PLAYER_ANALYSIS_SAMPLE.md
 ```
 
 The figures here are the charts from those two pages, `trends` and `dashboard

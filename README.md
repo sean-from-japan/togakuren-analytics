@@ -13,15 +13,33 @@ rate, when a team's shots and substitutions actually arrive.
 **No collected data is committed here.** The repository is code, and the people in
 this dataset are amateur students — see [docs/DATA_POLICY.md](docs/DATA_POLICY.md).
 
-📊 **[Findings](docs/FINDINGS.md)** — six things the federation's own pages do not
-show, with the charts: what promotion actually costs a squad, why a single
-season says nothing about year groups, and how far league position and shot
-volume come apart.
+📊 **[Findings](FINDINGS.md)** ([日本語](FINDINGS.ja.md)) — six things the
+federation's own pages do not show, with the charts: what promotion actually
+costs a squad, why a single season says nothing about year groups, and how far
+league position and shot volume come apart.
 
 ![Example dashboard](docs/example-dashboard.png)
 
 *Above: the dashboard in aggregate mode, which omits every per-player view. The
 local version adds the squad table and a matchday-by-player minutes grid.*
+
+## Documents
+
+| | |
+|---|---|
+| [FINDINGS.md](FINDINGS.md) · [ja](FINDINGS.ja.md) | Six results with the charts. Start here. |
+| [docs/TEAM_PROFILES.md](docs/TEAM_PROFILES.md) · [ja](docs/TEAM_PROFILES.ja.md) | Every club in the division: numbers, indices, year groups, history. Generated. |
+| [docs/PLAYER_ANALYSIS_SAMPLE.md](docs/PLAYER_ANALYSIS_SAMPLE.md) · [ja](docs/PLAYER_ANALYSIS_SAMPLE.ja.md) | What the player-level output looks like, over an **invented** season. Generated. |
+| [docs/DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
+
+The two generated documents come out of the tool in both languages
+(`--lang en|ja`), so only prose is ever translated by hand and the numbers
+cannot drift between versions. Regenerate them with:
+
+```bash
+togakuren profiles --series "2026 1部" --out docs/TEAM_PROFILES.md
+togakuren sample --out docs/PLAYER_ANALYSIS_SAMPLE.md
+```
 
 ## Install
 
@@ -48,6 +66,8 @@ togakuren dashboard --series "2026 1部"              # interactive, team select
 togakuren report --series "2026 1部"                 # flat standalone HTML
 togakuren export --series "2026 1部" --out d1.csv    # per-player season rows
 togakuren trends                                     # every season at once
+togakuren profiles --series "2026 1部"               # the division as Markdown
+togakuren sample                                     # player-level output, invented data
 togakuren privacy-check --series "2026 1部"          # how identifiable an export is
 ```
 
@@ -193,7 +213,7 @@ the reasoning.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-90 tests, no network access, no fixtures taken from the federation — the test data
+103 tests, no network access, no fixtures taken from the federation — the test data
 is invented clubs and invented people. CI runs them on Linux, macOS and Windows
 against Python 3.9 and 3.13, and fails the build if any collected data is ever
 committed.

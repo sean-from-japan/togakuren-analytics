@@ -27,6 +27,9 @@ WITH results AS (
            SUM(gt.score)                     AS goals_for,
            SUM(opp.score)                    AS goals_against,
            SUM(gt.points)                    AS points,
+           SUM(gt.score > opp.score)         AS win,
+           SUM(gt.score = opp.score)         AS draw,
+           SUM(gt.score < opp.score)         AS lose,
            SUM(gt.fairplay_points)           AS fairplay_points
     FROM game_teams gt
     JOIN games g      ON g.id = gt.game_id AND g.game_over = 1
@@ -65,7 +68,7 @@ subs AS (
 )
 SELECT t.id AS team_pk, t.team_id, t.short_name AS team,
        results.played, results.points, results.goals_for, results.goals_against,
-       results.fairplay_points,
+       results.win, results.draw, results.lose, results.fairplay_points,
        COALESCE(shooting.shots, 0) AS shots,
        COALESCE(shooting.first_half, 0) AS first_half,
        COALESCE(shooting.second_half, 0) AS second_half,

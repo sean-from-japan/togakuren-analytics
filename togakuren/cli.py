@@ -6,7 +6,8 @@ import logging
 import sys
 from pathlib import Path
 
-from . import __version__, dashboard, db, ingest, metrics, paths, privacy, report, trends
+from . import (__version__, dashboard, db, ingest, markdown, metrics, paths, privacy,
+               report, sample, trends)
 from .client import ApiError, Client
 
 
@@ -119,6 +120,30 @@ def cmd_trends(args):
     print(f"wrote {out} ({len(html):,} bytes, aggregates only)")
 
 
+def cmd_profiles(args):
+    """The whole division as a Markdown document, aggregates only."""
+    conn = db.connect(args.db or paths.database())
+    series_id = _resolve_series(conn, args.series)
+    text = markdown.team_profiles(conn, series_id, lang=args.lang, figure=args.figure)
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text, encoding="utf-8")
+    print(f"wrote {out} ({len(text):,} bytes, lang={args.lang}, aggregates only)")
+
+
+def cmd_sample(args):
+    """Player-level output over a synthetic season, safe to publish."""
+    conn = db.connect(":memory:")
+    series_id = sample.generate(conn, seed=args.seed)
+    text = markdown.player_document(
+        conn, series_id, lang=args.lang, min_minutes=args.min_minutes, top=args.top
+    )
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text, encoding="utf-8")
+    print(f"wrote {out} ({len(text):,} bytes, lang={args.lang}, invented data)")
+
+
 def cmd_export(args):
     conn = db.connect(args.db or paths.database())
     series_id = _resolve_series(conn, args.series)
@@ -207,6 +232,26 @@ def build_parser():
 
     listing = subparsers.add_parser("list", help="list series already in the database")
     listing.set_defaults(func=cmd_list)
+
+    profiles = subparsers.add_parser(
+        "profiles", help="write the division as Markdown (aggregates only)"
+    )
+    profiles.add_argument("--series", default="latest")
+    profiles.add_argument("--lang", choices=sorted(markdown.LABELS), default="en")
+    profiles.add_argument("--figure", default="figures/fig-fingerprints.png")
+    profiles.add_argument("--out", default="docs/TEAM_PROFILES.md")
+    profiles.set_defaults(func=cmd_profiles)
+
+    demo = subparsers.add_parser(
+        "sample",
+        help="write the player-level document over an invented season (no real person)",
+    )
+    demo.add_argument("--lang", choices=sorted(markdown.LABELS), default="en")
+    demo.add_argument("--seed", type=int, default=20260829)
+    demo.add_argument("--min-minutes", type=int, default=270)
+    demo.add_argument("--top", type=int, default=25)
+    demo.add_argument("--out", default="docs/PLAYER_ANALYSIS_SAMPLE.md")
+    demo.set_defaults(func=cmd_sample)
 
     across = subparsers.add_parser(
         "trends", help="build the cross-season page (aggregates only, safe to publish)"
