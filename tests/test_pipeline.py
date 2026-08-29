@@ -12,6 +12,7 @@ from . import fixtures
 class Pipeline(unittest.TestCase):
     def setUp(self):
         self.conn = db.connect(":memory:")
+        self.addCleanup(self.conn.close)
         ingest.ingest_series(self.conn, fixtures.FakeClient(), fixtures.SERIES)
 
     def test_every_table_is_populated(self):
@@ -80,6 +81,7 @@ class Pipeline(unittest.TestCase):
 class Report(unittest.TestCase):
     def setUp(self):
         self.conn = db.connect(":memory:")
+        self.addCleanup(self.conn.close)
         ingest.ingest_series(self.conn, fixtures.FakeClient(), fixtures.SERIES)
 
     def test_full_report_names_players(self):
@@ -109,8 +111,8 @@ class Report(unittest.TestCase):
 
 class CommandLine(unittest.TestCase):
     def setUp(self):
-        self.path = ":memory:"
-        self.conn = db.connect(self.path)
+        self.conn = db.connect(":memory:")
+        self.addCleanup(self.conn.close)
 
     def test_parser_requires_a_command(self):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
