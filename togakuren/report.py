@@ -160,6 +160,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
                 [
                     privacy.label(player["player_id"], names.get(player["player_id"]), mode, salt),
                     player["team"],
+                    f"{player['grade']}年" if player["grade"] else "-",
                     player["position"],
                     player["apps"],
                     player["starts"],
@@ -176,7 +177,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
             "from the starting eleven, timed substitutions and dismissals; the federation "
             "records none of them directly.</p>"
             + _table(
-                ["Player", "Team", "Pos", "Apps", "Starts", "Min", "Shots", "Goals", "S/90", "G/S"],
+                ["Player", "Team", "Yr", "Pos", "Apps", "Starts", "Min", "Shots", "Goals", "S/90", "G/S"],
                 rows,
             )
         )

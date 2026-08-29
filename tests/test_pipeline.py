@@ -118,9 +118,10 @@ class CommandLine(unittest.TestCase):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
             cli.build_parser().parse_args([])
 
-    def test_report_defaults_to_full_and_export_to_pseudonym(self):
+    def test_local_views_default_to_full_and_export_to_pseudonym(self):
         parser = cli.build_parser()
         self.assertEqual(parser.parse_args(["report"]).privacy, "full")
+        self.assertEqual(parser.parse_args(["dashboard"]).privacy, "full")
         self.assertEqual(parser.parse_args(["export"]).privacy, "pseudonym")
 
     def test_series_can_be_resolved_by_search_term(self):
@@ -129,10 +130,16 @@ class CommandLine(unittest.TestCase):
         self.assertEqual(cli._resolve_series(self.conn, "Division 1"), "series-1")
         self.assertEqual(cli._resolve_series(self.conn, "series-1"), "series-1")
 
+    def test_every_term_must_match(self):
+        ingest.ingest_series(self.conn, fixtures.FakeClient(), fixtures.SERIES)
+        self.assertEqual(cli._resolve_series(self.conn, "2099 Division"), "series-1")
+        with self.assertRaises(SystemExit):
+            cli._resolve_series(self.conn, "2099 Bundesliga")
+
     def test_unknown_series_term_exits(self):
         ingest.ingest_series(self.conn, fixtures.FakeClient(), fixtures.SERIES)
         with self.assertRaises(SystemExit):
-            cli._resolve_series(self.conn, "Division 9")
+            cli._resolve_series(self.conn, "Bundesliga")
 
     def test_empty_database_exits(self):
         with self.assertRaises(SystemExit):

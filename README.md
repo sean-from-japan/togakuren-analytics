@@ -13,7 +13,10 @@ rate, when a team's shots and substitutions actually arrive.
 **No collected data is committed here.** The repository is code, and the people in
 this dataset are amateur students — see [docs/DATA_POLICY.md](docs/DATA_POLICY.md).
 
-![Example report](docs/example-report.png)
+![Example dashboard](docs/example-dashboard.png)
+
+*Above: the dashboard in aggregate mode, which omits every per-player view. The
+local version adds the squad table and a matchday-by-player minutes grid.*
 
 ## Install
 
@@ -35,11 +38,44 @@ togakuren ingest
 # or just one year
 togakuren ingest --year 2026
 
-togakuren list                                  # what is loaded
-togakuren report --series "1部"                 # standalone HTML, opens anywhere
-togakuren export --series "1部" --out d1.csv    # per-player season rows
-togakuren privacy-check --series "1部"          # how identifiable an export is
+togakuren list                                       # what is loaded
+togakuren dashboard --series "2026 1部"              # interactive, team selector
+togakuren report --series "2026 1部"                 # flat standalone HTML
+togakuren export --series "2026 1部" --out d1.csv    # per-player season rows
+togakuren privacy-check --series "2026 1部"          # how identifiable an export is
 ```
+
+`--series` takes a series id or any set of search terms that narrows to one
+series, so `"2026 1部"` is enough.
+
+### What the dashboard shows
+
+Both views are one self-contained file with no external assets — no CDN, no
+build step, no server.
+
+**League level**
+
+- **Position × shot volume × goals.** Rank on the x axis, shots per game on the
+  y, total goals as circle area. A side that shoots a lot without scoring
+  separates visibly from one that converts a handful of chances.
+- **Six-axis team fingerprints** — shot volume, finishing, defence, rotation,
+  youth and late push, each scaled within the series. Twelve small radars side by
+  side make a settled veteran side and a young rotating one different *shapes*,
+  not different numbers.
+- **Points accumulated by matchday**, all teams at once, the selected one
+  highlighted.
+- **Goals split by the opponent's half of the table** — feasting on the bottom
+  and going quiet against the top looks identical in a goals column.
+
+**Team level**, behind a selector button
+
+- **A matchday × player minutes grid.** The single most useful view for a
+  squad: who actually plays, who rotates, who disappears after a certain week. A
+  settled side is a solid block; a rotated one is mottled.
+- **Minutes and goals by academic year**, plus mean year weighted by minutes.
+- **The club's history across divisions**, followed by its federation-wide id, so
+  relegation and promotion appear as a change of division on consecutive rows.
+- The full squad table with per-90 rates.
 
 The database and the response cache go to a per-user data directory
 (`~/Library/Application Support/togakuren-analytics` on macOS,
@@ -54,11 +90,12 @@ The database and the response cache go to a per-user data directory
 | `games` | fixtures: section, kickoff, venue, regulation length |
 | `game_teams` | one row per team per fixture: score, points, fair-play points |
 | `appearances` | who played, in which role, and **for how many minutes** |
+| `squad_members` | academic year, shirt number, position — the year group data |
 | `shots` | per player per match, split into halves and extra time |
 | `events` | goals and cards with the minute and the offence code |
 | `substitutions` | who came off, who came on, when |
 | `standings` | the league table the federation computes |
-| `players`, `squad_members` | squad lists — the only personal data, and droppable |
+| `players` | names — the only free-text personal data, and droppable |
 
 A full backfill as of August 2026:
 
@@ -133,7 +170,7 @@ the reasoning.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-57 tests, no network access, no fixtures taken from the federation — the test data
+79 tests, no network access, no fixtures taken from the federation — the test data
 is invented clubs and invented people. CI runs them on Linux, macOS and Windows
 against Python 3.9 and 3.13, and fails the build if any collected data is ever
 committed.

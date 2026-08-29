@@ -6,7 +6,7 @@ import logging
 import sys
 from pathlib import Path
 
-from . import __version__, db, ingest, metrics, paths, privacy, report
+from . import __version__, dashboard, db, ingest, metrics, paths, privacy, report
 from .client import ApiError, Client
 
 
@@ -25,10 +25,12 @@ def _resolve_series(conn, value):
     for row in rows:
         if row["id"] == value:
             return value
-    needle = value.lower()
+    # Every whitespace-separated term must appear, so "2026 1部" narrows a name
+    # that "1部" alone matches seven times over.
+    terms = value.lower().split()
     matches = [
         row for row in rows
-        if needle in f"{row['year']} {row['short_name']} {row['name']}".lower()
+        if all(term in f"{row['year']} {row['short_name']} {row['name']}".lower() for term in terms)
     ]
     if len(matches) == 1:
         return matches[0]["id"]
@@ -93,6 +95,20 @@ def cmd_report(args):
     print(f"wrote {out} ({len(html):,} bytes, privacy={args.privacy})")
 
 
+def cmd_dashboard(args):
+    conn = db.connect(args.db or paths.database())
+    series_id = _resolve_series(conn, args.series)
+    salt = args.salt or (privacy.new_salt() if args.privacy == "pseudonym" else None)
+    if args.public:
+        rows = metrics.player_season(conn, series_id, min_minutes=0)
+        privacy.check_public_safe(args.privacy, rows)
+    html = dashboard.build(conn, series_id, mode=args.privacy, salt=salt)
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(html, encoding="utf-8")
+    print(f"wrote {out} ({len(html):,} bytes, privacy={args.privacy})")
+
+
 def cmd_export(args):
     conn = db.connect(args.db or paths.database())
     series_id = _resolve_series(conn, args.series)
@@ -105,7 +121,7 @@ def cmd_export(args):
     names = dict(conn.execute("SELECT player_id, name FROM players"))
 
     columns = [
-        "label", "team", "position", "apps", "starts", "sub_apps", "minutes",
+        "label", "team", "grade", "position", "apps", "starts", "sub_apps", "minutes",
         "shots", "goals", "yellows", "reds", "shots_per_90", "goals_per_90", "conversion",
     ]
     handle = open(args.out, "w", newline="", encoding="utf-8") if args.out else sys.stdout
@@ -184,6 +200,7 @@ def build_parser():
 
     for name, handler, extra in (
         ("report", cmd_report, True),
+        ("dashboard", cmd_dashboard, True),
         ("export", cmd_export, False),
         ("privacy-check", cmd_privacy_check, None),
     ):
@@ -191,6 +208,7 @@ def build_parser():
             name,
             help={
                 "report": "build a standalone HTML report",
+                "dashboard": "build an interactive HTML dashboard with a team selector",
                 "export": "write per-player season rows as CSV",
                 "privacy-check": "measure how identifiable a de-named export is",
             }[name],
@@ -200,7 +218,9 @@ def build_parser():
         if extra is not None:
             sub.add_argument(
                 "--privacy", choices=privacy.MODES,
-                default="full" if name == "report" else "pseudonym",
+                # Local viewing defaults to real names; anything meant to leave
+                # the machine starts pseudonymous.
+                default="pseudonym" if name == "export" else "full",
             )
             sub.add_argument("--salt", help="reuse a salt so pseudonyms stay stable")
             sub.add_argument(
@@ -208,8 +228,9 @@ def build_parser():
                 help="refuse to write anything unsafe to publish",
             )
         if extra:
-            sub.add_argument("--out", default="reports/report.html")
-            sub.add_argument("--top", type=int, default=20)
+            sub.add_argument("--out", default=f"reports/{name}.html")
+            if name == "report":
+                sub.add_argument("--top", type=int, default=20)
         elif extra is False:
             sub.add_argument("--out", help="CSV path (default: stdout)")
         sub.set_defaults(func=handler)
