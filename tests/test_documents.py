@@ -172,3 +172,39 @@ class Slugs(unittest.TestCase):
         slug = markdown.season_slug("2030", "特別リーグ")
         self.assertEqual(slug, "2030-other")
         self.assertTrue(slug.isascii())
+
+
+class DocumentStability(unittest.TestCase):
+    """A committed document for a finished season must not churn."""
+
+    def setUp(self):
+        self.conn = db.connect(":memory:")
+        self.addCleanup(self.conn.close)
+        ingest.ingest_series(self.conn, fixtures.TwoGameClient(), fixtures.SERIES)
+
+    def _dates(self, kickoff):
+        self.conn.execute("UPDATE games SET kickoff = ?", (kickoff,))
+        self.conn.commit()
+
+    def test_a_past_season_carries_no_generation_date(self):
+        self._dates("2020-04-01 14:00:00")
+        text = markdown.team_profiles(self.conn, "series-1")
+        self.assertIn("is final", text)
+        self.assertNotIn("generated", text)
+
+    def test_a_future_season_is_dated_and_marked_in_progress(self):
+        self._dates("2999-01-01 14:00:00")
+        self.conn.execute("UPDATE games SET game_over = 0 WHERE id = 'game-2'")
+        self.conn.commit()
+        text = markdown.team_profiles(self.conn, "series-1")
+        self.assertIn("generated", text)
+        self.assertIn("in progress", text)
+
+    def test_a_fixture_that_was_never_played_does_not_make_a_season_current(self):
+        # One abandoned fixture in a season years past is not "in progress".
+        self._dates("2020-04-01 14:00:00")
+        self.conn.execute("UPDATE games SET game_over = 0 WHERE id = 'game-2'")
+        self.conn.commit()
+        text = markdown.team_profiles(self.conn, "series-1")
+        self.assertIn("is final", text)
+        self.assertIn("never played", text)

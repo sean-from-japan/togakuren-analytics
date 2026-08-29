@@ -220,7 +220,7 @@ the reasoning.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-110 tests, no network access, no fixtures taken from the federation — the test data
+113 tests, no network access, no fixtures taken from the federation — the test data
 is invented clubs and invented people. CI runs them on Linux, macOS and Windows
 against Python 3.9 and 3.13, and fails the build if any collected data is ever
 committed.
