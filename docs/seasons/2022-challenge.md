@@ -2,9 +2,9 @@
 
 Every club in the division, from the federation's published match records. Aggregates only — no individual appears in this document; see [../DATA_POLICY.md](../DATA_POLICY.md).
 
-Snapshot of 2022 チャレンジリーグ, generated 2026-08-29. Regenerate with `togakuren profiles --series "2022 チャレンジリーグ"`.
+2022 チャレンジリーグ. The season is over, so this document is final: the same code over the same records reproduces it exactly. Regenerate with `togakuren profiles --series "2022 チャレンジリーグ"`.
 
-**Season in progress: 119 of 120 fixtures played.**
+1 of the 120 scheduled fixtures were never played and are not counted anywhere above.
 
 ## League table
 

@@ -21,6 +21,10 @@ LABELS = {
             "[{policy}]({policy})."
         ),
         "snapshot": "Snapshot of {series}, generated {when}. Regenerate with `{command}`.",
+        "final": ("{series}. The season is over, so this document is final: the same code "
+                  "over the same records reproduces it exactly. Regenerate with `{command}`."),
+        "unplayed": ("{n} of the {total} scheduled fixtures were never played and are not "
+                     "counted anywhere above."),
         "in_progress": "**Season in progress: {done} of {total} fixtures played.**",
         "table": "League table",
         "fingerprints": "Fingerprints",
@@ -117,6 +121,9 @@ LABELS = {
             "個人は一切登場しない（[{policy}]({policy})）。"
         ),
         "snapshot": "{series} 時点の集計。生成日 {when}。再生成は `{command}`。",
+        "final": ("{series}。シーズンは終了しているため、この文書は確定である。"
+                  "同じ記録に同じ処理をかければそのまま再現される。再生成は `{command}`。"),
+        "unplayed": "予定されていた全{total}試合のうち{n}試合は不成立で、上の集計には含まれていない。",
         "in_progress": "**シーズン進行中: 全{total}試合中{done}試合を消化。**",
         "table": "順位表",
         "fingerprints": "チームの個性",
@@ -235,7 +242,8 @@ def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.p
         raise ValueError(f"series {series_id!r} has no completed fixtures")
     opponents = {row["team_pk"]: row for row in analysis.goals_by_opponent(conn, series_id, profile)}
     fixtures = conn.execute(
-        "SELECT COUNT(*), SUM(game_over) FROM games WHERE series_id = ?", (series_id,)
+        "SELECT COUNT(*), SUM(game_over), MAX(kickoff) FROM games WHERE series_id = ?",
+        (series_id,),
     ).fetchone()
 
     # Lineups only exist from 2022. Without them, minutes, shots and every index
@@ -254,21 +262,39 @@ def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.p
         if has_players else {}
     )
 
-    when = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d")
+    # A finished season's document must not change when it is regenerated, or
+    # committing it buys nothing: a generation date alone would rewrite forty
+    # files a day for no change in content.
+    #
+    # "Finished" is a question about the calendar, not the fixture count. Two
+    # seasons here have a fixture that was never played, and a 2022 season is
+    # not in progress because of it.
+    last = (fixtures[2] or "")[:10]
+    finished = bool(last) and last < datetime.now().strftime("%Y-%m-%d")
+    unplayed = (fixtures[0] or 0) - (fixtures[1] or 0)
+    label = f"{series['year']} {series['short_name']}"
+    command = f'togakuren profiles --series "{label}"'
+    header = (
+        text["final"].format(series=label, command=command)
+        if finished
+        else text["snapshot"].format(
+            series=label,
+            when=datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d"),
+            command=command,
+        )
+    )
     parts = [
         f"# {text['teams_title']} — {series['name'].strip()}",
         "",
         text["teams_intro"].format(
             policy=policy or ("DATA_POLICY.md" if lang == "en" else "DATA_POLICY.ja.md")
         ),
-        "",
-        text["snapshot"].format(
-            series=f"{series['year']} {series['short_name']}", when=when,
-            command=f'togakuren profiles --series "{series["year"]} {series["short_name"]}"',
-        ),
+        "", header,
     ]
-    if fixtures[0] and (fixtures[1] or 0) < fixtures[0]:
+    if not finished:
         parts += ["", text["in_progress"].format(done=fixtures[1] or 0, total=fixtures[0])]
+    elif unplayed:
+        parts += ["", text["unplayed"].format(n=unplayed, total=fixtures[0])]
 
     if not has_players:
         parts += ["", text["results_only"], "", f"## {text['table']}", "", _table(

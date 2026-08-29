@@ -2,7 +2,7 @@
 
 Every club in the division, from the federation's published match records. Aggregates only — no individual appears in this document; see [../DATA_POLICY.md](../DATA_POLICY.md).
 
-Snapshot of 2025 チャレンジリーグ, generated 2026-08-29. Regenerate with `togakuren profiles --series "2025 チャレンジリーグ"`.
+2025 チャレンジリーグ. The season is over, so this document is final: the same code over the same records reproduces it exactly. Regenerate with `togakuren profiles --series "2025 チャレンジリーグ"`.
 
 ## League table
 
