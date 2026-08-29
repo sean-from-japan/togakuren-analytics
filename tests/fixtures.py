@@ -127,6 +127,37 @@ GAME = {
 }
 
 
+#: A reverse fixture, so tests that need a table, a points curve or an
+#: opponent split have more than one result to work with.
+GAME2 = {
+    "_id": "game-2",
+    "seriesId": "series-1",
+    "section": "2",
+    "date": "2099-04-08 14:00:00",
+    "venue": "Sample Park",
+    "gameOver": True,
+    "published": True,
+    "matchTime": "90",
+    "extraTime": "0",
+    "gameRecords": [
+        _record(
+            "record-b2", "team-b", "b", 1,
+            shots=[(1, 1, 2), (3, 0, 1)],
+            starters=range(1, 12),
+            subs=[(3, 12, "60")],
+            events=[{"pid": 1, "type": "goal", "time": "20"}],
+        ),
+        _record(
+            "record-a2", "team-a", "a", 0,
+            shots=[(1, 1, 0), (5, 0, 1)],
+            starters=range(1, 12),
+            subs=[],
+            events=[],
+        ),
+    ],
+}
+
+
 class FakeClient:
     """Stands in for :class:`togakuren.client.Client` in tests."""
 
@@ -136,5 +167,14 @@ class FakeClient:
     def teams(self, series_id):
         return TEAMS
 
+    #: Number of fixtures this client serves.
+    fixtures = 1
+
     def games(self, series_id):
-        return [GAME]
+        return [GAME] if self.fixtures == 1 else [GAME, GAME2]
+
+
+class TwoGameClient(FakeClient):
+    """Serves both fixtures, giving tests a league table to reason about."""
+
+    fixtures = 2

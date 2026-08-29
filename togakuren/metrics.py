@@ -59,6 +59,7 @@ scoring AS (
 SELECT played.player_id,
        t.short_name                                        AS team,
        COALESCE(sm.position, main_position.position, '')   AS position,
+       sm.grade                                            AS grade,
        played.apps, played.starts, played.minutes,
        COALESCE(shooting.shots, 0)                         AS shots,
        COALESCE(scoring.goals, 0)                          AS goals,
