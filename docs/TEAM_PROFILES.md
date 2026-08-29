@@ -1,0 +1,363 @@
+# Team profiles — 2026年度 第４回 関東大学サッカーリーグ戦 東京・神奈川 1部
+
+Every club in the division, from the federation's published match records. Aggregates only — no individual appears in this document; see [DATA_POLICY.md](DATA_POLICY.md).
+
+Snapshot of 2026 1部リーグ, generated 2026-08-29. Regenerate with `togakuren profiles --series "2026 1部リーグ"`.
+
+**Season in progress: 78 of 132 fixtures played.**
+
+## League table
+
+| # | Team | P | Pts | W-D-L | GF | GA | GD | Shots | S/game | Conv |
+| --- | --- | --: | --: | --: | --: | --: | --: | --: | --: | --: |
+| 1 | 東京経済大学 | 13 | 33 | 10-3-0 | 42 | 8 | 34 | 211 | 16.2 | 0.199 |
+| 2 | 桜美林大学 | 13 | 31 | 9-4-0 | 42 | 12 | 30 | 234 | 18.0 | 0.179 |
+| 3 | 帝京大学 | 13 | 30 | 9-3-1 | 27 | 6 | 21 | 220 | 16.9 | 0.123 |
+| 4 | 学習院大学 | 13 | 22 | 6-4-3 | 25 | 17 | 8 | 121 | 9.3 | 0.207 |
+| 5 | 大東文化大学 | 13 | 21 | 6-3-4 | 23 | 20 | 3 | 113 | 8.7 | 0.204 |
+| 6 | 朝鮮大学校 | 13 | 20 | 6-2-5 | 13 | 21 | -8 | 112 | 8.6 | 0.116 |
+| 7 | 横浜国立大学（神奈川県） | 13 | 16 | 5-1-7 | 18 | 30 | -12 | 163 | 12.5 | 0.110 |
+| 8 | 武蔵大学 | 13 | 15 | 4-3-6 | 22 | 20 | 2 | 154 | 11.8 | 0.143 |
+| 9 | 日本大学文理学部 | 13 | 12 | 3-3-7 | 16 | 28 | -12 | 95 | 7.3 | 0.168 |
+| 10 | 玉川大学 | 13 | 8 | 2-2-9 | 12 | 26 | -14 | 118 | 9.1 | 0.102 |
+| 11 | 上智大学 | 13 | 8 | 2-2-9 | 11 | 27 | -16 | 107 | 8.2 | 0.103 |
+| 12 | 神奈川工科大学（神奈川県） | 13 | 3 | 1-0-12 | 7 | 43 | -36 | 75 | 5.8 | 0.093 |
+
+## Fingerprints
+
+![Fingerprints](figures/fig-fingerprints.png)
+
+Six indices, each scaled within this division. The chart is the same one the dashboard draws; the numbers under each club repeat it in text.
+
+### 1. 東京経済大学
+
+13 played · 33 points · 42 scored, 8 conceded · 16.2 shots per game at 0.199 · 30 players used, top eleven took 76% of the minutes · mean year 2.52
+
+**Indices** — Shot volume 86 / Finishing 93 / Defence 95 / Rotation 37 / Youth 54 / Late push 39
+
+9 against the top half, 33 against the bottom half (79% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 4 | 436 | 0 |
+| 2 | 7 | 3681 | 11 |
+| 3 | 11 | 6555 | 22 |
+| 4 | 5 | 1244 | 4 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 1部リーグ | 24 | 12-5-7 | 41 | 1.71 | 33 | 13 |
+| 2022 | 1部リーグ | 22 | 14-4-4 | 46 | 2.09 | 34 | 11 |
+| 2026 | 1部リーグ | 13 | 10-3-0 | 33 | 2.54 | 42 | 34 |
+
+### 2. 桜美林大学
+
+13 played · 31 points · 42 scored, 12 conceded · 18.0 shots per game at 0.179 · 24 players used, top eleven took 82% of the minutes · mean year 3.36
+
+**Indices** — Shot volume 100 / Finishing 76 / Defence 84 / Rotation 14 / Youth 0 / Late push 76
+
+15 against the top half, 27 against the bottom half (64% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 4 | 989 | 4 |
+| 2 | 2 | 1499 | 0 |
+| 3 | 3 | 2274 | 4 |
+| 4 | 15 | 8108 | 33 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 2部リーグ | 18 | 3-2-13 | 11 | 0.61 | 22 | -42 |
+| 2022 | チャレンジリーグ | 15 | 10-3-2 | 33 | 2.2 | 75 | 51 |
+| 2023 | チャレンジリーグ | 13 | 13-0-0 | 39 | 3.0 | 84 | 73 |
+| 2024 | 2部リーグ | 18 | 14-2-2 | 44 | 2.44 | 60 | 51 |
+| 2025 | 1部リーグ | 22 | 13-3-6 | 42 | 1.91 | 44 | 17 |
+| 2026 | 1部リーグ | 13 | 9-4-0 | 31 | 2.38 | 42 | 30 |
+
+### 3. 帝京大学
+
+13 played · 30 points · 27 scored, 6 conceded · 16.9 shots per game at 0.123 · 28 players used, top eleven took 72% of the minutes · mean year 2.96
+
+**Indices** — Shot volume 91 / Finishing 26 / Defence 100 / Rotation 54 / Youth 43 / Late push 100
+
+6 against the top half, 21 against the bottom half (78% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 5 | 1057 | 1 |
+| 2 | 6 | 2734 | 3 |
+| 3 | 9 | 4734 | 5 |
+| 4 | 8 | 4345 | 18 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 1部リーグ | 24 | 11-1-12 | 34 | 1.42 | 38 | 1 |
+| 2022 | 1部リーグ | 22 | 6-3-13 | 21 | 0.95 | 24 | -31 |
+| 2023 | 1部リーグ | 22 | 16-2-4 | 50 | 2.27 | 46 | 27 |
+| 2024 | 1部リーグ | 22 | 17-4-1 | 55 | 2.5 | 62 | 52 |
+| 2025 | 1部リーグ | 22 | 19-1-2 | 58 | 2.64 | 58 | 46 |
+| 2026 | 1部リーグ | 13 | 9-3-1 | 30 | 2.31 | 27 | 21 |
+
+### 4. 学習院大学
+
+13 played · 22 points · 25 scored, 17 conceded · 9.3 shots per game at 0.207 · 22 players used, top eleven took 80% of the minutes · mean year 2.81
+
+**Indices** — Shot volume 29 / Finishing 100 / Defence 70 / Rotation 21 / Youth 73 / Late push 48
+
+9 against the top half, 16 against the bottom half (64% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 5 | 1360 | 1 |
+| 2 | 4 | 3327 | 5 |
+| 3 | 6 | 4549 | 5 |
+| 4 | 7 | 3634 | 13 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 1部リーグ | 24 | 8-2-14 | 26 | 1.08 | 32 | -11 |
+| 2022 | 1部リーグ | 22 | 6-4-12 | 22 | 1.0 | 27 | -21 |
+| 2023 | 1部リーグ | 22 | 10-5-7 | 35 | 1.59 | 35 | 4 |
+| 2024 | 1部リーグ | 22 | 8-7-7 | 31 | 1.41 | 36 | 9 |
+| 2025 | 1部リーグ | 22 | 8-4-10 | 28 | 1.27 | 38 | 0 |
+| 2026 | 1部リーグ | 13 | 6-4-3 | 22 | 1.69 | 25 | 8 |
+
+### 5. 大東文化大学
+
+13 played · 21 points · 23 scored, 20 conceded · 8.7 shots per game at 0.204 · 32 players used, top eleven took 61% of the minutes · mean year 3.08
+
+**Indices** — Shot volume 24 / Finishing 97 / Defence 62 / Rotation 100 / Youth 44 / Late push 35
+
+8 against the top half, 15 against the bottom half (65% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 1 | 45 | 0 |
+| 2 | 11 | 3779 | 10 |
+| 3 | 9 | 4132 | 4 |
+| 4 | 11 | 4914 | 9 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 1部リーグ | 24 | 4-6-14 | 18 | 0.75 | 11 | -32 |
+| 2022 | 2部リーグ | 20 | 19-0-1 | 57 | 2.85 | 56 | 45 |
+| 2023 | 1部リーグ | 22 | 12-6-4 | 42 | 1.91 | 34 | 19 |
+| 2024 | 1部リーグ | 22 | 14-4-4 | 46 | 2.09 | 58 | 26 |
+| 2025 | 1部リーグ | 22 | 16-2-4 | 50 | 2.27 | 55 | 32 |
+| 2026 | 1部リーグ | 13 | 6-3-4 | 21 | 1.62 | 23 | 3 |
+
+### 6. 朝鮮大学校
+
+13 played · 20 points · 13 scored, 21 conceded · 8.6 shots per game at 0.116 · 29 players used, top eleven took 77% of the minutes · mean year 3.04
+
+**Indices** — Shot volume 23 / Finishing 20 / Defence 60 / Rotation 32 / Youth 10 / Late push 0
+
+5 against the top half, 8 against the bottom half (62% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 5 | 785 | 0 |
+| 2 | 3 | 2019 | 2 |
+| 3 | 5 | 3782 | 5 |
+| 4 | 14 | 5742 | 3 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 1部リーグ | 24 | 7-4-13 | 25 | 1.04 | 22 | -12 |
+| 2022 | 1部リーグ | 22 | 8-4-10 | 28 | 1.27 | 29 | -10 |
+| 2023 | 1部リーグ | 22 | 16-4-2 | 52 | 2.36 | 48 | 32 |
+| 2024 | 1部リーグ | 22 | 8-4-10 | 28 | 1.27 | 43 | -2 |
+| 2025 | 1部リーグ | 22 | 6-2-14 | 20 | 0.91 | 22 | -26 |
+| 2026 | 1部リーグ | 13 | 6-2-5 | 20 | 1.54 | 13 | -8 |
+
+### 7. 横浜国立大学（神奈川県）
+
+13 played · 16 points · 18 scored, 30 conceded · 12.5 shots per game at 0.110 · 26 players used, top eleven took 85% of the minutes · mean year 3.09
+
+**Indices** — Shot volume 55 / Finishing 15 / Defence 35 / Rotation 0 / Youth 47 / Late push 23
+
+11 against the top half, 7 against the bottom half (39% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 4 | 657 | 0 |
+| 2 | 7 | 3235 | 3 |
+| 3 | 5 | 3318 | 3 |
+| 4 | 10 | 5660 | 12 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2023 | 1部リーグ | 22 | 4-7-11 | 19 | 0.86 | 24 | -14 |
+| 2024 | 2部リーグ | 18 | 14-2-2 | 44 | 2.44 | 67 | 46 |
+| 2025 | 1部リーグ | 22 | 10-4-8 | 34 | 1.55 | 34 | 0 |
+| 2026 | 1部リーグ | 13 | 5-1-7 | 16 | 1.23 | 18 | -12 |
+
+### 8. 武蔵大学
+
+13 played · 15 points · 22 scored, 20 conceded · 11.8 shots per game at 0.143 · 32 players used, top eleven took 70% of the minutes · mean year 2.88
+
+**Indices** — Shot volume 50 / Finishing 44 / Defence 62 / Rotation 63 / Youth 100 / Late push 1
+
+6 against the top half, 16 against the bottom half (73% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 6 | 604 | 5 |
+| 2 | 12 | 4893 | 11 |
+| 3 | 6 | 2760 | 3 |
+| 4 | 8 | 4601 | 3 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 2部リーグ | 18 | 8-6-4 | 30 | 1.67 | 34 | 14 |
+| 2022 | 2部リーグ | 20 | 10-3-7 | 33 | 1.65 | 42 | 21 |
+| 2023 | 1部リーグ | 22 | 6-3-13 | 21 | 0.95 | 24 | -13 |
+| 2024 | 1部リーグ | 22 | 9-6-7 | 33 | 1.5 | 48 | 8 |
+| 2025 | 1部リーグ | 22 | 12-3-7 | 39 | 1.77 | 44 | 8 |
+| 2026 | 1部リーグ | 13 | 4-3-6 | 15 | 1.15 | 22 | 2 |
+
+### 9. 日本大学文理学部
+
+13 played · 12 points · 16 scored, 28 conceded · 7.3 shots per game at 0.168 · 26 players used, top eleven took 80% of the minutes · mean year 2.94
+
+**Indices** — Shot volume 13 / Finishing 66 / Defence 40 / Rotation 23 / Youth 34 / Late push 25
+
+5 against the top half, 11 against the bottom half (69% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 5 | 1133 | 1 |
+| 2 | 4 | 2378 | 4 |
+| 3 | 11 | 5524 | 4 |
+| 4 | 6 | 3835 | 7 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 3部リーグ | 8 | 3-3-2 | 12 | 1.5 | 20 | 10 |
+| 2022 | 2部リーグ | 20 | 11-0-9 | 33 | 1.65 | 32 | -6 |
+| 2023 | 2部リーグ | 22 | 16-1-5 | 49 | 2.23 | 66 | 35 |
+| 2024 | 1部リーグ | 22 | 7-5-10 | 26 | 1.18 | 31 | -19 |
+| 2025 | 1部リーグ | 22 | 10-4-8 | 34 | 1.55 | 33 | 0 |
+| 2026 | 1部リーグ | 13 | 3-3-7 | 12 | 0.92 | 16 | -12 |
+
+### 10. 玉川大学
+
+13 played · 8 points · 12 scored, 26 conceded · 9.1 shots per game at 0.102 · 26 players used, top eleven took 74% of the minutes · mean year 3.12
+
+**Indices** — Shot volume 27 / Finishing 7 / Defence 46 / Rotation 48 / Youth 31 / Late push 15
+
+4 against the top half, 8 against the bottom half (67% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 6 | 1240 | 3 |
+| 2 | 7 | 2180 | 3 |
+| 3 | 5 | 3298 | 3 |
+| 4 | 8 | 6140 | 2 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 2部リーグ | 18 | 12-3-3 | 39 | 2.17 | 42 | 26 |
+| 2022 | 1部リーグ | 22 | 2-2-18 | 8 | 0.36 | 16 | -36 |
+| 2023 | 1部リーグ | 22 | 7-2-13 | 23 | 1.05 | 28 | -8 |
+| 2024 | 1部リーグ | 22 | 4-9-9 | 21 | 0.95 | 24 | -16 |
+| 2025 | 1部リーグ | 22 | 11-4-7 | 37 | 1.68 | 32 | 8 |
+| 2026 | 1部リーグ | 13 | 2-2-9 | 8 | 0.62 | 12 | -14 |
+
+### 11. 上智大学
+
+13 played · 8 points · 11 scored, 27 conceded · 8.2 shots per game at 0.103 · 26 players used, top eleven took 83% of the minutes · mean year 2.67
+
+**Indices** — Shot volume 20 / Finishing 8 / Defence 43 / Rotation 7 / Youth 95 / Late push 55
+
+5 against the top half, 6 against the bottom half (55% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 6 | 2368 | 2 |
+| 2 | 7 | 2983 | 3 |
+| 3 | 7 | 3993 | 2 |
+| 4 | 6 | 3526 | 4 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2021 | 2部リーグ | 18 | 15-3-0 | 48 | 2.67 | 41 | 33 |
+| 2022 | 1部リーグ | 22 | 2-6-14 | 12 | 0.55 | 19 | -28 |
+| 2023 | 1部リーグ | 22 | 9-5-8 | 32 | 1.45 | 30 | 5 |
+| 2024 | 1部リーグ | 22 | 4-5-13 | 17 | 0.77 | 16 | -29 |
+| 2025 | 2部リーグ | 18 | 11-4-3 | 37 | 2.06 | 33 | 16 |
+| 2026 | 1部リーグ | 13 | 2-2-9 | 8 | 0.62 | 11 | -16 |
+
+### 12. 神奈川工科大学（神奈川県）
+
+13 played · 3 points · 7 scored, 43 conceded · 5.8 shots per game at 0.093 · 24 players used, top eleven took 76% of the minutes · mean year 2.52
+
+**Indices** — Shot volume 0 / Finishing 0 / Defence 0 / Rotation 38 / Youth 86 / Late push 53
+
+1 against the top half, 6 against the bottom half (86% from below).
+
+**By academic year**
+
+| Year | Players | Minutes | Goals |
+| --- | --: | --: | --: |
+| 1 | 8 | 3816 | 2 |
+| 2 | 3 | 1262 | 0 |
+| 3 | 9 | 5074 | 5 |
+| 4 | 4 | 2718 | 0 |
+
+**Season history**
+
+| Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
+| --- | --- | --: | --: | --: | --: | --: | --: |
+| 2023 | 2部リーグ | 22 | 9-5-8 | 32 | 1.45 | 38 | 8 |
+| 2024 | 2部リーグ | 18 | 12-1-5 | 37 | 2.06 | 56 | 31 |
+| 2025 | 2部リーグ | 18 | 11-2-5 | 35 | 1.94 | 34 | 7 |
+| 2026 | 1部リーグ | 13 | 1-0-12 | 3 | 0.23 | 7 | -36 |
+
+---
+
+*Followed by federation club id, so a division change is a real move.*
