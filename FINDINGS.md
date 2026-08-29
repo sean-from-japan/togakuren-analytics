@@ -203,6 +203,14 @@ object entirely. Everything player-level runs locally, on a database this
 repository does not ship. [docs/DATA_POLICY.md](docs/DATA_POLICY.md) has the full
 reasoning and the measurements.
 
+## Related documents
+
+- [docs/SEASON_TRENDS.md](docs/SEASON_TRENDS.md) — every table behind sections 1, 2, 5 and 6,
+  including all 57 division changes and every club's path through the tiers.
+- [docs/seasons/](docs/seasons/) — one document per season and division, 2021–2026.
+- [docs/PLAYER_ANALYSIS_SAMPLE.md](docs/PLAYER_ANALYSIS_SAMPLE.md) — what the player-level
+  output looks like, over an invented season.
+
 ## Reproducing
 
 ```bash
@@ -211,8 +219,8 @@ togakuren ingest                                 # about 40 seconds
 togakuren trends                                 # sections 1, 2, 5, 6
 togakuren dashboard --series "2026 1部"          # sections 3, 4
 togakuren privacy-check --series "2026 1部"      # the last section
-togakuren profiles --series "2026 1部"           # docs/TEAM_PROFILES.md
-togakuren sample                                 # docs/PLAYER_ANALYSIS_SAMPLE.md
+togakuren trends --format md                     # docs/SEASON_TRENDS.md
+togakuren profiles --all                         # docs/seasons/
 ```
 
 The figures here are the charts from those two pages, `trends` and `dashboard

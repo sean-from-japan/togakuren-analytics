@@ -139,7 +139,7 @@ function gradeChart(host, tier) {
       "stroke-width": 1.6, "stroke-dasharray": "3 2" }));
   }
   node.appendChild(el("text", { x: 0, y: 12, "font-size": 11, "font-weight": 600,
-    fill: "currentColor" }, "出場時間シェア（棒）と goals/90（点線）"));
+    fill: "currentColor" }, "出場時間の割合（棒）と90分あたり得点（点線）"));
   node.appendChild(el("text", { x: W, y: H - 6, "font-size": 9.5, "text-anchor": "end",
     fill: "currentColor", "fill-opacity": .5 }, "色 = 学年 1 / 2 / 3 / 4"));
   host.replaceChildren(node);
@@ -209,14 +209,14 @@ function moves(host) {
     node.appendChild(dot);
   }
   node.appendChild(el("text", { x: W / 2, y: H - 6, "font-size": 11, "text-anchor": "middle",
-    fill: "currentColor", "fill-opacity": .6 }, "移動前シーズンの1試合平均勝点 →"));
+    fill: "currentColor", "fill-opacity": .6 }, "昇降格前シーズンの1試合平均勝点 →"));
   node.appendChild(el("text", { x: 0, y: 12, "font-size": 11, fill: "currentColor",
-    "fill-opacity": .6 }, "移動後 ↑   橙=昇格 / 青=降格"));
+    "fill-opacity": .6 }, "昇降格後 ↑   橙=昇格 / 青=降格"));
   host.replaceChildren(node);
 }
 
-divisionLines(document.getElementById("goals-line"), "goals_per_game", "1試合あたり得点", 2);
-divisionLines(document.getElementById("shots-line"), "shots_per_game", "1試合あたりシュート", 1);
+divisionLines(document.getElementById("goals-line"), "goals_per_game", "1試合あたりの得点", 2);
+divisionLines(document.getElementById("shots-line"), "shots_per_game", "1試合あたりのシュート数", 1);
 divisionLines(document.getElementById("conv-line"), "conversion", "決定率", 3);
 moves(document.getElementById("moves"));
 
@@ -314,12 +314,12 @@ def build(conn, focus_team_id=None):
     promoted = [m for m in moves if m["direction"] == "promoted" and m["complete_after"] > 0.95]
     relegated = [m for m in moves if m["direction"] == "relegated" and m["complete_after"] > 0.95]
     summary = ""
-    for label, group in (("昇格した翌季", promoted), ("降格した翌季", relegated)):
+    for label, group in (("昇格した翌シーズン", promoted), ("降格した翌シーズン", relegated)):
         if not group:
             continue
         mean = sum(m["delta"] for m in group) / len(group)
         summary += (
-            f'<div class="card"><b>{mean:+.2f}</b><span>{_e(label)}の勝点/試合 '
+            f'<div class="card"><b>{mean:+.2f}</b><span>{_e(label)}の1試合あたり勝点 '
             f"({len(group)}件)</span></div>"
         )
 
@@ -341,7 +341,7 @@ def build(conn, focus_team_id=None):
 <thead><tr><th class="l">年度</th><th class="l">部</th><th>チーム</th><th>試合</th><th>消化</th>
 <th>得点/試合</th><th>S/試合</th><th>決定率</th><th>警告/試合</th><th>退場</th></tr></thead>
 <tbody>{season_rows}</tbody></table></div>
-<p class="note">選手単位の記録は2022年から。2021年は結果のみのため、シュートと決定率は算出していない。</p>
+<p class="note">選手単位の記録は2022年から。2021年は結果のみのため、シュート数と決定率は算出していない。</p>
 
 <h2>リーグ水準の推移</h2>
 <div class="grid">
@@ -349,13 +349,13 @@ def build(conn, focus_team_id=None):
   <div id="shots-line"></div>
 </div>
 <div id="conv-line"></div>
-<p class="note">薄い点はまだ消化中のシーズン。</p>
+<p class="note">薄い点は消化途中のシーズン。</p>
 
 <h2>学年別の出場と得点</h2>
 <div class="tabs" id="tiers">{tier_buttons}</div>
 <div id="grades"></div>
-<p class="note">棒が出場時間シェア（積み上げで100%）、点線が goals/90。
-学年構成は毎年入れ替わるので、1シーズンだけの上下は世代差であってトレンドではない。</p>
+<p class="note">棒が出場時間の割合（積み上げで100%）、点線が90分あたり得点。
+学年構成は毎年入れ替わるため、1シーズンだけの上下は世代差であって傾向ではない。</p>
 
 <h2>クラブの軌跡</h2>
 <p class="sub"><select id="club">{options}</select></p>
@@ -365,11 +365,11 @@ def build(conn, focus_team_id=None):
 <th>勝点</th><th>1試合平均</th><th>得点</th><th>得失</th></tr></thead>
 <tbody id="club-rows"></tbody></table></div>
 
-<h2>昇格・降格の影響</h2>
+<h2>昇降格の影響</h2>
 <div class="cards">{summary}</div>
 <div id="moves"></div>
-<p class="note">対角線より上なら移動後に勝点/試合が伸びたということ。
-薄い点は消化中のシーズンなので確定値ではない。上の平均は完了シーズンのみで計算している。</p>
+<p class="note">対角線より上なら、昇降格後に1試合あたりの勝点が伸びたということ。
+薄い点は消化途中のシーズンで、確定値ではない。上の平均は終了済みシーズンのみで計算している。</p>
 
 <footer>
 出典: 東京都大学サッカー連盟 公開コンテンツAPI。集計値のみを掲載している。

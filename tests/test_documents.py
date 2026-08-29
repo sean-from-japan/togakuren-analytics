@@ -110,3 +110,65 @@ class PlayerDocument(unittest.TestCase):
         self.assertIn("Minutes by matchday", text)
         header = next(line for line in text.splitlines() if line.startswith("| Player | Yr | Pos |"))
         self.assertEqual(header.count("|"), 3 + sample.ROUNDS + 2)
+
+
+class ResultsOnlySeason(unittest.TestCase):
+    """A season the federation recorded without lineups."""
+
+    def setUp(self):
+        self.conn = db.connect(":memory:")
+        self.addCleanup(self.conn.close)
+        ingest.ingest_series(self.conn, fixtures.TwoGameClient(), fixtures.SERIES)
+        self.conn.execute("DELETE FROM appearances")
+        self.conn.execute("DELETE FROM shots")
+        self.conn.commit()
+
+    def test_derived_columns_are_dropped_rather_than_zeroed(self):
+        text = markdown.team_profiles(self.conn, "series-1")
+        self.assertIn("Results only", text)
+        self.assertNotIn("| Shots |", text)
+        self.assertNotIn("S/game", text)
+        self.assertNotIn("Fingerprints", text)
+
+    def test_the_table_itself_survives(self):
+        text = markdown.team_profiles(self.conn, "series-1")
+        self.assertIn("Alpha", text)
+        self.assertIn("Beta", text)
+        self.assertIn("W-D-L", text)
+
+    def test_japanese_says_the_same_thing(self):
+        text = markdown.team_profiles(self.conn, "series-1", lang="ja")
+        self.assertIn("結果のみのシーズン", text)
+        self.assertNotIn("決定率", text)
+
+
+class SeasonTrendsDocument(unittest.TestCase):
+    def setUp(self):
+        self.conn = db.connect(":memory:")
+        self.addCleanup(self.conn.close)
+        ingest.ingest_series(self.conn, fixtures.TwoGameClient(), fixtures.SERIES)
+
+    def test_it_renders_in_both_languages_without_a_person(self):
+        names = [row[0] for row in self.conn.execute("SELECT name FROM players")]
+        for lang in markdown.LABELS:
+            text = markdown.season_trends(self.conn, lang=lang)
+            self.assertIn("Alpha", text)
+            for name in names:
+                self.assertNotIn(name, text)
+
+    def test_empty_database(self):
+        empty = db.connect(":memory:")
+        self.addCleanup(empty.close)
+        with self.assertRaises(ValueError):
+            markdown.season_trends(empty)
+
+
+class Slugs(unittest.TestCase):
+    def test_known_divisions_get_ascii_filenames(self):
+        self.assertEqual(markdown.season_slug("2026", "1部リーグ"), "2026-d1")
+        self.assertEqual(markdown.season_slug("2022", "チャレンジリーグ"), "2022-challenge")
+
+    def test_an_unknown_division_still_produces_a_filename(self):
+        slug = markdown.season_slug("2030", "特別リーグ")
+        self.assertEqual(slug, "2030-other")
+        self.assertTrue(slug.isascii())
