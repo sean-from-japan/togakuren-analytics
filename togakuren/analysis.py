@@ -409,7 +409,7 @@ TIERS = {"1部リーグ": 1, "2部リーグ": 2, "3部リーグ": 3, "4部リー
 UNKNOWN_TIER = 9
 
 
-def _league_series(conn):
+def league_series(conn):
     """Every league series, tournaments and the CMS's stray duplicates excluded.
 
     ``has_player_data`` marks the seasons where lineups were recorded. The
@@ -451,7 +451,7 @@ def season_summary(conn):
     progress is visibly not comparable with a finished one.
     """
     rows = []
-    for series in _league_series(conn):
+    for series in league_series(conn):
         totals = conn.execute(
             """
             SELECT COUNT(DISTINCT gt.team_pk)                      AS teams,
@@ -504,7 +504,7 @@ def grade_trend(conn, tier=None):
     rest are folded in.
     """
     wanted = [
-        s for s in _league_series(conn)
+        s for s in league_series(conn)
         if s["has_player_data"] and (tier is None or TIERS.get(s["division"]) == tier)
     ]
     by_year = defaultdict(lambda: defaultdict(lambda: {"minutes": 0, "goals": 0, "players": set()}))
@@ -568,7 +568,7 @@ def club_trajectories(conn):
     Keyed by the federation-wide club id, so a promotion shows up as the tier
     number falling between two consecutive rows.
     """
-    series = {s["id"]: s for s in _league_series(conn)}
+    series = {s["id"]: s for s in league_series(conn)}
     clubs = defaultdict(lambda: {"name": None, "seasons": []})
     for row in conn.execute(
         """

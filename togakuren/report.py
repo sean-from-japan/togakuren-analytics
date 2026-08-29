@@ -140,19 +140,18 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
     banner = ""
     if mode == "aggregate":
         banner = (
-            '<div class="banner"><strong>Aggregate mode.</strong> Per-player rows are '
-            "omitted. What remains is statistical information about groups, which is "
-            "outside the scope of the Personal Information Protection Act.</div>"
+            '<div class="banner"><strong>集計モード。</strong> 選手単位の行は出力していない。'
+            "残っているのは集団についての統計情報であり、個人情報保護法の適用範囲外にあたる。</div>"
         )
         player_section = ""
     else:
         anonymity = privacy.k_anonymity(players, ["team", "position"])
         if mode != "full":
             banner = (
-                f'<div class="banner"><strong>Privacy mode: {_e(mode)}.</strong> '
-                f"Names are replaced, but {anonymity['unique']} of {anonymity['total']} rows "
-                "are still unique on team and position alone, both of which the federation "
-                "publishes. Treat this as pseudonymised, not anonymous.</div>"
+                f'<div class="banner"><strong>プライバシーモード: {_e(mode)}。</strong> '
+                f"名前は置き換えてあるが、{anonymity['total']}行のうち{anonymity['unique']}行は"
+                "チームとポジションだけで一意のままであり、どちらも連盟が公開している。"
+                "匿名ではなく仮名化として扱うこと。</div>"
             )
         rows = []
         for player in players[:top]:
@@ -172,12 +171,11 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
                 ]
             )
         player_section = (
-            f"<h2>Shot volume per 90 minutes &mdash; top {min(top, len(players))}</h2>"
-            f'<p class="sub">Minimum {min_minutes} minutes played. Minutes are reconstructed '
-            "from the starting eleven, timed substitutions and dismissals; the federation "
-            "records none of them directly.</p>"
+            f"<h2>90分あたりのシュート数 &mdash; 上位{min(top, len(players))}人</h2>"
+            f'<p class="sub">出場時間{min_minutes}分以上。出場時間は先発11人・時刻つきの交代・退場から'
+            "復元した値で、連盟はいずれも直接記録していない。</p>"
             + _table(
-                ["Player", "Team", "Yr", "Pos", "Apps", "Starts", "Min", "Shots", "Goals", "S/90", "G/S"],
+                ["選手", "チーム", "学年", "ポジション", "出場", "先発", "出場時間", "シュート", "得点", "90分あたり", "決定率"],
                 rows,
             )
         )
@@ -196,47 +194,47 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
     ]
 
     generated = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M")
-    half_pairs = [("1st half", halves[0]), ("2nd half", halves[1])]
+    half_pairs = [("前半", halves[0]), ("後半", halves[1])]
     if halves[2] or halves[3]:
-        half_pairs += [("ET 1", halves[2]), ("ET 2", halves[3])]
+        half_pairs += [("延長前半", halves[2]), ("延長後半", halves[3])]
 
     return f"""<!doctype html>
-<html lang="en"><head>
+<html lang="ja"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{_e(series['short_name'] or series['name'])} {_e(series['year'])} &mdash; togakuren-analytics</title>
 <style>{CSS}</style>
 </head><body><main>
 <h1>{_e(series['name'])}</h1>
-<p class="sub">{_e(series['year'])} &middot; generated {_e(generated)} &middot; togakuren-analytics</p>
+<p class="sub">{_e(series['year'])} &middot; 生成 {_e(generated)} &middot; togakuren-analytics</p>
 {banner}
 
-<h2>League table and shooting</h2>
-{_table(["Team", "P", "Pts", "W-D-L", "GF", "GD", "Shots", "S/game", "Conv"], table_rows)}
-<p class="note">Conv is goals divided by shots. The federation publishes the table and a
-goals ranking; the shot columns are derived here.</p>
+<h2>順位表とシュート</h2>
+{_table(["チーム", "試合", "勝点", "勝-分-敗", "得点", "得失点", "シュート", "1試合平均", "決定率"], table_rows)}
+<p class="note">決定率は得点をシュート数で割った値。順位表と得点ランキングは連盟が公開しているが、
+シュート関連の列はここで算出したもの。</p>
 
 <div class="grid">
-  <div>{_bar_chart(by_volume, 'shots_per_game', 'team', 'Shots per game', colour=PALETTE[0])}</div>
-  <div>{_bar_chart(by_conversion, 'conversion', 'team', 'Conversion rate', colour=PALETTE[2], fmt='{:.3f}')}</div>
+  <div>{_bar_chart(by_volume, 'shots_per_game', 'team', '1試合あたりのシュート数', colour=PALETTE[0])}</div>
+  <div>{_bar_chart(by_conversion, 'conversion', 'team', '決定率', colour=PALETTE[2], fmt='{:.3f}')}</div>
 </div>
 
-<h2>When things happen</h2>
+<h2>時間帯</h2>
 <div class="grid">
-  <div>{_column_chart(timeline, 'Goals by 15-minute block', colour=PALETTE[1])}
-    <p class="note">The final block absorbs stoppage time.</p></div>
-  <div>{_column_chart(half_pairs, 'Shots by period', colour=PALETTE[3])}</div>
+  <div>{_column_chart(timeline, '15分ごとの得点', colour=PALETTE[1])}
+    <p class="note">最後の区分にはアディショナルタイムが含まれる。</p></div>
+  <div>{_column_chart(half_pairs, '時間帯別のシュート', colour=PALETTE[3])}</div>
 </div>
 
 {player_section}
 
-<h2>Substitution timing</h2>
-{_table(["Team", "Subs", "Mean minute", "Players used"],
+<h2>交代のタイミング</h2>
+{_table(["チーム", "交代", "平均時刻", "起用人数"],
         [[row["team"], row["subs"], row["mean_minute"], row["players_used"]] for row in subs])}
 
 <footer>
-Source: Tokyo University Football Association (東京都大学サッカー連盟) public content API.
-This report is generated locally and contains no data beyond what that site publishes.
+出典: 東京都大学サッカー連盟 公開コンテンツAPI。
+このレポートはローカルで生成されたもので、同サイトが公開している以上の情報は含まない。
 </footer>
 </main></body></html>
 """

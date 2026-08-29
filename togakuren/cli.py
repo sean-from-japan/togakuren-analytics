@@ -153,7 +153,7 @@ def cmd_profiles(args):
     # A season that is over will never change, so its document is worth keeping
     # in the repository rather than regenerating to read.
     written = []
-    for series in analysis._league_series(conn):
+    for series in analysis.league_series(conn):
         if not series["completed"]:
             continue
         for lang in args.lang_all:
@@ -167,7 +167,7 @@ def cmd_profiles(args):
 
 def _seasons_index(conn, langs):
     rows = []
-    for series in analysis._league_series(conn):
+    for series in analysis.league_series(conn):
         if not series["completed"]:
             continue
         slug = markdown.season_slug(series["year"], series["division"])
