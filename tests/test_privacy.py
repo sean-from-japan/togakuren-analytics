@@ -85,14 +85,16 @@ class DataLocation(unittest.TestCase):
     def test_override_is_honoured(self):
         import os
         from importlib import reload
+        from pathlib import Path
 
         from togakuren import paths
 
-        os.environ["TOGAKUREN_HOME"] = "/tmp/example-togakuren"
+        root = Path("example-togakuren").resolve()
+        os.environ["TOGAKUREN_HOME"] = str(root)
         try:
             reload(paths)
-            self.assertEqual(str(paths.database()), "/tmp/example-togakuren/togakuren.sqlite3")
-            self.assertEqual(str(paths.cache()), "/tmp/example-togakuren/cache")
+            self.assertEqual(paths.database(), root / "togakuren.sqlite3")
+            self.assertEqual(paths.cache(), root / "cache")
         finally:
             del os.environ["TOGAKUREN_HOME"]
             reload(paths)
