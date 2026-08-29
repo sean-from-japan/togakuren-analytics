@@ -13,16 +13,15 @@ rate, when a team's shots and substitutions actually arrive.
 **No collected data is committed here.** The repository is code, and the people in
 this dataset are amateur students — see [docs/DATA_POLICY.md](docs/DATA_POLICY.md).
 
+📊 **[Findings](docs/FINDINGS.md)** — six things the federation's own pages do not
+show, with the charts: what promotion actually costs a squad, why a single
+season says nothing about year groups, and how far league position and shot
+volume come apart.
+
 ![Example dashboard](docs/example-dashboard.png)
 
 *Above: the dashboard in aggregate mode, which omits every per-player view. The
 local version adds the squad table and a matchday-by-player minutes grid.*
-
-![Promotion and relegation](docs/example-trends.png)
-
-*Above: from the cross-season page. Points per game before a division change
-against after it. Promotion costs a squad **1.04 points per game**; relegation
-returns **0.53**. Fifty-seven completed cases across five seasons.*
 
 ## Install
 

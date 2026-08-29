@@ -92,7 +92,7 @@ function svg(width, height, label) {
    that shoots a lot without scoring separates from one that does not shoot. */
 function bubbles(host, teams, selected) {
   const W = 620, H = 330, L = 72, R = 18, T = 26, B = 42;
-  const node = svg(W, H, "League position against shot volume");
+  const node = svg(W, H, "順位とシュート量");
   const maxRank = teams.length;
   const maxY = Math.max(...teams.map(t => t.shots_per_game)) * 1.12 || 1;
   const maxGoals = Math.max(...teams.map(t => t.goals_for)) || 1;
@@ -100,7 +100,7 @@ function bubbles(host, teams, selected) {
   const y = v => T + (H - T - B) * (1 - v / maxY);
 
   node.appendChild(el("text", { x: 0, y: 12, "font-size": 11, fill: "currentColor",
-    "fill-opacity": .6 }, "Shots / game"));
+    "fill-opacity": .6 }, "シュート/試合"));
   const ticks = [];
   for (let i = 0; i <= 4; i++) {
     const value = maxY * i / 4;
@@ -114,7 +114,7 @@ function bubbles(host, teams, selected) {
     const circle = el("circle", { cx: x(team.rank), cy: y(team.shots_per_game), r: radius,
       fill: on ? "var(--warm)" : "var(--accent)", "fill-opacity": on ? .55 : .3,
       stroke: on ? "var(--warm)" : "var(--accent)", "stroke-width": on ? 2 : 1, cursor: "pointer" });
-    circle.appendChild(el("title", {}, `${team.team} — ${team.rank}位 / ${fmt(team.shots_per_game)} shots per game / ${team.goals_for} goals`));
+    circle.appendChild(el("title", {}, `${team.team} — ${team.rank}位 / シュート${fmt(team.shots_per_game)}本per試合 / ${team.goals_for}得点`));
     circle.addEventListener("click", () => select(team.team_pk));
     node.appendChild(circle);
     node.appendChild(el("text", { x: x(team.rank), y: y(team.shots_per_game) + 3.5,
@@ -126,15 +126,15 @@ function bubbles(host, teams, selected) {
       "text-anchor": "end", fill: "currentColor", "fill-opacity": .55 }, fmt(value)));
   }
   node.appendChild(el("text", { x: (L + W - R) / 2, y: H - 8, "font-size": 11,
-    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, "League position →"));
+    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, "順位 →"));
   node.appendChild(el("text", { x: W - R, y: H - 8, "font-size": 10, "text-anchor": "end",
-    fill: "currentColor", "fill-opacity": .5 }, "circle area = goals scored"));
+    fill: "currentColor", "fill-opacity": .5 }, "円の面積 = 総得点"));
   host.replaceChildren(node);
 }
 
 function radar(team, size, selected) {
   const c = size / 2, radius = size * 0.34;
-  const node = svg(size, size, `${team.team} profile`);
+  const node = svg(size, size, `${team.team} の個性`);
   const points = AXES.map((axis, i) => {
     const angle = -Math.PI / 2 + i * 2 * Math.PI / AXES.length;
     const value = team.axes[axis.key] / 100;
@@ -186,7 +186,7 @@ function radarGrid(host, teams, selected) {
 
 function curve(host, selected) {
   const W = 620, H = 300, L = 34, R = 96, T = 20, B = 32;
-  const node = svg(W, H, "Points accumulated by matchday");
+  const node = svg(W, H, "節ごとの勝点の積み上がり");
   const maxSection = Math.max(...DATA.curve.flatMap(t => t.points.map(p => p[0])));
   const maxPoints = Math.max(...DATA.curve.flatMap(t => t.points.map(p => p[1]))) || 1;
   const x = s => L + (W - L - R) * (s - 1) / Math.max(1, maxSection - 1);
@@ -215,13 +215,13 @@ function curve(host, selected) {
       fill: "currentColor", "fill-opacity": end.on ? .95 : .4 }, end.team.team.slice(0, 8)));
   }
   node.appendChild(el("text", { x: (L + W - R) / 2, y: H - 6, "font-size": 11,
-    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, "Matchday →"));
+    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, "節 →"));
   host.replaceChildren(node);
 }
 
 function stacked(host, rows, selected) {
   const rowH = 21, L = 118, W = 560, T = 8;
-  const node = svg(W, T + rows.length * rowH + 6, "Goals against the top and bottom half");
+  const node = svg(W, T + rows.length * rowH + 6, "上位半分・下位半分から奪った得点");
   const peak = Math.max(...rows.map(r => r.vs_top + r.vs_bottom)) || 1;
   const span = W - L - 96;
   rows.forEach((row, i) => {
@@ -283,7 +283,7 @@ function heat(host, team) {
 
 function grades(host, team) {
   const W = 380, H = 128, L = 30, T = 24, B = 26;
-  const node = svg(W, H, "Minutes and goals by academic year");
+  const node = svg(W, H, "学年別の出場時間と得点");
   const entries = ["1", "2", "3", "4"].map(g => [g, team.grades[g] || { minutes: 0, goals: 0, players: 0 }]);
   const peak = Math.max(...entries.map(e => e[1].minutes)) || 1;
   const slot = (W - L - 12) / entries.length;
@@ -301,7 +301,7 @@ function grades(host, team) {
       `${grade}年 (${value.players})`));
   });
   node.appendChild(el("text", { x: 0, y: 12, "font-size": 11, "font-weight": 600,
-    fill: "currentColor" }, "Minutes by academic year"));
+    fill: "currentColor" }, "学年別の出場時間"));
   host.replaceChildren(node);
 }
 

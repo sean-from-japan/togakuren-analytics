@@ -104,7 +104,7 @@ function divisionLines(host, key, title, digits) {
 function gradeChart(host, tier) {
   const rows = DATA.grades[tier] || [];
   const W = 560, H = 280, L = 40, R = 40, T = 28, B = 42;
-  const node = svg(W, H, "Minutes share and scoring rate by academic year");
+  const node = svg(W, H, "学年別の出場時間シェアと得点率");
   if (!rows.length) { host.replaceChildren(node); return; }
   const years = [...new Set(rows.map(r => r.year))].sort();
   const slot = (W - L - R) / years.length;
@@ -148,7 +148,7 @@ function gradeChart(host, tier) {
 /* Tier on an inverted axis so promotion reads as the line going up. */
 function trajectory(host, club) {
   const W = 560, H = 210, L = 62, R = 30, T = 26, B = 34;
-  const node = svg(W, H, `${club.name} across seasons`);
+  const node = svg(W, H, `${club.name} のシーズン推移`);
   const years = DATA.years;
   const maxTier = 5;
   const x = year => L + (W - L - R) * years.indexOf(year) / Math.max(1, years.length - 1);
@@ -184,7 +184,7 @@ function trajectory(host, club) {
    what the division change cost or gave. */
 function moves(host) {
   const W = 500, H = 330, P = 44;
-  const node = svg(W, H, "Points per game before and after a division change");
+  const node = svg(W, H, "部の移動前後の1試合平均勝点");
   const span = W - P * 2;
   const x = v => P + span * v / 3;
   const y = v => H - P - (H - P * 2) * v / 3;
