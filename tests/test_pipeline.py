@@ -93,6 +93,7 @@ class Report(unittest.TestCase):
 
     def test_aggregate_report_contains_no_person(self):
         html = report.build(self.conn, "series-1", mode="aggregate", min_minutes=0)
+        self.assertIn("集計モード", html)
         self.assertNotIn("Alpha Player", html)
         self.assertNotIn("Beta Player", html)
         self.assertIn("Alpha", html, "team level figures remain")
@@ -102,7 +103,7 @@ class Report(unittest.TestCase):
             self.conn, "series-1", mode="pseudonym", salt="a" * 32, min_minutes=0
         )
         self.assertNotIn("Alpha Player", html)
-        self.assertIn("pseudonymised, not anonymous", html)
+        self.assertIn("匿名ではなく仮名化", html)
 
     def test_unknown_series(self):
         with self.assertRaises(ValueError):
