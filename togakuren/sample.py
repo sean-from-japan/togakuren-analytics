@@ -133,11 +133,7 @@ class SampleClient:
         self.squads = {index: _squad(self.rng, index) for index in range(len(CLUBS))}
         self._games = None
 
-    @property
-    def series(self_):  # noqa: N805 - matches the real client's attribute style
-        return self_._series
-
-    def _series(self, year=None):
+    def series(self, year=None):
         return [
             {
                 "_id": "sample-series",
@@ -226,7 +222,7 @@ class SampleClient:
 def generate(conn, seed=20260829, year="2099"):
     """Populate ``conn`` with one synthetic season. Returns the series id."""
     client = SampleClient(seed=seed, year=year)
-    series = client._series()[0]
+    series = client.series()[0]
     ingest.ingest_series(conn, client, series)
     # Per-match points are not part of the federation's payload for this shape,
     # so derive them from the scorelines the generator already produced.

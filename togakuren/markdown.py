@@ -10,7 +10,7 @@ cheap half of bilingual docs: only prose has to be translated by hand.
 
 from datetime import datetime, timezone
 
-from . import analysis, metrics, privacy
+from . import analysis, metrics
 
 LABELS = {
     "en": {
