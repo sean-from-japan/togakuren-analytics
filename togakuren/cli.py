@@ -6,7 +6,7 @@ import logging
 import sys
 from pathlib import Path
 
-from . import __version__, dashboard, db, ingest, metrics, paths, privacy, report
+from . import __version__, dashboard, db, ingest, metrics, paths, privacy, report, trends
 from .client import ApiError, Client
 
 
@@ -109,6 +109,16 @@ def cmd_dashboard(args):
     print(f"wrote {out} ({len(html):,} bytes, privacy={args.privacy})")
 
 
+def cmd_trends(args):
+    """Everything that only shows up across several seasons."""
+    conn = db.connect(args.db or paths.database())
+    html = trends.build(conn, focus_team_id=args.club)
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(html, encoding="utf-8")
+    print(f"wrote {out} ({len(html):,} bytes, aggregates only)")
+
+
 def cmd_export(args):
     conn = db.connect(args.db or paths.database())
     series_id = _resolve_series(conn, args.series)
@@ -197,6 +207,13 @@ def build_parser():
 
     listing = subparsers.add_parser("list", help="list series already in the database")
     listing.set_defaults(func=cmd_list)
+
+    across = subparsers.add_parser(
+        "trends", help="build the cross-season page (aggregates only, safe to publish)"
+    )
+    across.add_argument("--club", help="federation club id to open the trajectory on")
+    across.add_argument("--out", default="reports/trends.html")
+    across.set_defaults(func=cmd_trends)
 
     for name, handler, extra in (
         ("report", cmd_report, True),

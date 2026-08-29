@@ -384,3 +384,245 @@ def team_history(conn, team_id):
             row["points_per_game"] = round(row["points"] / row["played"], 2)
         rows.append(row)
     return rows
+
+
+# --- across seasons -------------------------------------------------------
+
+#: League tiers, shallowest number first. The federation renamed nothing across
+#: 2021-2026, so a plain lookup is enough.
+TIERS = {"1部リーグ": 1, "2部リーグ": 2, "3部リーグ": 3, "4部リーグ": 4, "チャレンジリーグ": 5}
+
+#: Sorts last, and is excluded from anything that reasons about direction.
+UNKNOWN_TIER = 9
+
+
+def _league_series(conn):
+    """Every league series, tournaments and the CMS's stray duplicates excluded.
+
+    ``has_player_data`` marks the seasons where lineups were recorded. The
+    federation only started storing them in 2022; before that a fixture has a
+    score and nothing else, so any per-minute figure over those years is
+    meaningless rather than merely sparse.
+    """
+    return [
+        dict(row)
+        for row in conn.execute(
+            """
+            SELECT s.id, s.year, s.short_name AS division, s.name,
+                   COUNT(DISTINCT g.id) AS games,
+                   SUM(g.game_over) AS completed,
+                   -- A played fixture yields roughly 26 appearance rows. The
+                   -- 2021 season has a bare handful in total, left over from
+                   -- the schema change, so require real coverage rather than
+                   -- mere presence.
+                   (SELECT COUNT(*) FROM appearances a
+                     JOIN game_teams gt ON gt.id = a.game_team_id
+                    WHERE gt.series_id = s.id)
+                   >= 10 * COALESCE(SUM(g.game_over), 0) AS has_player_data
+            FROM series s LEFT JOIN games g ON g.series_id = s.id
+            WHERE s.type = 'league'
+              AND s.name NOT LIKE '%トーナメント%'
+              AND s.name NOT LIKE '\\_\\_%' ESCAPE '\\'
+            GROUP BY s.id
+            HAVING games > 0
+            ORDER BY s.year, s.short_name
+            """
+        )
+    ]
+
+
+def season_summary(conn):
+    """One row per league season: scale, scoring and shooting.
+
+    ``complete`` is the share of fixtures already played, so a season still in
+    progress is visibly not comparable with a finished one.
+    """
+    rows = []
+    for series in _league_series(conn):
+        totals = conn.execute(
+            """
+            SELECT COUNT(DISTINCT gt.team_pk)                      AS teams,
+                   COUNT(DISTINCT gt.game_id)                      AS games,
+                   SUM(gt.score)                                   AS goals,
+                   (SELECT SUM(s2.total) FROM shots s2
+                     JOIN game_teams gt2 ON gt2.id = s2.game_team_id
+                     JOIN games g2 ON g2.id = gt2.game_id AND g2.game_over = 1
+                    WHERE gt2.series_id = :series_id)              AS shots,
+                   (SELECT COUNT(*) FROM events e
+                     JOIN game_teams gt3 ON gt3.id = e.game_team_id
+                     JOIN games g3 ON g3.id = gt3.game_id AND g3.game_over = 1
+                    WHERE gt3.series_id = :series_id AND e.type = 'yellow') AS yellows,
+                   (SELECT COUNT(*) FROM events e
+                     JOIN game_teams gt4 ON gt4.id = e.game_team_id
+                     JOIN games g4 ON g4.id = gt4.game_id AND g4.game_over = 1
+                    WHERE gt4.series_id = :series_id AND e.type = 'red') AS reds
+            FROM game_teams gt
+            JOIN games g ON g.id = gt.game_id AND g.game_over = 1
+            WHERE gt.series_id = :series_id
+            """,
+            {"series_id": series["id"]},
+        ).fetchone()
+        games = totals["games"] or 0
+        goals = totals["goals"] or 0
+        shots = totals["shots"] or 0
+        rows.append(
+            {
+                "series_id": series["id"], "year": series["year"],
+                "division": series["division"], "tier": TIERS.get(series["division"], UNKNOWN_TIER),
+                "teams": totals["teams"], "games": games,
+                "complete": (series["completed"] or 0) / series["games"] if series["games"] else 0,
+                "has_player_data": bool(series["has_player_data"]),
+                "goals": goals, "shots": shots,
+                "goals_per_game": goals / games if games else 0.0,
+                "shots_per_game": (shots / games if games else 0.0) if series["has_player_data"] else None,
+                "conversion": (goals / shots if shots else 0.0) if series["has_player_data"] else None,
+                "yellows_per_game": (totals["yellows"] or 0) / games if games else 0.0,
+                "reds": totals["reds"] or 0,
+            }
+        )
+    return rows
+
+
+def grade_trend(conn, tier=None):
+    """Minutes and scoring rate by academic year, season by season.
+
+    Pass ``tier`` to stay inside one division: pooling every division mixes
+    populations, and a pattern that shows up in one of them can vanish once the
+    rest are folded in.
+    """
+    wanted = [
+        s for s in _league_series(conn)
+        if s["has_player_data"] and (tier is None or TIERS.get(s["division"]) == tier)
+    ]
+    by_year = defaultdict(lambda: defaultdict(lambda: {"minutes": 0, "goals": 0, "players": set()}))
+    ids = {s["id"]: s["year"] for s in wanted}
+    if not ids:
+        return []
+    marks = ",".join("?" for _ in ids)
+
+    for series_id, grade, player_id, minutes in conn.execute(
+        f"""
+        SELECT gt.series_id, sm.grade, a.player_id, SUM(a.minutes)
+        FROM appearances a
+        JOIN game_teams gt    ON gt.id = a.game_team_id
+        JOIN games g          ON g.id = gt.game_id AND g.game_over = 1
+        JOIN squad_members sm ON sm.player_id = a.player_id AND sm.team_pk = gt.team_pk
+        WHERE gt.series_id IN ({marks})
+        GROUP BY gt.series_id, sm.grade, a.player_id
+        """,
+        list(ids),
+    ):
+        entry = by_year[ids[series_id]][grade or "?"]
+        entry["minutes"] += minutes or 0
+        entry["players"].add(player_id)
+
+    for series_id, grade, goals in conn.execute(
+        f"""
+        SELECT gt.series_id, sm.grade, COUNT(*)
+        FROM events e
+        JOIN game_teams gt    ON gt.id = e.game_team_id
+        JOIN games g          ON g.id = gt.game_id AND g.game_over = 1
+        JOIN squad_members sm ON sm.player_id = e.player_id AND sm.team_pk = gt.team_pk
+        WHERE gt.series_id IN ({marks}) AND e.type = 'goal'
+        GROUP BY gt.series_id, sm.grade
+        """,
+        list(ids),
+    ):
+        by_year[ids[series_id]][grade or "?"]["goals"] += goals
+
+    rows = []
+    for year in sorted(by_year, reverse=True):
+        total = sum(entry["minutes"] for entry in by_year[year].values())
+        for grade in GRADES:
+            entry = by_year[year].get(grade)
+            if not entry:
+                continue
+            rows.append(
+                {
+                    "year": year, "grade": grade,
+                    "players": len(entry["players"]), "minutes": entry["minutes"],
+                    "goals": entry["goals"],
+                    "minutes_share": entry["minutes"] / total if total else 0.0,
+                    "goals_per_90": entry["goals"] * 90 / entry["minutes"] if entry["minutes"] else 0.0,
+                }
+            )
+    return rows
+
+
+def club_trajectories(conn):
+    """Every club's tier and points per game, season by season.
+
+    Keyed by the federation-wide club id, so a promotion shows up as the tier
+    number falling between two consecutive rows.
+    """
+    series = {s["id"]: s for s in _league_series(conn)}
+    clubs = defaultdict(lambda: {"name": None, "seasons": []})
+    for row in conn.execute(
+        """
+        SELECT t.team_id, t.short_name, t.series_id, st.played, st.win, st.draw,
+               st.lose, st.points, st.goals_for, st.goal_difference
+        FROM teams t
+        JOIN standings st ON st.team_pk = t.id
+        ORDER BY t.team_id
+        """
+    ):
+        info = series.get(row["series_id"])
+        if not info or not row["played"]:
+            continue
+        club = clubs[row["team_id"]]
+        club["name"] = row["short_name"]
+        club["seasons"].append(
+            {
+                "year": info["year"], "division": info["division"],
+                "tier": TIERS.get(info["division"], UNKNOWN_TIER),
+                "played": row["played"], "win": row["win"], "draw": row["draw"],
+                "lose": row["lose"], "points": row["points"],
+                "points_per_game": round(row["points"] / row["played"], 3),
+                "goals_for": row["goals_for"], "goal_difference": row["goal_difference"],
+            }
+        )
+    result = []
+    for team_id, club in clubs.items():
+        club["seasons"].sort(key=lambda item: (item["year"], item["tier"]))
+        result.append({"team_id": team_id, "name": club["name"], "seasons": club["seasons"]})
+    result.sort(key=lambda club: (club["seasons"][0]["tier"], club["name"] or ""))
+    return result
+
+
+def division_moves(conn, trajectories=None):
+    """What happened to clubs the season after they changed division.
+
+    Promotion and relegation are the one natural experiment this dataset offers:
+    the same squad, a season later, against different opposition.
+    """
+    trajectories = trajectories or club_trajectories(conn)
+    completeness = {
+        (row["year"], row["division"]): row["complete"] for row in season_summary(conn)
+    }
+    moves = []
+    for club in trajectories:
+        seasons = club["seasons"]
+        for before, after in zip(seasons, seasons[1:]):
+            if before["tier"] == after["tier"]:
+                continue
+            # A division outside the known tier order (a rename, a one-off
+            # competition) has no up or down; reporting one would be invention.
+            if UNKNOWN_TIER in (before["tier"], after["tier"]):
+                continue
+            moves.append(
+                {
+                    "team_id": club["team_id"], "name": club["name"],
+                    "from_year": before["year"], "from_division": before["division"],
+                    "to_year": after["year"], "to_division": after["division"],
+                    "direction": "promoted" if after["tier"] < before["tier"] else "relegated",
+                    "ppg_before": before["points_per_game"],
+                    "ppg_after": after["points_per_game"],
+                    "delta": round(after["points_per_game"] - before["points_per_game"], 3),
+                    # A club can drop out of these leagues for a year; a gap of
+                    # more than one season is not a promotion or a relegation.
+                    "gap": int(after["year"]) - int(before["year"]),
+                    "complete_after": round(completeness.get((after["year"], after["division"]), 1.0), 2),
+                }
+            )
+    moves.sort(key=lambda move: (move["to_year"], move["name"] or ""))
+    return moves
