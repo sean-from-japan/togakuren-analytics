@@ -16,9 +16,19 @@ FINGERPRINT_AXES = (
     ("finishing", "Finishing", "Goals per shot"),
     ("defence", "Defence", "Fewer goals conceded per game"),
     ("rotation", "Rotation", "Minutes spread beyond a settled eleven"),
-    ("youth", "Youth", "Share of minutes played by 1st and 2nd years"),
-    ("late", "Late push", "Share of shots taken in the second half"),
+    ("youth", "Underclassmen", "Share of minutes played by 1st and 2nd years"),
+    ("late", "Second-half weight", "Share of shots taken in the second half"),
 )
+
+#: Japanese names for the same axes, used by the dashboard and the ja documents.
+FINGERPRINT_AXES_JA = {
+    "volume": ("シュート数", "1試合あたりのシュート数"),
+    "finishing": ("決定率", "シュート1本あたりの得点"),
+    "defence": ("守備", "1試合あたりの失点の少なさ"),
+    "rotation": ("ターンオーバー", "固定の11人から外へ広がった出場時間"),
+    "youth": ("下級生比率", "1・2年が占める出場時間の割合"),
+    "late": ("後半の比重", "後半に打ったシュートの割合"),
+}
 
 TEAM_PROFILE = """
 WITH results AS (

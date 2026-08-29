@@ -221,7 +221,7 @@ function curve(host, selected) {
 
 function stacked(host, rows, selected) {
   const rowH = 21, L = 118, W = 560, T = 8;
-  const node = svg(W, T + rows.length * rowH + 6, "上位半分・下位半分から奪った得点");
+  const node = svg(W, T + rows.length * rowH + 6, "上位陣・下位陣から奪った得点");
   const peak = Math.max(...rows.map(r => r.vs_top + r.vs_bottom)) || 1;
   const span = W - L - 96;
   rows.forEach((row, i) => {
@@ -362,7 +362,7 @@ function select(teamPk) {
   cards(document.getElementById("team-cards"), [
     ["勝点", team.points], ["得点", team.goals_for], ["失点", team.goals_against],
     ["シュート/試合", fmt(team.shots_per_game)], ["決定率", fmt(team.conversion, 3)],
-    ["起用選手", team.players_used], ["主力11人の出場比率", Math.round(team.core_share * 100) + "%"],
+    ["起用人数", team.players_used], ["主力11人の出場時間比率", Math.round(team.core_share * 100) + "%"],
     ["平均学年", fmt(team.mean_grade, 2)],
   ]);
   grades(document.getElementById("grades"), team);
@@ -474,7 +474,12 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
             history[row["team_id"]] = analysis.team_history(conn, row["team_id"])
 
     payload = {
-        "axes": [{"key": key, "label": label_, "hint": hint} for key, label_, hint in analysis.FINGERPRINT_AXES],
+        # The page is Japanese, so the radar reads in Japanese too.
+        "axes": [
+            {"key": key, "label": analysis.FINGERPRINT_AXES_JA[key][0],
+             "hint": analysis.FINGERPRINT_AXES_JA[key][1]}
+            for key, _, _ in analysis.FINGERPRINT_AXES
+        ],
         "teams": teams,
         "curve": analysis.points_curve(conn, series_id),
         "opponents": analysis.goals_by_opponent(conn, series_id, profile),
@@ -506,7 +511,9 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
         for row in profile
     )
     axis_list = "".join(
-        f"<li><b>{_e(label_)}</b> — {_e(hint)}</li>" for _, label_, hint in analysis.FINGERPRINT_AXES
+        f"<li><b>{_e(analysis.FINGERPRINT_AXES_JA[key][0])}</b> — "
+        f"{_e(analysis.FINGERPRINT_AXES_JA[key][1])}</li>"
+        for key, _, _ in analysis.FINGERPRINT_AXES
     )
     player_sections = (
         """
@@ -515,7 +522,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
 <div class="legend"><span>出場時間</span><i style="background:var(--panel)"></i>0分
   <i style="background:color-mix(in srgb, var(--accent) 54%, transparent)"></i>45分
   <i style="background:color-mix(in srgb, var(--accent) 90%, transparent)"></i>90分</div>
-<p class="note">上が最も使われた選手。固定メンバーのチームは縦に濃く揃い、入れ替えの多いチームはまだらになる。</p>
+<p class="note">上ほど出場時間が長い選手。固定メンバーのチームは縦に濃く揃い、ターンオーバーの多いチームはまだらになる。</p>
 
 <h3>選手一覧</h3>
 <div id="squad"></div>
@@ -539,15 +546,15 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
 <div class="tabs">{buttons}</div>
 
 <h2>リーグ全体</h2>
-<h3>順位 × シュート量 × 得点</h3>
+<h3>順位 × シュート数 × 得点</h3>
 <div id="bubbles"></div>
 <p class="note">横軸が最終順位、縦軸が1試合あたりシュート数、円の面積が総得点。
-順位の割に撃っているチームと、少ない手数で決めているチームが同じ図の中で分かれる。</p>
+順位の割にシュートが多いチームと、少ない本数で決めているチームが同じ図の中で分かれる。</p>
 
 <div class="grid">
   <div><h3>勝点の積み上がり</h3><div id="curve"></div></div>
-  <div><h3>得点した相手（上位半分 / 下位半分）</h3><div id="opponents"></div>
-  <p class="note">青が上位半分、橙が下位半分から奪った得点。</p></div>
+  <div><h3>得点した相手（上位/下位）</h3><div id="opponents"></div>
+  <p class="note">青が上位陣から、橙が下位陣から奪った得点。</p></div>
 </div>
 
 <h3>チームの個性（6指標）</h3>

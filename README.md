@@ -28,7 +28,8 @@ local version adds the squad table and a matchday-by-player minutes grid.*
 | | |
 |---|---|
 | [FINDINGS.md](FINDINGS.md) · [ja](FINDINGS.ja.md) | Six results with the charts. Start here. |
-| [docs/TEAM_PROFILES.md](docs/TEAM_PROFILES.md) · [ja](docs/TEAM_PROFILES.ja.md) | Every club in the division: numbers, indices, year groups, history. Generated. |
+| [docs/SEASON_TRENDS.md](docs/SEASON_TRENDS.md) · [ja](docs/SEASON_TRENDS.ja.md) | Every season in one place: league level, year groups, all 57 division changes, every club's path. Generated. |
+| [docs/seasons/](docs/seasons/) | One document per league season and division, 2021–2026: table, indices, year groups, history. 40 documents, generated. |
 | [docs/PLAYER_ANALYSIS_SAMPLE.md](docs/PLAYER_ANALYSIS_SAMPLE.md) · [ja](docs/PLAYER_ANALYSIS_SAMPLE.ja.md) | What the player-level output looks like, over an **invented** season. Generated. |
 | [docs/DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
 
@@ -37,9 +38,14 @@ The two generated documents come out of the tool in both languages
 cannot drift between versions. Regenerate them with:
 
 ```bash
-togakuren profiles --series "2026 1部" --out docs/TEAM_PROFILES.md
+togakuren trends --format md --out docs/SEASON_TRENDS.md
+togakuren profiles --all                 # docs/seasons/, both languages
 togakuren sample --out docs/PLAYER_ANALYSIS_SAMPLE.md
 ```
+
+Seasons before 2026 are over, so their documents never change: the same code
+over the same records reproduces them byte for byte. That is why they are
+committed rather than left to be regenerated.
 
 ## Install
 
@@ -66,7 +72,8 @@ togakuren dashboard --series "2026 1部"              # interactive, team select
 togakuren report --series "2026 1部"                 # flat standalone HTML
 togakuren export --series "2026 1部" --out d1.csv    # per-player season rows
 togakuren trends                                     # every season at once
-togakuren profiles --series "2026 1部"               # the division as Markdown
+togakuren profiles --series "2026 1部"               # one division as Markdown
+togakuren profiles --all                             # every completed season
 togakuren sample                                     # player-level output, invented data
 togakuren privacy-check --series "2026 1部"          # how identifiable an export is
 ```
@@ -213,7 +220,7 @@ the reasoning.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-103 tests, no network access, no fixtures taken from the federation — the test data
+110 tests, no network access, no fixtures taken from the federation — the test data
 is invented clubs and invented people. CI runs them on Linux, macOS and Windows
 against Python 3.9 and 3.13, and fails the build if any collected data is ever
 committed.

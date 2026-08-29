@@ -18,7 +18,7 @@ LABELS = {
         "teams_intro": (
             "Every club in the division, from the federation's published match records. "
             "Aggregates only — no individual appears in this document; see "
-            "[DATA_POLICY.md](DATA_POLICY.md)."
+            "[{policy}]({policy})."
         ),
         "snapshot": "Snapshot of {series}, generated {when}. Regenerate with `{command}`.",
         "in_progress": "**Season in progress: {done} of {total} fixtures played.**",
@@ -35,6 +35,12 @@ LABELS = {
         "opponents": "Where the goals came from",
         "no_history": "No earlier season in this federation's leagues.",
         "cols_table": ["#", "Team", "P", "Pts", "W-D-L", "GF", "GA", "GD", "Shots", "S/game", "Conv"],
+        "cols_table_thin": ["#", "Team", "P", "Pts", "W-D-L", "GF", "GA", "GD"],
+        "results_only": (
+            "**Results only.** The federation did not record lineups this season, so "
+            "minutes, shots and everything derived from them do not exist for it. The "
+            "table below is the whole of what this season holds."
+        ),
         "cols_grade": ["Year", "Players", "Minutes", "Goals"],
         "cols_history": ["Season", "Division", "P", "W-D-L", "Pts", "Pts/game", "GF", "GD"],
         "cols_player": ["Player", "Team", "Yr", "Pos", "Apps", "Starts", "Min", "Shots",
@@ -53,6 +59,8 @@ LABELS = {
             "students, and per-player rows are personal data. "
             "[DATA_POLICY.md](DATA_POLICY.md) has the reasoning and the measurements."
         ),
+        "players_source": ("Source series: *{series}* — {clubs} clubs, "
+                           "{players} players above {minutes} minutes."),
         "players_heading": "Season totals and rates",
         "players_note": (
             "Minimum {minutes} minutes. Minutes played are reconstructed from lineups, "
@@ -64,16 +72,52 @@ LABELS = {
             "side is a solid block; a rotated one is patchy. The dashboard draws this as "
             "a heat map."
         ),
+        "cols_matrix": ["Player", "Yr", "Pos"],
+        "total": "Total",
         "reproduce": "Reproduce",
+        "trends_title": "Across seasons",
+        "trends_intro": (
+            "Every completed season in one place. Seasons before 2026 are finished, so "
+            "these tables are fixed: the same code over the same records reproduces them "
+            "exactly. Aggregates only — no individual appears here."
+        ),
+        "seasons": "Seasons",
+        "seasons_note": (
+            "Player-level recording begins in 2022. 2021 has results only, so shots and "
+            "conversion are not computed for it rather than derived from a rounding error."
+        ),
+        "grades_section": "Academic year, season by season",
+        "grades_note": (
+            "Share of minutes and goals per 90 minutes, within one division. Which year "
+            "group looks weak changes annually, which is a cohort effect and not a "
+            "structural one."
+        ),
+        "moves_section": "Promotion and relegation",
+        "moves_note": (
+            "Points per game in the season before a division change, and in the season "
+            "after it. Seasons still in progress are marked and excluded from the averages."
+        ),
+        "moves_summary": "{label}: {n} cases, {mean:+.2f} points per game on average.",
+        "trajectories": "Club trajectories",
+        "trajectories_note": (
+            "Division by season for every club, followed by federation club id. A blank "
+            "means the club was not in these leagues that season."
+        ),
+        "cols_seasons": ["Season", "Division", "Teams", "Fixtures", "Played",
+                         "Goals/game", "Shots/game", "Conv", "Yellows/game", "Reds"],
+        "cols_grades": ["Season", "Year", "Players", "Minutes", "Share", "Goals", "Goals/90"],
+        "cols_moves": ["From", "Division", "To", "Division", "Direction",
+                       "Pts/game before", "after", "Change"],
+        "promoted": "Promoted", "relegated": "Relegated", "in_progress_mark": "in progress",
     },
     "ja": {
         "teams_title": "チーム分析",
         "teams_intro": (
-            "連盟が公開している試合記録から、その部の全チーム。集計値のみで、"
-            "個人は一切登場しない（[DATA_POLICY.md](DATA_POLICY.md)）。"
+            "連盟が公開している試合記録をもとにした、その部の全チーム。集計値のみで、"
+            "個人は一切登場しない（[{policy}]({policy})）。"
         ),
-        "snapshot": "{series} のスナップショット。生成 {when}。再生成は `{command}`。",
-        "in_progress": "**シーズン進行中: {total}試合中{done}試合を消化。**",
+        "snapshot": "{series} 時点の集計。生成日 {when}。再生成は `{command}`。",
+        "in_progress": "**シーズン進行中: 全{total}試合中{done}試合を消化。**",
         "table": "順位表",
         "fingerprints": "チームの個性",
         "fingerprint_note": (
@@ -83,39 +127,83 @@ LABELS = {
         "axes": "指標",
         "grades": "学年別",
         "history": "過去シーズン",
-        "history_note": "連盟のクラブIDで追跡しているため、部の移動が実際の昇降格を表す。",
+        "history_note": "連盟のクラブIDで追跡しているため、部の変化がそのまま昇降格を表す。",
         "opponents": "得点した相手",
         "no_history": "この連盟のリーグでは過去シーズンなし。",
-        "cols_table": ["#", "チーム", "試合", "勝点", "勝-分-敗", "得点", "失点", "得失",
-                       "シュート", "S/試合", "決定率"],
-        "cols_grade": ["学年", "人数", "出場分", "得点"],
+        "cols_table": ["順位", "チーム", "試合", "勝点", "勝-分-敗", "得点", "失点", "得失点",
+                       "シュート", "1試合平均", "決定率"],
+        "cols_table_thin": ["順位", "チーム", "試合", "勝点", "勝-分-敗", "得点", "失点", "得失点"],
+        "results_only": (
+            "**結果のみのシーズン。** この年、連盟は出場メンバーを記録していない。"
+            "そのため出場時間・シュート数と、そこから導かれる指標はいずれも存在しない。"
+            "以下の順位表がこのシーズンに残っている情報のすべてである。"
+        ),
+        "cols_grade": ["学年", "人数", "出場時間(分)", "得点"],
         "cols_history": ["年度", "部", "試合", "勝-分-敗", "勝点", "1試合平均", "得点", "得失"],
-        "cols_player": ["選手", "チーム", "学年", "Pos", "出場", "先発", "分", "シュート",
-                        "得点", "S/90", "決定率"],
-        "summary": ("{played}試合 · 勝点{points} · {gf}得点 {ga}失点 · "
-                    "1試合{spg}本を決定率{conv} · {used}人起用、主力11人が出場時間の{core} · "
-                    "平均学年{grade}"),
-        "opp_line": "上位半分から{top}点、下位半分から{bottom}点（下位比率{share}）。",
+        "cols_player": ["選手", "チーム", "学年", "ポジション", "出場", "先発", "出場時間",
+                        "シュート", "得点", "90分あたりシュート", "決定率"],
+        "summary": ("{played}試合 / 勝点{points} / {gf}得点{ga}失点 / "
+                    "1試合平均{spg}本のシュートを決定率{conv}で決める / "
+                    "{used}人を起用し、主力11人が出場時間の{core}を占める / 平均学年{grade}"),
+        "opp_line": "上位陣から{top}点、下位陣から{bottom}点（下位陣からが{share}）。",
         "players_title": "選手単位の出力 — サンプル",
         "players_intro": (
-            "選手単位のビューが何を出すかを示すサンプル。**以下のクラブ・選手・結果はすべて架空**で、"
-            "`togakuren.sample` が生成したものを通常のingestに通している。"
-            "つまり実データと同じコード経路で作られた出力である。\n\n"
-            "実データ版を公開しないのはツールの制約ではなく設計上の判断による。"
+            "選手単位の出力がどういうものかを示すサンプル。"
+            "**以下のクラブ・選手・成績はすべて架空**で、`togakuren.sample` が生成したものを"
+            "通常の取り込み処理に通している。実データとまったく同じコードで作られた出力である。\n\n"
+            "実データ版を公開しないのは、ツールの制約ではなく設計上の判断による。"
             "連盟の記録に載っているのはアマチュアの学生であり、選手単位の行は個人情報にあたる。"
-            "根拠と実測値は [DATA_POLICY.md](DATA_POLICY.md) に置いてある。"
+            "根拠と実測値は [DATA_POLICY.ja.md](DATA_POLICY.ja.md) に置いてある。"
         ),
-        "players_heading": "シーズン通算と率",
+        "players_source": ("対象: *{series}* — {clubs}クラブ、"
+                           "出場時間{minutes}分以上の{players}人。"),
+        "players_heading": "シーズン通算と各種指標",
         "players_note": (
-            "{minutes}分以上。出場時間はスタメン・交代・退場から復元した値で、"
+            "出場時間{minutes}分以上。出場時間は先発・交代・退場から復元した値で、"
             "連盟はいずれも記録していない。"
         ),
         "minutes_heading": "節ごとの出場時間",
         "minutes_note": (
-            "1行が選手、1列が節。固定メンバーのチームは塊になり、入れ替えの多いチームはまばらになる。"
+            "1行が選手、1列が節。固定メンバーで戦うチームは値が揃い、"
+            "ターンオーバーの多いチームはまばらになる。"
             "ダッシュボードではこれをヒートマップで描いている。"
         ),
+        "cols_matrix": ["選手", "学年", "ポジション"],
+        "total": "合計",
         "reproduce": "再現手順",
+        "trends_title": "シーズン横断",
+        "trends_intro": (
+            "終了した全シーズンをまとめたもの。2026年より前のシーズンは終了しているため、"
+            "以下の表は固定である。同じ記録に同じ処理をかければ、そのまま再現される。"
+            "集計値のみで、個人は登場しない。"
+        ),
+        "seasons": "シーズン一覧",
+        "seasons_note": (
+            "選手単位の記録は2022年から。2021年は結果のみのため、シュート数と決定率は"
+            "丸め誤差から算出せず、空欄にしている。"
+        ),
+        "grades_section": "学年別の推移",
+        "grades_note": (
+            "1つの部の中での、出場時間の割合と90分あたり得点。"
+            "低く見える学年は毎年入れ替わり、これは世代差であって構造ではない。"
+        ),
+        "moves_section": "昇降格",
+        "moves_note": (
+            "部が変わる前のシーズンと、変わった後のシーズンの1試合あたり勝点。"
+            "消化途中のシーズンには印を付け、平均からは除外している。"
+        ),
+        "moves_summary": "{label}: {n}件、1試合あたり勝点は平均 {mean:+.2f}。",
+        "trajectories": "クラブの推移",
+        "trajectories_note": (
+            "連盟のクラブIDで追跡した、全クラブのシーズンごとの所属部。"
+            "空欄はそのシーズンにこれらのリーグにいなかったことを示す。"
+        ),
+        "cols_seasons": ["年度", "部", "チーム", "全試合", "消化",
+                         "得点/試合", "シュート/試合", "決定率", "警告/試合", "退場"],
+        "cols_grades": ["年度", "学年", "人数", "出場時間", "割合", "得点", "90分あたり得点"],
+        "cols_moves": ["前年度", "部", "翌年度", "部", "方向",
+                       "前の勝点/試合", "後", "変化"],
+        "promoted": "昇格", "relegated": "降格", "in_progress_mark": "消化途中",
     },
 }
 
@@ -134,7 +222,8 @@ def _pct(value):
     return f"{value * 100:.0f}%"
 
 
-def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.png"):
+def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.png",
+                  policy=None):
     """The whole division: table, fingerprints and one section per club."""
     text = LABELS[lang]
     series = conn.execute("SELECT * FROM series WHERE id = ?", (series_id,)).fetchone()
@@ -144,17 +233,34 @@ def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.p
     profile = analysis.team_profile(conn, series_id)
     if not profile:
         raise ValueError(f"series {series_id!r} has no completed fixtures")
-    prints = {row["team_pk"]: row["axes"] for row in analysis.fingerprints(conn, series_id, profile)}
     opponents = {row["team_pk"]: row for row in analysis.goals_by_opponent(conn, series_id, profile)}
     fixtures = conn.execute(
         "SELECT COUNT(*), SUM(game_over) FROM games WHERE series_id = ?", (series_id,)
     ).fetchone()
 
+    # Lineups only exist from 2022. Without them, minutes, shots and every index
+    # built on them are absent rather than zero, and printing zeros would read as
+    # a measurement.
+    appearances = conn.execute(
+        """
+        SELECT COUNT(*) FROM appearances a
+        JOIN game_teams gt ON gt.id = a.game_team_id WHERE gt.series_id = ?
+        """,
+        (series_id,),
+    ).fetchone()[0]
+    has_players = appearances >= 10 * (fixtures[1] or 0)
+    prints = (
+        {row["team_pk"]: row["axes"] for row in analysis.fingerprints(conn, series_id, profile)}
+        if has_players else {}
+    )
+
     when = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d")
     parts = [
         f"# {text['teams_title']} — {series['name'].strip()}",
         "",
-        text["teams_intro"],
+        text["teams_intro"].format(
+            policy=policy or ("DATA_POLICY.md" if lang == "en" else "DATA_POLICY.ja.md")
+        ),
         "",
         text["snapshot"].format(
             series=f"{series['year']} {series['short_name']}", when=when,
@@ -163,6 +269,19 @@ def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.p
     ]
     if fixtures[0] and (fixtures[1] or 0) < fixtures[0]:
         parts += ["", text["in_progress"].format(done=fixtures[1] or 0, total=fixtures[0])]
+
+    if not has_players:
+        parts += ["", text["results_only"], "", f"## {text['table']}", "", _table(
+            text["cols_table_thin"],
+            [
+                [row["rank"], row["team"], row["played"], row["points"],
+                 f"{row['win']}-{row['draw']}-{row['lose']}",
+                 row["goals_for"], row["goals_against"], row["goal_difference"]]
+                for row in profile
+            ],
+            left=2,
+        ), ""]
+        return "\n".join(parts)
 
     parts += ["", f"## {text['table']}", "", _table(
         text["cols_table"],
@@ -179,7 +298,11 @@ def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.p
     parts += ["", f"## {text['fingerprints']}", "", f"![{text['fingerprints']}]({figure})", "",
               text["fingerprint_note"]]
 
-    axis_names = {key: label for key, label, _ in analysis.FINGERPRINT_AXES}
+    if lang == "ja":
+        axis_names = {key: analysis.FINGERPRINT_AXES_JA[key][0]
+                      for key, _, _ in analysis.FINGERPRINT_AXES}
+    else:
+        axis_names = {key: label for key, label, _ in analysis.FINGERPRINT_AXES}
     for row in profile:
         axes = prints.get(row["team_pk"], {})
         parts += [
@@ -233,8 +356,10 @@ def player_document(conn, series_id, lang="en", min_minutes=270, top=25, matrix_
 
     parts = [
         f"# {text['players_title']}", "", text["players_intro"], "",
-        f"Source series: *{series['name'].strip()}* — "
-        f"{len(profile)} clubs, {len(rows)} players above {min_minutes} minutes.",
+        text["players_source"].format(
+            series=series["name"].strip(), clubs=len(profile), players=len(rows),
+            minutes=min_minutes,
+        ),
         "", f"## {text['players_heading']}", "",
         _table(
             text["cols_player"],
@@ -254,7 +379,7 @@ def player_document(conn, series_id, lang="en", min_minutes=270, top=25, matrix_
     team_name = next((row["team"] for row in profile if row["team_pk"] == team), "")
     grid = analysis.minutes_matrix(conn, series_id, team)
     if grid["players"]:
-        headers = ["Player", "Yr", "Pos"] + [str(s) for s in grid["sections"]] + ["Total"]
+        headers = text["cols_matrix"] + [str(s) for s in grid["sections"]] + [text["total"]]
         body = []
         for player in grid["players"]:
             body.append(
@@ -268,4 +393,92 @@ def player_document(conn, series_id, lang="en", min_minutes=270, top=25, matrix_
 
     parts += ["", f"## {text['reproduce']}", "", "```bash",
               "togakuren sample --out docs/PLAYER_ANALYSIS_SAMPLE.md", "```", ""]
+    return "\n".join(parts)
+
+
+DIVISION_SLUGS = {
+    "1部リーグ": "d1", "2部リーグ": "d2", "3部リーグ": "d3",
+    "4部リーグ": "d4", "チャレンジリーグ": "challenge",
+}
+
+
+def season_slug(year, division):
+    """A stable, ASCII filename for one season of one division."""
+    return f"{year}-{DIVISION_SLUGS.get(division, 'other')}"
+
+
+def season_trends(conn, lang="en", figures=("figures/fig-conversion.png",
+                                            "figures/fig-grades.png",
+                                            "figures/fig-promotion.png")):
+    """Everything that only becomes visible across seasons, as one document."""
+    text = LABELS[lang]
+    seasons = analysis.season_summary(conn)
+    if not seasons:
+        raise ValueError("no league seasons in this database")
+    clubs = analysis.club_trajectories(conn)
+    moves = analysis.division_moves(conn, clubs)
+    years = sorted({row["year"] for row in seasons})
+    when = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d")
+
+    parts = [
+        f"# {text['trends_title']} — {years[0]}–{years[-1]}", "", text["trends_intro"], "",
+        text["snapshot"].format(series=f"{years[0]}–{years[-1]}", when=when,
+                                command="togakuren trends --format md"),
+        "", f"## {text['seasons']}", "",
+        _table(
+            text["cols_seasons"],
+            [
+                [row["year"], row["division"], row["teams"], row["games"],
+                 "-" if row["complete"] > 0.95 else _pct(row["complete"]),
+                 f"{row['goals_per_game']:.2f}",
+                 "-" if row["shots_per_game"] is None else f"{row['shots_per_game']:.1f}",
+                 "-" if row["conversion"] is None else f"{row['conversion']:.3f}",
+                 f"{row['yellows_per_game']:.2f}", row["reds"]]
+                for row in seasons
+            ],
+            left=2,
+        ),
+        "", text["seasons_note"],
+        "", f"![{text['seasons']}]({figures[0]})",
+    ]
+
+    parts += ["", f"## {text['grades_section']}", "", f"![{text['grades_section']}]({figures[1]})"]
+    for tier, name in ((1, "1部リーグ"), (2, "2部リーグ"), (3, "3部リーグ"), (5, "チャレンジリーグ")):
+        rows = analysis.grade_trend(conn, tier=tier)
+        if not rows:
+            continue
+        parts += ["", f"### {name}", "", _table(
+            text["cols_grades"],
+            [[row["year"], row["grade"], row["players"], row["minutes"],
+              _pct(row["minutes_share"]), row["goals"], f"{row['goals_per_90']:.3f}"]
+             for row in rows],
+            left=2,
+        )]
+    parts += ["", text["grades_note"]]
+
+    parts += ["", f"## {text['moves_section']}", "", f"![{text['moves_section']}]({figures[2]})", ""]
+    for key, label in (("promoted", text["promoted"]), ("relegated", text["relegated"])):
+        done = [m for m in moves if m["direction"] == key and m["complete_after"] > 0.95]
+        if done:
+            parts.append("- " + text["moves_summary"].format(
+                label=label, n=len(done),
+                mean=sum(m["delta"] for m in done) / len(done)))
+    parts += ["", _table(
+        text["cols_moves"],
+        [
+            [m["from_year"], m["from_division"], m["to_year"], m["to_division"],
+             text[m["direction"]] + ("" if m["complete_after"] > 0.95
+                                     else f" ({text['in_progress_mark']})"),
+             f"{m['ppg_before']:.2f}", f"{m['ppg_after']:.2f}", f"{m['delta']:+.2f}"]
+            for m in moves
+        ],
+        left=5,
+    ), "", text["moves_note"]]
+
+    parts += ["", f"## {text['trajectories']}", ""]
+    rows = []
+    for club in clubs:
+        by_year = {season["year"]: season["division"] for season in club["seasons"]}
+        rows.append([club["name"]] + [by_year.get(year, "") for year in years])
+    parts += [_table([text["trajectories"]] + years, rows, left=1), "", text["trajectories_note"], ""]
     return "\n".join(parts)
