@@ -46,7 +46,9 @@ th:first-child,td:first-child,th.l,td.l { text-align:left; }
 th { color:var(--muted); font-weight:600; font-size:.74rem; text-transform:uppercase; letter-spacing:.04em; }
 tbody tr:hover { background:var(--panel); }
 svg { display:block; max-width:100%; height:auto; }
-#bubbles svg, #curve svg, #opponents svg, #grades svg { width:100%; max-width:640px; }
+#bubbles svg, #curve svg, #opponents svg, #grades svg,
+#goals-line svg, #shots-line svg, #conv-line svg, #trajectory svg, #moves svg
+  { width:100%; max-width:640px; }
 #radar-big svg { width:100%; max-width:320px; }
 .grid { display:grid; gap:1.4rem; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); }
 .cards { display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); margin:.8rem 0; }

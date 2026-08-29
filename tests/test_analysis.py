@@ -1,6 +1,6 @@
 import unittest
 
-from togakuren import analysis, dashboard, db, ingest
+from togakuren import analysis, dashboard, db, ingest, trends
 
 from . import fixtures
 
@@ -113,7 +113,7 @@ class History(Base):
     def test_a_club_is_followed_by_its_federation_id(self):
         rows = analysis.team_history(self.conn, "100")
         self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0]["division"], "D1")
+        self.assertEqual(rows[0]["division"], "1部リーグ")
         self.assertEqual(rows[0]["points_per_game"], 3.0)
 
     def test_unknown_club(self):
@@ -142,3 +142,100 @@ class Dashboard(Base):
     def test_unknown_series(self):
         with self.assertRaises(ValueError):
             dashboard.build(self.conn, "nope")
+
+
+class Seasons(Base):
+    def test_summary_reports_scale_and_scoring(self):
+        rows = analysis.season_summary(self.conn)
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(row["teams"], 2)
+        self.assertEqual(row["games"], 2)
+        self.assertEqual(row["goals"], 3)
+        self.assertAlmostEqual(row["goals_per_game"], 1.5)
+        self.assertEqual(row["complete"], 1.0)
+        self.assertTrue(row["has_player_data"])
+
+    def test_per_minute_columns_are_withheld_without_lineups(self):
+        self.conn.execute("DELETE FROM appearances")
+        self.conn.commit()
+        row = analysis.season_summary(self.conn)[0]
+        self.assertFalse(row["has_player_data"])
+        self.assertIsNone(row["shots_per_game"])
+        self.assertIsNone(row["conversion"])
+        # A results-only season still reports what it does have.
+        self.assertAlmostEqual(row["goals_per_game"], 1.5)
+
+    def test_grade_trend_shares_sum_to_one(self):
+        rows = analysis.grade_trend(self.conn)
+        self.assertTrue(rows)
+        self.assertAlmostEqual(sum(row["minutes_share"] for row in rows), 1.0, places=6)
+
+    def test_grade_trend_skips_seasons_without_lineups(self):
+        self.conn.execute("DELETE FROM appearances")
+        self.conn.commit()
+        self.assertEqual(analysis.grade_trend(self.conn), [])
+
+
+class Trajectories(Base):
+    def _add_second_season(self, division, points, played=10):
+        """A follow-up season for Alpha, one tier up."""
+        self.conn.executescript(
+            f"""
+            INSERT INTO series (id, year, name, short_name, type)
+              VALUES ('series-2', '2100', 'Example League 2100 {division}', '{division}', 'league');
+            INSERT INTO teams (id, series_id, team_id, name, short_name)
+              VALUES ('team-a2', 'series-2', '100', 'Alpha University FC', 'Alpha');
+            INSERT INTO games (id, series_id, section, kickoff, game_over, length)
+              VALUES ('game-3', 'series-2', '1', '2100-04-01', 1, 90);
+            INSERT INTO standings (team_pk, series_id, played, win, draw, lose, points,
+                                   goals_for, goal_difference, fairplay_points)
+              VALUES ('team-a2', 'series-2', {played}, 3, 1, 6, {points}, 9, -5, 0);
+            """
+        )
+        self.conn.commit()
+
+    def test_a_club_is_followed_by_federation_id(self):
+        self._add_second_season("2部リーグ", 10)
+        clubs = {club["team_id"]: club for club in analysis.club_trajectories(self.conn)}
+        self.assertEqual([s["year"] for s in clubs["100"]["seasons"]], ["2099", "2100"])
+
+    def test_a_tier_change_is_reported_as_a_move(self):
+        self._add_second_season("2部リーグ", 10)
+        moves = analysis.division_moves(self.conn)
+        self.assertEqual(len(moves), 1)
+        move = moves[0]
+        self.assertEqual(move["direction"], "relegated")
+        self.assertEqual(move["gap"], 1)
+        self.assertAlmostEqual(move["ppg_after"], 1.0)
+        self.assertAlmostEqual(move["delta"], move["ppg_after"] - move["ppg_before"])
+
+    def test_staying_in_the_same_tier_is_not_a_move(self):
+        self._add_second_season("1部リーグ", 10)
+        self.assertEqual(analysis.division_moves(self.conn), [])
+
+    def test_an_unrecognised_division_is_not_a_promotion(self):
+        # A renamed or one-off competition has no place in the tier order, and
+        # must not be reported as movement in either direction.
+        self._add_second_season("特別リーグ", 10)
+        self.assertEqual(analysis.division_moves(self.conn), [])
+
+
+class Trends(Base):
+    def test_it_renders_without_any_personal_data(self):
+        html = trends.build(self.conn)
+        self.assertIn("<!doctype html>", html)
+        self.assertIn('charset="utf-8"', html)
+        self.assertIn("Alpha", html)
+        self.assertNotIn("Alpha Player", html)
+        self.assertNotIn("Beta Player", html)
+
+    def test_the_focus_club_is_preselected(self):
+        html = trends.build(self.conn, focus_team_id="200")
+        self.assertIn('value="200" selected', html)
+
+    def test_empty_database(self):
+        empty = db.connect(":memory:")
+        self.addCleanup(empty.close)
+        with self.assertRaises(ValueError):
+            trends.build(empty)

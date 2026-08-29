@@ -8,7 +8,7 @@ SERIES = {
     "_id": "series-1",
     "year": "2099",
     "name": "Example League 2099 Division 1",
-    "shortName": "D1",
+    "shortName": "1部リーグ",
     "type": "league",
     "requirements": "1部",
 }

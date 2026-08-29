@@ -18,6 +18,12 @@ this dataset are amateur students — see [docs/DATA_POLICY.md](docs/DATA_POLICY
 *Above: the dashboard in aggregate mode, which omits every per-player view. The
 local version adds the squad table and a matchday-by-player minutes grid.*
 
+![Promotion and relegation](docs/example-trends.png)
+
+*Above: from the cross-season page. Points per game before a division change
+against after it. Promotion costs a squad **1.04 points per game**; relegation
+returns **0.53**. Fifty-seven completed cases across five seasons.*
+
 ## Install
 
 Python 3.9 or newer. No dependencies — standard library only, including the
@@ -42,6 +48,7 @@ togakuren list                                       # what is loaded
 togakuren dashboard --series "2026 1部"              # interactive, team selector
 togakuren report --series "2026 1部"                 # flat standalone HTML
 togakuren export --series "2026 1部" --out d1.csv    # per-player season rows
+togakuren trends                                     # every season at once
 togakuren privacy-check --series "2026 1部"          # how identifiable an export is
 ```
 
@@ -76,6 +83,23 @@ build step, no server.
 - **The club's history across divisions**, followed by its federation-wide id, so
   relegation and promotion appear as a change of division on consecutive rows.
 - The full squad table with per-90 rates.
+
+**Across seasons** (`togakuren trends`)
+
+One season answers who is good now; several answer the questions that made the
+backfill worth doing. Aggregates throughout, so this page is publishable as it
+stands.
+
+- **League level over time** — goals, shots and conversion per division, with
+  seasons still in progress drawn faintly so they are not mistaken for finished
+  ones.
+- **Academic year over time**, per division: minutes share as stacked columns
+  and scoring rate as a line. Enough seasons to tell a real pattern from one
+  cohort being strong.
+- **Club trajectories** — tier on an inverted axis, so promotion reads as the
+  line going up, sized by points per game.
+- **Promotion and relegation as a natural experiment** — the same squad, a year
+  later, against different opposition.
 
 The database and the response cache go to a per-user data directory
 (`~/Library/Application Support/togakuren-analytics` on macOS,
@@ -170,7 +194,7 @@ the reasoning.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-79 tests, no network access, no fixtures taken from the federation — the test data
+90 tests, no network access, no fixtures taken from the federation — the test data
 is invented clubs and invented people. CI runs them on Linux, macOS and Windows
 against Python 3.9 and 3.13, and fails the build if any collected data is ever
 committed.
