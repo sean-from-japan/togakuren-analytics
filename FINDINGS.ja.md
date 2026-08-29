@@ -155,4 +155,4 @@ togakuren trends --format md --lang ja           # docs/SEASON_TRENDS.ja.md
 togakuren profiles --all                         # docs/seasons/
 ```
 
-図はこの2ページ、`trends` と `dashboard --privacy aggregate` の実際のチャートを1枚ずつ切り出したものです。この文書の数字は1つも手で打っていません。
+図はこの2ページ、`trends` と `dashboard --privacy aggregate` の実際のチャートをCSSで1枚ずつ切り出し、ヘッドレスで撮影・自動トリミングして256色に減色したものです。この文書の数字は1つも手で打っていません。

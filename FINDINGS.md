@@ -224,5 +224,5 @@ togakuren profiles --all                         # docs/seasons/
 ```
 
 The figures here are the charts from those two pages, `trends` and `dashboard
---privacy aggregate`, isolated and cropped. No number in this document was typed
-in by hand.
+--privacy aggregate`, isolated with CSS, screenshotted headless, auto-cropped and
+quantised to 256 colours. No number in this document was typed in by hand.
