@@ -138,6 +138,11 @@ is invented clubs and invented people. CI runs them on Linux, macOS and Windows
 against Python 3.9 and 3.13, and fails the build if any collected data is ever
 committed.
 
+## Licence
+
+MIT — see [LICENSE](LICENSE). It covers this code. It says nothing about the
+federation's data, which the tool does not redistribute.
+
 ## Not affiliated
 
 An independent hobby project, not endorsed by or connected to the Tokyo University
