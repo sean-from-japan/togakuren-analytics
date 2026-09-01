@@ -34,9 +34,21 @@ from . import predict
 FULL_MATCH = 90.0
 
 #: Ridge penalty on player columns, and on club columns when they are included.
-#: Chosen by grouped cross-validation over 2022-2026 league fixtures.
+#: Chosen by grouped cross-validation over 2022-2026 league fixtures — which is
+#: every fixture a plain ``validate`` then scores on. Quoting that figure quotes
+#: a number the choice has already seen; ``validate(..., nested=True)`` picks the
+#: penalties inside each training fold instead. These remain the defaults for
+#: ``fit``, where there is no held-out set to protect.
 PLAYER_PENALTY = 30.0
 CLUB_PENALTY = 0.1
+
+#: Searched when the penalties are picked inside a fold.
+PLAYER_PENALTIES = (5.0, 10.0, 20.0, 30.0, 45.0, 70.0, 110.0)
+CLUB_PENALTIES = (0.03, 0.1, 0.3, 1.0, 3.0)
+
+#: Folds for that inner search. Fewer than the outer loop: it only has to rank
+#: penalties against one another, not produce a number anybody quotes.
+INNER_FOLDS = 3
 
 #: Players below this many minutes in the fitting sample get no column of their
 #: own; they are absorbed into the intercept-free baseline.
@@ -310,33 +322,146 @@ def folds(rows, count=5, seed=20260901):
             for fold in range(count)]
 
 
+def _columns(rows, min_minutes, use_players, use_clubs):
+    """The player and club column maps a model of this shape gets from ``rows``."""
+    played = minutes(rows)
+    players = ({player: index for index, player in
+                enumerate(sorted(p for p in played if played[p] >= min_minutes))}
+               if use_players else {})
+    clubs = ({club: index for index, club in
+              enumerate(sorted({club for row in rows for club in row.clubs}))}
+             if use_clubs else None)
+    return players, clubs
+
+
+def _fold_error(train, test, min_minutes, use_players, use_clubs,
+                player_penalty, club_penalty):
+    """``(squared error, matches)`` on the held-out fixtures."""
+    players, clubs = _columns(train, min_minutes, use_players, use_clubs)
+    design = Design(train, players, clubs)
+    coefficients = solve(design, design.penalties(player_penalty, club_penalty))
+    totals = by_match(test, Design(test, players, clubs).predict(coefficients))
+    return (sum((actual - predicted) ** 2 for actual, predicted in totals.values()),
+            len(totals))
+
+
+def _cv_error(rows, count, min_minutes, use_players, use_clubs,
+              player_penalty, club_penalty, seed):
+    total, matches = 0.0, 0
+    for train, test in folds(rows, count, seed):
+        error, played = _fold_error(train, test, min_minutes, use_players,
+                                    use_clubs, player_penalty, club_penalty)
+        total += error
+        matches += played
+    return total / matches
+
+
+def tune(rows, count=INNER_FOLDS, min_minutes=MIN_MINUTES,
+         use_players=True, use_clubs=True, seed=20260902):
+    """Pick the two ridge penalties by cross-validation *within* ``rows``.
+
+    A coordinate search rather than the full product. Clubs and players barely
+    share columns, so the two penalties are close to separable and a pass over
+    the clubs, then the players, then the clubs again lands where the grid does
+    for a fraction of the fits. The seed differs from :func:`folds`' default so
+    that an inner split is not a copy of the outer one.
+    """
+    player_penalty, club_penalty = PLAYER_PENALTY, CLUB_PENALTY
+
+    def best(values, pair):
+        return min((_cv_error(rows, count, min_minutes, use_players, use_clubs,
+                              *pair(value), seed=seed), value)
+                   for value in values)[1]
+
+    for _ in range(2):
+        if use_clubs:
+            club_penalty = best(CLUB_PENALTIES, lambda v: (player_penalty, v))
+        if use_players:
+            player_penalty = best(PLAYER_PENALTIES, lambda v: (v, club_penalty))
+    return player_penalty, club_penalty
+
+
+Validation = collections.namedtuple("Validation", "scores penalties")
+
+
 def validate(rows, count=5, min_minutes=MIN_MINUTES,
-             player_penalty=PLAYER_PENALTY, club_penalty=CLUB_PENALTY):
+             player_penalty=PLAYER_PENALTY, club_penalty=CLUB_PENALTY,
+             nested=False):
     """Grouped cross-validation, reported as match goal-difference error.
 
-    Returns ``{model: mean squared error}`` for the zero model, clubs alone,
-    players alone and both. Aggregate figures only, so this is the part that can
-    be published.
+    Returns ``Validation(scores, penalties)``: ``scores`` maps the zero model,
+    clubs alone, players alone and both to a mean squared error, ``penalties``
+    maps each fitted model to the ``(player, club)`` pair used in each fold.
+    Aggregate figures only, so this is the part that can be published.
+
+    With ``nested``, the penalties are chosen by :func:`tune` inside each
+    training fold and nothing about the held-out fixtures reaches the choice.
+    Without it the module constants are used, and those were themselves picked
+    by cross-validation over these same fixtures — the resulting figure is
+    optimistic by however much that choice was worth.
     """
     baseline = _mean_square(by_match(rows, [0.0] * len(rows)))
-    scores = {"zero": baseline}
+    scores, chosen = {"zero": baseline}, {}
     for name, use_players, use_clubs in (("clubs", False, True),
                                          ("players", True, False),
                                          ("clubs+players", True, True)):
-        total, matches = 0.0, 0
+        total, matches, picks = 0.0, 0, []
         for train, test in folds(rows, count):
-            played = minutes(train)
-            players = ({player: index for index, player in
-                        enumerate(sorted(p for p in played if played[p] >= min_minutes))}
-                       if use_players else {})
-            clubs = ({club: index for index, club in
-                      enumerate(sorted({club for row in train for club in row.clubs}))}
-                     if use_clubs else None)
-            design = Design(train, players, clubs)
-            coefficients = solve(design, design.penalties(player_penalty, club_penalty))
-            held = Design(test, players, clubs)
-            totals = by_match(test, held.predict(coefficients))
-            total += sum((actual - predicted) ** 2 for actual, predicted in totals.values())
-            matches += len(totals)
+            penalties = (tune(train, min_minutes=min_minutes,
+                              use_players=use_players, use_clubs=use_clubs)
+                         if nested else (player_penalty, club_penalty))
+            picks.append(penalties)
+            error, played = _fold_error(train, test, min_minutes, use_players,
+                                        use_clubs, *penalties)
+            total += error
+            matches += played
         scores[name] = total / matches
-    return scores
+        chosen[name] = picks
+    return Validation(scores, chosen)
+
+
+def season_split(rows, dates, share=0.6):
+    """``(train, test)``: the first ``share`` of each season, then the rest of it.
+
+    Split inside a season rather than across seasons. A quarter of this league's
+    players leave every March, so fitting on 2022 and scoring 2026 would mostly
+    be asking about players who are no longer there.
+    """
+    grouped = collections.defaultdict(list)
+    for row in rows:
+        grouped[row.year].append(row.game)
+    early = set()
+    for year, games in grouped.items():
+        ordered = sorted(set(games), key=lambda game: (dates.get(game) or "", game))
+        early.update(ordered[:round(len(ordered) * share)])
+    return ([row for row in rows if row.game in early],
+            [row for row in rows if row.game not in early])
+
+
+def forward(rows, dates, share=0.6, min_minutes=MIN_MINUTES, nested=False,
+            player_penalty=PLAYER_PENALTY, club_penalty=CLUB_PENALTY):
+    """Fit on the early part of each season and score the rest of that season.
+
+    The harder question of the two. Cross-validation holds out fixtures from
+    all through a season, so a player's rating is partly fitted on matches that
+    come after the ones it is scored on; this only ever looks forward.
+
+    ``nested`` chooses the penalties inside the training part, by the same inner
+    cross-validation :func:`validate` uses.
+    """
+    train, test = season_split(rows, dates, share)
+    if not train or not test:
+        raise ValueError("the split left one side empty")
+    scores = {"zero": _mean_square(by_match(test, [0.0] * len(test)))}
+    chosen = {}
+    for name, use_players, use_clubs in (("clubs", False, True),
+                                         ("players", True, False),
+                                         ("clubs+players", True, True)):
+        penalties = (tune(train, min_minutes=min_minutes, use_players=use_players,
+                          use_clubs=use_clubs)
+                     if nested else (player_penalty, club_penalty))
+        error, matches = _fold_error(train, test, min_minutes, use_players,
+                                     use_clubs, *penalties)
+        scores[name] = error / matches
+        chosen[name] = [penalties]
+    return Validation(scores, chosen)

@@ -49,6 +49,13 @@ difference for yourself.
 
 ## What it is worth
 
+Two ridge penalties have to be set before any of this means anything, and where
+they come from decides whether the answer is worth reading. Picking them by
+cross-validation over every fixture and then reporting a cross-validated score
+over those same fixtures reports a number the choice has already seen. So the
+penalties below are chosen **inside the training data of each split**, by an
+inner cross-validation that never sees the fixtures being scored — `--tune`.
+
 Grouped five-fold cross-validation — whole fixtures are held out, so no segment
 of a test match is ever in training. The error is on the goal difference of the
 whole match, formed by summing the model's segment predictions.
@@ -56,25 +63,45 @@ whole match, formed by summing the model's segment predictions.
 | model | MSE | vs zero |
 |---|---|---|
 | zero | 6.7676 | — |
-| clubs | 4.4667 | −34.0% |
-| players, no club terms | 5.2921 | −21.8% |
-| **clubs + players** | **4.2851** | **−36.7%** |
+| clubs | 4.4652 | −34.0% |
+| players, no club terms | 5.0296 | −25.7% |
+| **clubs + players** | **4.2988** | **−36.5%** |
 
-Knowing the players and not just the clubs: **+4.07%**.
+Knowing the players and not just the clubs: **+3.73%**.
 
 A stricter check, because cross-validation of this kind measures how well the
 ratings *describe* a season rather than how well they carry forward: fit on the
-first 60% of each season's fixtures and predict the rest of that same season.
+first 60% of each season's fixtures and predict the rest of that same season,
+741 training and 494 test fixtures.
 
 | model | MSE | vs zero |
 |---|---|---|
-| zero | 6.3180 | — |
-| clubs | 4.3427 | −31.3% |
-| **clubs + players** | **4.1062** | **−35.0%** |
+| zero | 6.7955 | — |
+| clubs | 4.4501 | −34.5% |
+| players, no club terms | 5.3796 | −20.8% |
+| **clubs + players** | **4.2696** | **−37.2%** |
 
-Knowing the players and not just the clubs: **+5.44%**, over 735 training and 500
-test fixtures. The forward split is the harder test and it comes out slightly
-better, which is the right way round.
+Knowing the players and not just the clubs: **+4.06%**. The forward split is the
+harder test and it comes out slightly better, which is the right way round.
+
+```
+togakuren ratings --validate --tune          # the first table, about 2.5 minutes
+togakuren ratings --forward --tune           # the second, about 20 seconds
+```
+
+**What the honesty cost: 0.34 of a percentage point.** Left on the constants,
+the cross-validated figure reads +4.07% rather than +3.73%. The reason the gap
+is small is visible in what the tuning picks — the player penalty lands on 20 or
+30 in every fold and the club penalty on 0.03 to 0.3, so the constants (30 and
+0.1) were sitting inside the range the folds choose for themselves. That is the
+good case. It was not knowable without running it.
+
+An earlier draft of this document quoted **+5.44%** for the forward split, from
+a prototype written before the method moved into this package. That figure is
+not reproducible here: the split it used divided 735/500 rather than 741/494 and
+its numbers do not come back. It has been replaced by what the shipped code
+prints rather than reconciled, because a figure nobody can re-run is not
+evidence.
 
 Home advantage falls out of the same fit at **+0.26 goals per 90**. It is
 estimated from the venue, since the API records a venue and never a host — see
