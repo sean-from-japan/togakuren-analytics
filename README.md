@@ -1,37 +1,42 @@
 # togakuren-analytics
 
-Collect and analyse match records from the Tokyo University Football Association
-(東京都大学サッカー連盟), which runs the Tokyo/Kanagawa university leagues.
+[![tests](https://github.com/sean-from-japan/togakuren-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/sean-from-japan/togakuren-analytics/actions/workflows/ci.yml)
+![python](https://img.shields.io/badge/python-3.9%20%E2%80%93%203.13-blue)
+![dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
+![licence](https://img.shields.io/badge/licence-MIT-blue)
 
-The federation publishes fixtures, results and a top-scorers list. The records
-behind them are far more detailed than the pages let on — per-player shot counts,
-the starting eleven, timed substitutions, cards with offence codes — and none of
-it is aggregated anywhere. This turns those records into a queryable database and
-the rate metrics the site never shows: minutes played, shots per 90, conversion
-rate, when a team's shots and substitutions actually arrive.
+Match records from the Tokyo University Football Association
+(東京都大学サッカー連盟), turned into a database and a set of measurements.
+**2,312 fixtures, 53 clubs, 2021–2026 (player-level records from 2022), no
+dependencies outside the standard library, and no collected data in the
+repository.**
 
-One thing here is not a record of what happened: `forecast` gives win/draw/loss
-probabilities for the fixtures still to play, and `backtest` scores that against
-the class prior on seasons its settings were not chosen on — see
-[docs/PREDICTION.md](docs/PREDICTION.md). `ratings` is the other one: an adjusted
-plus-minus fitted to the lineup on the pitch between one change and the next,
-which answers what knowing the players is worth on top of knowing the clubs — see
-[docs/RATINGS.md](docs/RATINGS.md).
+The federation's site shows fixtures, a table and a top-scorers list. The records
+underneath hold per-player shot counts, lineups, timed substitutions and coded
+cards, and none of it is aggregated anywhere.
 
-Two limits worth knowing before reading any rate here. A goal record carries a
-scorer and a minute and nothing else, so **penalties cannot be separated from open
-play** — every conversion rate on this page includes them, where the usual
-treatment would report non-penalty goals. And goal events reconcile with the
-recorded score in 79% of fixtures; the gap is unattributed and own goals, which
-the federation stores as a count rather than an event.
+## What came out of it
 
-**No collected data is committed here.** The repository is code, and the people in
-this dataset are amateur students — see [docs/DATA_POLICY.md](docs/DATA_POLICY.md).
+| | result | where |
+|---|---|---|
+| **Forecasting** | Settings frozen on 2022–24; on 2025–26 (n=525) log loss goes **1.0200 → 0.8192**, past Elo at 0.8753. Accuracy 44.6% → 65.7%. The time decay is the whole story — removing it costs 0.095 nats, more than the model's entire margin over Elo. | [PREDICTION.md](docs/PREDICTION.md) · [ja](docs/PREDICTION.ja.md) |
+| **Player ratings** | Adjusted plus-minus over 8,087 lineup segments. Knowing the players beats knowing only the clubs by **+3.73%** (cross-validated) and **+4.06%** (forward split), with the ridge penalties chosen *inside* each training fold. | [RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) |
+| **What the data cannot do** | Goal records carry a scorer and a minute and nothing else, so **penalties cannot be separated from open play** — no non-penalty rate is possible from this source. Goal events reconcile with the recorded score in **79%** of fixtures. | [FINDINGS.md](FINDINGS.md) |
+| **What may be published** | Names removed is not anonymous: club, position and appearances alone identify **56%** of a division uniquely, and 77% once goals are added. Measured, not assumed — `privacy-check` reproduces it. | [DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) |
 
-📊 **[Findings](FINDINGS.md)** ([日本語](FINDINGS.ja.md)) — six things the
-federation's own pages do not show, with the charts: what promotion actually
-costs a squad, why a single season says nothing about year groups, and how far
-league position and shot volume come apart.
+Two things were worked out here that the source documents nowhere: the four shot
+columns are halves and extra time rather than quarters (the fourth is never used
+in five seasons), and minutes played are not recorded at all — they are rebuilt
+from the eleven, the bench and free-text substitution times, which include `HT`,
+`90+2` and a full-width `90⁺5`.
+
+**No collected data is committed here.** The repository is code, and the people
+in this dataset are amateur students — see
+[docs/DATA_POLICY.md](docs/DATA_POLICY.md). CI fails if collected data appears in
+a commit.
+
+📊 **[Findings](FINDINGS.md)** ([日本語](FINDINGS.ja.md)) — six results with the
+charts, including two that came out against expectation.
 
 ![Example dashboard](docs/example-dashboard.png)
 
@@ -50,6 +55,7 @@ local version adds the squad table and a matchday-by-player minutes grid.*
 | [docs/RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) | Adjusted plus-minus: what knowing the players adds over knowing the clubs, and the two mistakes that reverse the answer. |
 | [docs/SOURCE_SELECTION.md](docs/SOURCE_SELECTION.md) · [ja](docs/SOURCE_SELECTION.ja.md) | Why this league and not the tier above: what each federation publishes, and what its site says about being read by a program. |
 | [docs/DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
+| [CHANGELOG.md](CHANGELOG.md) | What changed and, where a published figure moved, why it moved. |
 
 The two generated documents come out of the tool in both languages
 (`--lang en|ja`), so only prose is ever translated by hand and the numbers
