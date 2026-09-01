@@ -240,9 +240,102 @@ class Validation(unittest.TestCase):
             build.match((eleven("a"), sorted(rng.sample(range(1, 90), scored))),
                         (eleven("b"), []), (scored, 0), day=match)
         rows = rapm.segments(build.conn)
-        scores = rapm.validate(rows, count=4, min_minutes=90)
+        scores, penalties = rapm.validate(rows, count=4, min_minutes=90)
         self.assertEqual(set(scores), {"zero", "clubs", "players", "clubs+players"})
         self.assertTrue(all(value >= 0 for value in scores.values()))
+        self.assertEqual(set(penalties), {"clubs", "players", "clubs+players"})
+        self.assertTrue(all(len(picks) == 4 for picks in penalties.values()))
+
+    def test_without_tuning_every_fold_uses_the_same_penalties(self):
+        rows = self.noisy_rows()
+        _, penalties = rapm.validate(rows, count=3, min_minutes=90)
+        self.assertEqual(set(penalties["clubs+players"]),
+                         {(rapm.PLAYER_PENALTY, rapm.CLUB_PENALTY)})
+
+    def test_tuning_picks_from_the_grid_and_only_sees_the_training_fold(self):
+        rows = self.noisy_rows()
+        seen = []
+        original = rapm.tune
+
+        def spy(train, **kwargs):
+            seen.append({row.game for row in train})
+            return original(train, **kwargs)
+
+        rapm.tune = spy
+        try:
+            _, penalties = rapm.validate(rows, count=3, min_minutes=90, nested=True)
+        finally:
+            rapm.tune = original
+
+        for picks in penalties.values():
+            for player_penalty, club_penalty in picks:
+                self.assertIn(player_penalty, rapm.PLAYER_PENALTIES)
+                self.assertIn(club_penalty, rapm.CLUB_PENALTIES)
+
+        # Whatever tune was shown, the fold it was choosing for was not in it.
+        held = [test for _, test in rapm.folds(rows, count=3)]
+        for index, games in enumerate(seen):
+            self.assertFalse(games & {row.game for row in held[index % 3]})
+
+    def test_tuning_shrinks_harder_when_there_is_no_player_effect_to_find(self):
+        """The whole point of choosing the penalty: let the data set it.
+
+        One sample has a planted player worth three goals a match, the other is
+        the same shape with nobody responsible for anything. The second should
+        be pulled towards zero harder than the first.
+        """
+        noise, _ = rapm.tune(self.noisy_rows(), count=3, min_minutes=90,
+                             use_clubs=False)
+        signal, _ = rapm.tune(self.planted_rows(), count=3, min_minutes=90,
+                              use_clubs=False)
+        self.assertGreater(noise, signal)
+
+    def noisy_rows(self):
+        build = Builder()
+        self.addCleanup(build.conn.close)
+        rng = random.Random(11)
+        for match in range(48):
+            scored = rng.choice([0, 0, 1, 2])
+            build.match((eleven("a"), sorted(rng.sample(range(1, 90), scored))),
+                        (eleven("b"), []), (scored, 0), day=match)
+        return rapm.segments(build.conn)
+
+    def planted_rows(self):
+        """The same shape, but "a0" is worth three goals whenever they play."""
+        build = Builder()
+        self.addCleanup(build.conn.close)
+        rng = random.Random(11)
+        squad = [f"a{index}" for index in range(16)]
+        for match in range(48):
+            star = match % 2 == 0
+            pool = [player for player in squad if player != "a0"]
+            rng.shuffle(pool)
+            picked = (["a0"] + pool[:10]) if star else pool[:11]
+            minutes = [20, 55, 75] if star else []
+            build.match(([(player, 0, 90) for player in picked], minutes),
+                        (eleven("b"), []), (len(minutes), 0), day=match)
+        return rapm.segments(build.conn)
+
+    def test_the_forward_split_cuts_each_season_by_date_and_never_across(self):
+        rows = [rapm.Segment(f"{year}-{index}", year, "s1", ("100", "200"), 0,
+                             90, 0, ("a",), ("b",))
+                for year in ("2024", "2025") for index in range(10)]
+        dates = {row.game: f"{row.year}-{row.game.split('-')[1]:0>2}-01" for row in rows}
+        train, test = rapm.season_split(rows, dates, share=0.6)
+        for year in ("2024", "2025"):
+            early = sorted(row.game for row in train if row.year == year)
+            late = sorted(row.game for row in test if row.year == year)
+            self.assertEqual(len(early), 6)
+            self.assertEqual(len(late), 4)
+            self.assertLess(max(dates[g] for g in early), min(dates[g] for g in late))
+
+    def test_the_forward_split_scores_every_model(self):
+        rows = self.planted_rows()
+        dates = {row.game: f"2099-01-{int(row.game[1:]) + 1:02d}" for row in rows}
+        scores, penalties = rapm.forward(rows, dates, min_minutes=90)
+        self.assertEqual(set(scores), {"zero", "clubs", "players", "clubs+players"})
+        self.assertLess(scores["clubs+players"], scores["zero"])
+        self.assertTrue(all(len(picks) == 1 for picks in penalties.values()))
 
     def test_folds_keep_a_match_whole(self):
         rows = [rapm.Segment(f"g{index // 3}", "2099", "s1", ("100", "200"), 0,

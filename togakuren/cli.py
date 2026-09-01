@@ -249,16 +249,35 @@ def cmd_ratings(args):
     print(f"{len(rows):,} segments over {games:,} fixtures "
           f"({all_games - games:,} left out: timed goals do not add up to the score)")
 
-    if args.validate:
-        scores = rapm.validate(rows, min_minutes=args.min_minutes)
+    if args.validate or args.forward:
+        if args.forward:
+            dates = {match["game_id"]: match["date"] for match in predict.load(conn)}
+            scores, penalties = rapm.forward(rows, dates, min_minutes=args.min_minutes,
+                                             nested=args.tune)
+            train, test = rapm.season_split(rows, dates)
+            header = (f"Forward split, first 60% of each season "
+                      f"({len({r.game for r in train}):,} fixtures) predicting the rest "
+                      f"({len({r.game for r in test}):,})")
+        else:
+            scores, penalties = rapm.validate(rows, min_minutes=args.min_minutes,
+                                              nested=args.tune)
+            header = "Grouped 5-fold CV, match goal-difference error"
         baseline = scores["zero"]
-        print(f"\nGrouped {5}-fold CV, match goal-difference error\n")
+        picked = ("penalties chosen inside the training data only"
+                  if args.tune else "penalties from the module constants, which "
+                                    "were chosen over these same fixtures")
+        print(f"\n{header}\n({picked})\n")
         print(f"{'model':16} {'MSE':>8} {'vs zero':>9}")
         for name in ("zero", "clubs", "players", "clubs+players"):
             share = "" if name == "zero" else f"{(scores[name] - baseline) / baseline:9.2%}"
             print(f"{name:16} {scores[name]:8.4f} {share:>9}")
         gain = (scores["clubs"] - scores["clubs+players"]) / scores["clubs"]
         print(f"\nknowing the players and not just the clubs: {gain:+.2%}")
+        if args.tune:
+            print("\nchosen (player, club)")
+            for name in ("clubs", "players", "clubs+players"):
+                shown = ", ".join(f"({p:g}, {c:g})" for p, c in penalties[name])
+                print(f"  {name:16} {shown}")
         return
 
     ratings, home, _, _ = rapm.fit(rows, min_minutes=args.min_minutes)
@@ -479,6 +498,13 @@ def build_parser():
                          help="add cup ties, which are single fixtures between divisions")
     ratings.add_argument("--validate", action="store_true",
                          help="print the cross-validation table instead of the players")
+    ratings.add_argument("--forward", action="store_true",
+                         help="score the first 60% of each season against the rest of "
+                              "it, instead of cross-validating. The harder test")
+    ratings.add_argument("--tune", action="store_true",
+                         help="with --validate, choose the ridge penalties inside each "
+                              "training fold rather than using the constants, which were "
+                              "chosen over every fixture being scored. Slower and honest")
     ratings.add_argument("--top", type=int, default=15, help="players to show at each end")
     ratings.set_defaults(func=cmd_ratings)
 
