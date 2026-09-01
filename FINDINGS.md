@@ -15,6 +15,19 @@ Everything here describes teams, divisions and year groups. Nothing describes an
 individual; [the last section](#what-is-not-in-this-document) explains why that
 is a deliberate limit rather than a gap.
 
+## In one screen
+
+Ordered by how much the number said that was not already obvious.
+
+| | result | why it is worth reading |
+|---|---|---|
+| [2](#2-year-groups-have-no-structure-beyond-fourth-years-score) | Year groups | A promising pattern in the 2026 third years **disappeared** once five seasons were laid side by side — 2025's third years were the best of the lot. Kept in as a negative result. |
+| [5](#5-conversion-rises-as-the-division-falls-except-in-the-second) | Conversion by division | Conversion rises as the division falls, **except** that the second division fell below the first in 2025 and has not come back. No explanation survived checking, so none is offered. |
+| [3](#3-league-position-and-shot-volume-are-only-loosely-related) | Position against shots | Below third place the two come apart: 5 of 12 clubs sit three or more places from where their shot count would put them. |
+| [4](#4-squad-character-has-a-shape) | Squad character | How much of a season a club gives to eleven players, and which opponents its goals come from, separate clubs the table does not. |
+| [6](#6-a-club-can-cross-three-tiers-in-five-years) | Movement | Second division → challenge league → second division champion → first division runner-up, in five years. |
+| [1](#1-promotion-costs-a-point-a-game-relegation-gives-back-half) | Promotion | The **expected** result, kept for its size rather than its direction: −1.04 points per game in 26 of 27 cases. Read it for the asymmetry with relegation, which only gives back half. |
+
 ## The dataset
 
 Every league and cup competition the federation still publishes, as of August
