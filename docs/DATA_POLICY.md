@@ -117,5 +117,6 @@ The default delay between requests is 0.5 seconds and responses are cached on
 disk, so a full five-season backfill is a few hundred requests once. Do not
 remove the delay.
 
-If the federation would prefer this tool not to exist, open an issue and it will
-be taken down. Nothing here is worth being a nuisance over.
+If the federation, or any club whose results appear here, would prefer this tool
+not to exist, open an issue and it will be taken down. Nothing here is worth being
+a nuisance over.
