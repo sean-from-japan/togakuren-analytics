@@ -82,6 +82,11 @@ SELECT t.id                                AS team_pk,
        t.short_name                        AS team,
        COUNT(DISTINCT gt.id)               AS played,
        SUM(gt.score)                       AS goals_for,
+       -- Shot rows are missing for some fixtures, so conversion has to be taken
+       -- over the fixtures that have them; goals_for covers every fixture.
+       COUNT(shot.game_team_id)            AS shot_games,
+       SUM(CASE WHEN shot.game_team_id IS NOT NULL THEN gt.score ELSE 0 END)
+                                           AS goals_with_shots,
        SUM(shot.total)                     AS shots,
        SUM(shot.h1) AS first_half, SUM(shot.h2) AS second_half,
        st.points, st.win, st.draw, st.lose, st.goal_difference
@@ -133,9 +138,12 @@ def team_season(conn, series_id):
     for row in conn.execute(TEAM_SEASON, {"series_id": series_id}):
         entry = dict(row)
         shots = entry["shots"] or 0
+        covered = entry["shot_games"] or 0
         entry["shots"] = shots
-        entry["shots_per_game"] = round(shots / entry["played"], 1) if entry["played"] else 0.0
-        entry["conversion"] = round((entry["goals_for"] or 0) / shots, 3) if shots else 0.0
+        entry["shot_coverage"] = round(covered / entry["played"], 3) if entry["played"] else 0.0
+        entry["shots_per_game"] = round(shots / covered, 1) if covered else 0.0
+        entry["conversion"] = (round((entry["goals_with_shots"] or 0) / shots, 3)
+                               if shots else 0.0)
         rows.append(entry)
     return rows
 
