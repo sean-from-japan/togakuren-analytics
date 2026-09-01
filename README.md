@@ -10,6 +10,21 @@ it is aggregated anywhere. This turns those records into a queryable database an
 the rate metrics the site never shows: minutes played, shots per 90, conversion
 rate, when a team's shots and substitutions actually arrive.
 
+One thing here is not a record of what happened: `forecast` gives win/draw/loss
+probabilities for the fixtures still to play, and `backtest` scores that against
+the class prior on seasons its settings were not chosen on — see
+[docs/PREDICTION.md](docs/PREDICTION.md). `ratings` is the other one: an adjusted
+plus-minus fitted to the lineup on the pitch between one change and the next,
+which answers what knowing the players is worth on top of knowing the clubs — see
+[docs/RATINGS.md](docs/RATINGS.md).
+
+Two limits worth knowing before reading any rate here. A goal record carries a
+scorer and a minute and nothing else, so **penalties cannot be separated from open
+play** — every conversion rate on this page includes them, where the usual
+treatment would report non-penalty goals. And goal events reconcile with the
+recorded score in 79% of fixtures; the gap is unattributed and own goals, which
+the federation stores as a count rather than an event.
+
 **No collected data is committed here.** The repository is code, and the people in
 this dataset are amateur students — see [docs/DATA_POLICY.md](docs/DATA_POLICY.md).
 
@@ -31,6 +46,9 @@ local version adds the squad table and a matchday-by-player minutes grid.*
 | [docs/SEASON_TRENDS.md](docs/SEASON_TRENDS.md) · [ja](docs/SEASON_TRENDS.ja.md) | Every season in one place: league level, year groups, all 57 division changes, every club's path. Generated. |
 | [docs/seasons/](docs/seasons/) | One document per league season and division, 2021–2026: table, indices, year groups, history. 40 documents, generated. |
 | [docs/PLAYER_ANALYSIS_SAMPLE.md](docs/PLAYER_ANALYSIS_SAMPLE.md) · [ja](docs/PLAYER_ANALYSIS_SAMPLE.ja.md) | What the player-level output looks like, over an **invented** season. Generated. |
+| [docs/PREDICTION.md](docs/PREDICTION.md) · [ja](docs/PREDICTION.ja.md) | Forecasting the fixtures still to play, scored against the class prior on seasons the settings were not chosen on. |
+| [docs/RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) | Adjusted plus-minus: what knowing the players adds over knowing the clubs, and the two mistakes that reverse the answer. |
+| [docs/SOURCE_SELECTION.md](docs/SOURCE_SELECTION.md) · [ja](docs/SOURCE_SELECTION.ja.md) | Why this league and not the tier above: what each federation publishes, and what its site says about being read by a program. |
 | [docs/DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
 
 The two generated documents come out of the tool in both languages
@@ -76,6 +94,11 @@ togakuren profiles --series "2026 1部"               # one division as Markdown
 togakuren profiles --all                             # every completed season
 togakuren sample                                     # player-level output, invented data
 togakuren privacy-check --series "2026 1部"          # how identifiable an export is
+
+togakuren forecast --series "2026 1部"                # odds for the fixtures left to play
+togakuren backtest --league-only                     # how well those odds have done
+togakuren ratings --validate                         # what player identity is worth
+togakuren ratings                                    # adjusted plus-minus, locally
 ```
 
 `--series` takes a series id or any set of search terms that narrows to one
@@ -233,5 +256,11 @@ federation's data, which the tool does not redistribute.
 ## Not affiliated
 
 An independent hobby project, not endorsed by or connected to the Tokyo University
-Football Association. It reads only what their site already publishes. If they
-would prefer it not to exist, open an issue and it comes down.
+Football Association. It reads only what their site already publishes.
+
+Every figure is computed from the federation's public records. Nothing
+unpublished is used, every club goes through the same code, and no club is
+favoured or singled out.
+
+If the federation, or any club whose results appear here, would prefer this not to
+exist, open an issue and it comes down.

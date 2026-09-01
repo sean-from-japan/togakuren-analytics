@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from . import (__version__, analysis, dashboard, db, ingest, markdown, metrics, paths,
-               privacy, report, sample, trends)
+               predict, privacy, rapm, report, sample, trends)
 from .client import ApiError, Client
 
 
@@ -190,6 +190,129 @@ def _seasons_index(conn, langs):
     )
 
 
+
+def cmd_forecast(args):
+    """Probabilities for the fixtures that have not been played yet."""
+    conn = db.connect(args.db or paths.database())
+    series_id = _resolve_series(conn, args.series)
+    matches = predict.load(conn)
+    remaining = predict.upcoming(matches, series_id)
+    if not remaining:
+        raise SystemExit("every fixture in that series has been played")
+
+    cutoff = predict.as_of(matches)
+    model = predict.Poisson()
+    predict.fit_through(model, matches, cutoff)
+
+    print(f"{remaining[0]['series_name']} {remaining[0]['year']}: "
+          f"{len(remaining)} fixtures to play, as of {cutoff}\n")
+    print(f"{'date':11} {'fixture':44} {'win':>6} {'draw':>6} {'win':>6}  expected")
+    for match in remaining:
+        first, second = match["names"]
+        chances = model.predict(match)
+        goals = model.rates(match)
+        when = "  TBC     " if predict.undated(match, cutoff) else str(match["date"])
+        print(f"{when} {first[:20]:20} v {second[:20]:20} "
+              f"{chances[0]:6.1%} {chances[1]:6.1%} {chances[2]:6.1%}  "
+              f"{goals[0]:.1f}-{goals[1]:.1f}")
+
+    played = [m for m in matches if m["series_id"] == series_id and m["played"]]
+    points, positions = predict.simulate(model, played, remaining, runs=args.runs)
+    names = {m["clubs"][i]: m["names"][i] for m in matches if m["series_id"] == series_id
+             for i in (0, 1)}
+    standing = predict.table(played)
+    print(f"\nProjected table after {args.runs:,} simulated seasons\n")
+    print(f"{'club':24} {'pl':>3} {'pts':>4} {'proj':>6} {'1st':>7} {'top3':>7} {'last':>7}")
+    for club in sorted(points, key=lambda c: -points[c]):
+        place = positions[club]
+        total = sum(place.values()) or 1
+        last = max(place) if place else 0
+        print(f"{(names.get(club) or club)[:24]:24} {standing[club][0]:3} {standing[club][1]:4} "
+              f"{points[club]:6.1f} {place[1]/total:7.1%} "
+              f"{sum(place[p] for p in (1, 2, 3))/total:7.1%} {place[last]/total:7.1%}")
+    print("\nOne club's odds, not advice, and no player-level claim is made.")
+
+
+def cmd_ratings(args):
+    """Adjusted plus-minus: how a player moves goal difference while on the pitch.
+
+    The validation table is aggregate and safe to quote. The leaderboard is
+    player-level, so it prints here and is never written to a file.
+    """
+    conn = db.connect(args.db or paths.database())
+    rows = rapm.segments(conn, min_year=args.min_year, league_only=not args.include_cups)
+    if not rows:
+        raise SystemExit("no usable segments; run `ingest` first")
+    loose = rapm.segments(conn, min_year=args.min_year,
+                          league_only=not args.include_cups, reconcile=False)
+    games, all_games = len({r.game for r in rows}), len({r.game for r in loose})
+    print(f"{len(rows):,} segments over {games:,} fixtures "
+          f"({all_games - games:,} left out: timed goals do not add up to the score)")
+
+    if args.validate:
+        scores = rapm.validate(rows, min_minutes=args.min_minutes)
+        baseline = scores["zero"]
+        print(f"\nGrouped {5}-fold CV, match goal-difference error\n")
+        print(f"{'model':16} {'MSE':>8} {'vs zero':>9}")
+        for name in ("zero", "clubs", "players", "clubs+players"):
+            share = "" if name == "zero" else f"{(scores[name] - baseline) / baseline:9.2%}"
+            print(f"{name:16} {scores[name]:8.4f} {share:>9}")
+        gain = (scores["clubs"] - scores["clubs+players"]) / scores["clubs"]
+        print(f"\nknowing the players and not just the clubs: {gain:+.2%}")
+        return
+
+    ratings, home, _, _ = rapm.fit(rows, min_minutes=args.min_minutes)
+    played = rapm.minutes(rows)
+    names = {row[0]: row[1] for row in conn.execute("SELECT player_id, name FROM players")}
+    print(f"home advantage {home:+.3f} goals per 90; {len(ratings):,} players rated "
+          f"at {args.min_minutes}+ minutes\n")
+    order = sorted(ratings, key=ratings.get, reverse=True)
+    for label, group in (("highest", order[:args.top]), ("lowest", order[-args.top:])):
+        print(f"{label}\n{'player':24} {'minutes':>8} {'per 90':>8}")
+        for player in group:
+            print(f"{(names.get(player) or player)[:24]:24} "
+                  f"{played[player]:8,} {ratings[player]:+8.3f}")
+        print()
+    print("Player-level output, so it stays on this machine; see docs/DATA_POLICY.md.")
+
+
+def cmd_backtest(args):
+    """Score the models against the class prior, walking forward through time."""
+    conn = db.connect(args.db or paths.database())
+    matches = predict.load(conn)
+    models = [
+        predict.Prior(),
+        predict.Elo(k=60, regress=0.5, name="elo"),
+        predict.Poisson(home=False, name="poisson (no home term)"),
+        predict.Poisson(name="poisson"),
+    ]
+    def keep(match):
+        if args.league_only and match["type"] != "league":
+            return False
+        return args.until is None or match["year"] <= args.until
+    predictions, actuals, scored = predict.walk_forward(
+        models, matches, start=args.start, keep=keep
+    )
+    if not actuals:
+        raise SystemExit("nothing to score; run `ingest` first")
+
+    print(f"{len(actuals):,} fixtures from {scored[0]['date']} to {scored[-1]['date']}"
+          f"{' (league only)' if args.league_only else ''}\n")
+    print(f"{'model':26} {'log loss':>9} {'Brier':>7} {'accuracy':>9}")
+    for model in models:
+        rows = predictions[model.name]
+        print(f"{model.name:26} {predict.log_loss(rows, actuals):9.4f} "
+              f"{predict.brier(rows, actuals):7.4f} {predict.accuracy(rows, actuals):9.1%}")
+
+    best = min(models[1:], key=lambda m: predict.log_loss(predictions[m.name], actuals))
+    print(f"\nCalibration of {best.name}: predicted against observed\n")
+    print(f"{'band':>12} {'n':>7} {'predicted':>10} {'observed':>9}")
+    for low, high, count, predicted, observed in predict.calibration(
+        predictions[best.name], actuals
+    ):
+        print(f"{low:5.0%}-{high:<6.0%} {count:7,} {predicted:10.1%} {observed:9.1%}")
+
+
 def cmd_sample(args):
     """Player-level output over a synthetic season, safe to publish."""
     conn = db.connect(":memory:")
@@ -328,6 +451,36 @@ def build_parser():
     across.add_argument("--lang", choices=sorted(markdown.LABELS), default="en")
     across.add_argument("--out")
     across.set_defaults(func=cmd_trends)
+
+    forecast = subparsers.add_parser(
+        "forecast", help="win/draw/loss probabilities for the fixtures still to play"
+    )
+    forecast.add_argument("--series", default="latest", help="series id, a search term, or 'latest'")
+    forecast.add_argument("--runs", type=int, default=10000, help="simulated seasons")
+    forecast.set_defaults(func=cmd_forecast)
+
+    backtest = subparsers.add_parser(
+        "backtest", help="score the forecast models against the class prior"
+    )
+    backtest.add_argument("--start", default="2022", help="first season to score")
+    backtest.add_argument("--until", help="last season to score, for reproducing a tuning window")
+    backtest.add_argument("--league-only", action="store_true",
+                          help="skip cup ties, which are single fixtures between divisions")
+    backtest.set_defaults(func=cmd_backtest)
+
+    ratings = subparsers.add_parser(
+        "ratings", help="adjusted plus-minus ratings, and how much they add over the club"
+    )
+    ratings.add_argument("--min-year", default="2022",
+                         help="first season to use; player records begin in 2022")
+    ratings.add_argument("--min-minutes", type=int, default=rapm.MIN_MINUTES,
+                         help="minutes a player needs before they get a column of their own")
+    ratings.add_argument("--include-cups", action="store_true",
+                         help="add cup ties, which are single fixtures between divisions")
+    ratings.add_argument("--validate", action="store_true",
+                         help="print the cross-validation table instead of the players")
+    ratings.add_argument("--top", type=int, default=15, help="players to show at each end")
+    ratings.set_defaults(func=cmd_ratings)
 
     for name, handler, extra in (
         ("report", cmd_report, True),
