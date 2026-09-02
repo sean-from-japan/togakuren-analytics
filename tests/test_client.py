@@ -15,6 +15,10 @@ from unittest import mock
 from togakuren import __version__
 from togakuren.client import API, USER_AGENT, ApiError, Client
 
+#: A stand-in for the site's common.js. The token is counted hex digits, not a
+#: credential -- there is no real token anywhere in this repository, by design,
+#: because the client reads the live one out of the site at run time. Secret
+#: scanners will flag the line; this comment is here so triage takes a second.
 COMMON_JS = """
   axios.defaults.baseURL = "https://data.example.test/";
   axios.defaults.headers.common.Authorization = "Bearer 0123456789abcdef";
