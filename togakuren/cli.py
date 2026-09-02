@@ -11,6 +11,19 @@ from . import (__version__, analysis, dashboard, db, ingest, markdown, metrics, 
 from .client import ApiError, Client
 
 
+def _database(args, path=None):
+    """Open the database and have :func:`main` close it when the command ends.
+
+    Every command used to open a connection and none of them closed it. That is
+    harmless on a POSIX system and not on Windows, where an open SQLite handle
+    keeps the file locked and a temporary directory cannot be removed around it.
+    The command tests found it; the fix belongs here rather than in them.
+    """
+    conn = db.connect(path or args.db or paths.database())
+    args.__dict__.setdefault("_open", []).append(conn)
+    return conn
+
+
 def _client(args):
     cache = None if args.no_cache else (args.cache or paths.cache())
     return Client(cache_dir=cache, delay=args.delay)
@@ -50,7 +63,7 @@ def cmd_series(args):
 def cmd_ingest(args):
     target = Path(args.db or paths.database())
     target.parent.mkdir(parents=True, exist_ok=True)
-    conn = db.connect(target)
+    conn = _database(args, target)
     client = _client(args)
     if args.series:
         wanted = set(args.series)
@@ -69,7 +82,7 @@ def cmd_ingest(args):
 
 
 def cmd_list(args):
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     for row in metrics.series_list(conn):
         print(
             f"{row['id']}  {row['year']}  {(row['short_name'] or ''):12}"
@@ -78,7 +91,7 @@ def cmd_list(args):
 
 
 def cmd_report(args):
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     series_id = _resolve_series(conn, args.series)
     salt = None
     if args.privacy == "pseudonym":
@@ -97,7 +110,7 @@ def cmd_report(args):
 
 
 def cmd_dashboard(args):
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     series_id = _resolve_series(conn, args.series)
     salt = args.salt or (privacy.new_salt() if args.privacy == "pseudonym" else None)
     if args.public:
@@ -112,7 +125,7 @@ def cmd_dashboard(args):
 
 def cmd_trends(args):
     """Everything that only shows up across several seasons."""
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     if args.format == "md":
         body = markdown.season_trends(conn, lang=args.lang)
     else:
@@ -138,7 +151,7 @@ def _write_profile(conn, series, out_dir, lang, figure):
 
 def cmd_profiles(args):
     """One division as Markdown, or every completed league season at once."""
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     if not args.all:
         series_id = _resolve_series(conn, args.series)
         text = markdown.team_profiles(conn, series_id, lang=args.lang, figure=args.figure)
@@ -193,7 +206,7 @@ def _seasons_index(conn, langs):
 
 def cmd_forecast(args):
     """Probabilities for the fixtures that have not been played yet."""
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     series_id = _resolve_series(conn, args.series)
     matches = predict.load(conn)
     remaining = predict.upcoming(matches, series_id)
@@ -239,7 +252,7 @@ def cmd_ratings(args):
     The validation table is aggregate and safe to quote. The leaderboard is
     player-level, so it prints here and is never written to a file.
     """
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     rows = rapm.segments(conn, min_year=args.min_year, league_only=not args.include_cups)
     if not rows:
         raise SystemExit("no usable segments; run `ingest` first")
@@ -303,7 +316,7 @@ def cmd_ratings(args):
 
 def cmd_backtest(args):
     """Score the models against the class prior, walking forward through time."""
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     matches = predict.load(conn)
     models = [
         predict.Prior(),
@@ -340,7 +353,7 @@ def cmd_backtest(args):
 
 def cmd_sample(args):
     """Player-level output over a synthetic season, safe to publish."""
-    conn = db.connect(":memory:")
+    conn = _database(args, ":memory:")
     series_id = sample.generate(conn, seed=args.seed)
     text = markdown.player_document(
         conn, series_id, lang=args.lang, min_minutes=args.min_minutes, top=args.top
@@ -352,7 +365,7 @@ def cmd_sample(args):
 
 
 def cmd_export(args):
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     series_id = _resolve_series(conn, args.series)
     rows = metrics.player_season(conn, series_id, min_minutes=args.min_minutes)
     if args.privacy == "aggregate":
@@ -384,7 +397,7 @@ def cmd_export(args):
 
 def cmd_privacy_check(args):
     """Report how identifiable a de-named export would still be."""
-    conn = db.connect(args.db or paths.database())
+    conn = _database(args)
     series_id = _resolve_series(conn, args.series)
     rows = metrics.player_season(conn, series_id, min_minutes=args.min_minutes)
     print(f"{len(rows)} players above {args.min_minutes} minutes\n")
@@ -564,6 +577,9 @@ def main(argv=None):
         args.func(args)
     except (ApiError, privacy.PrivacyError) as exc:
         raise SystemExit(f"error: {exc}") from exc
+    finally:
+        for conn in args.__dict__.get("_open", ()):
+            conn.close()
     return 0
 
 
