@@ -3,7 +3,8 @@
 *[日本語版](FINDINGS.ja.md)*
 
 Six things the Tokyo University Football Association's own pages do not show,
-taken from five seasons of its published match records.
+taken from its published match records: results from 2021 and player-level
+records for the five seasons from 2022.
 
 The federation publishes fixtures, a league table and a top-scorers list. The
 records underneath hold per-player shot counts, lineups, timed substitutions and
@@ -239,3 +240,5 @@ togakuren profiles --all                         # docs/seasons/
 The figures here are the charts from those two pages, `trends` and `dashboard
 --privacy aggregate`, isolated with CSS, screenshotted headless, auto-cropped and
 quantised to 256 colours. No number in this document was typed in by hand.
+
+See [docs/FIGURES.md](docs/FIGURES.md) for which chart each file is.
