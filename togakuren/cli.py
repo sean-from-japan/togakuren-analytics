@@ -252,8 +252,14 @@ def cmd_ratings(args):
     if args.validate or args.forward:
         if args.forward:
             dates = {match["game_id"]: match["date"] for match in predict.load(conn)}
-            scores, penalties = rapm.forward(rows, dates, min_minutes=args.min_minutes,
-                                             nested=args.tune)
+            try:
+                scores, penalties = rapm.forward(rows, dates,
+                                                 min_minutes=args.min_minutes,
+                                                 nested=args.tune)
+            except ValueError as exc:
+                # Too few fixtures for a 60/40 cut inside a season. Say that
+                # rather than showing the caller a traceback.
+                raise SystemExit(f"cannot split this sample forwards: {exc}") from exc
             train, test = rapm.season_split(rows, dates)
             header = (f"Forward split, first 60% of each season "
                       f"({len({r.game for r in train}):,} fixtures) predicting the rest "

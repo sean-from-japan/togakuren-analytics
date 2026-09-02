@@ -178,3 +178,42 @@ class TwoGameClient(FakeClient):
     """Serves both fixtures, giving tests a league table to reason about."""
 
     fixtures = 2
+
+
+def _scheduled(record_id, team_id, prefix):
+    """A record for a fixture that has not been played: named sides, no score."""
+    return {
+        "_id": record_id,
+        "team": {"_id": team_id, "display": prefix.title()},
+        "score": "", "pk": "0", "point": "0", "goalDifferential": "0",
+        "fairplayPoint": "0", "mcm": {"name": "", "post": ""},
+        "starters": [], "benches": [], "shoots": [], "substitutions": [],
+        "records": [], "suspensions": [],
+    }
+
+
+#: A fixture still to play, so the forecasting command has something to forecast.
+GAME3 = {
+    "_id": "game-3",
+    "seriesId": "series-1",
+    "section": "3",
+    "date": "2099-04-15 14:00:00",
+    "venue": "Example Ground",
+    "gameOver": False,
+    "published": True,
+    "matchTime": "90",
+    "extraTime": "0",
+    "gameRecords": [
+        _scheduled("record-a3", "team-a", "a"),
+        _scheduled("record-b3", "team-b", "b"),
+    ],
+}
+
+
+class UnfinishedSeasonClient(FakeClient):
+    """Two results and one fixture still to come."""
+
+    fixtures = 3
+
+    def games(self, series_id):
+        return [GAME, GAME2, GAME3]
