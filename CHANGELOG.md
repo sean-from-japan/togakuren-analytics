@@ -19,6 +19,13 @@ Dates are the day the work landed on `main`.
 - `ratings --forward`: the forward split — fit the first 60% of each season,
   predict the rest of it — now in the package rather than quoted from a
   prototype.
+- `compare` and `togakuren/compare.py`: each division measured as a league in its
+  own right — Noll-Scully, the noise-corrected talent spread that Noll-Scully
+  gets wrong for a short season, match shape, and predictability against a
+  reference set. `docs/reference-leagues.json` ships 22 European professional
+  divisions as derived statistics so `--reference` works out of the box. See
+  [docs/LEAGUE_COMPARISON.md](docs/LEAGUE_COMPARISON.md), which also records the
+  two headline results that widening the sample destroyed.
 - `docs/SOURCE_SELECTION.md`: why this league and not the tier above, in terms
   of what each federation publishes and what its site says about being read by a
   program.
@@ -41,6 +48,10 @@ Dates are the day the work landed on `main`.
   connection and none of them closed it. Harmless on macOS and Linux; on Windows
   an open SQLite handle keeps the file locked, so a caller could not remove the
   directory around it. Found by running the new command tests on Windows CI.
+- **`forecast --runs 0` divided by zero, and `--runs -5` was worse**: the
+  simulation loop simply did not run and every club came back with an expected
+  zero points, which reads as an answer rather than as a mistake. Counts that
+  cannot sensibly be zero are now validated by argparse.
 - `ratings --forward` raised a bare `ValueError` at the caller when a sample was
   too small to cut 60/40 inside a season. It now exits with a message. Found by
   the new command tests.
