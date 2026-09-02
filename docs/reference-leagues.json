@@ -1,0 +1,222 @@
+[
+  {
+    "league": "Portugal 1",
+    "code": "P1",
+    "talent_spread": 0.1567,
+    "gain": 0.1282,
+    "noll_scully": 2.084,
+    "draw_rate": 0.2477,
+    "goals_per_fixture": 2.65,
+    "half_life": 180
+  },
+  {
+    "league": "Netherlands 1",
+    "code": "N1",
+    "talent_spread": 0.1429,
+    "gain": 0.0573,
+    "noll_scully": 1.947,
+    "draw_rate": 0.2418,
+    "goals_per_fixture": 3.064,
+    "half_life": 180
+  },
+  {
+    "league": "Scotland 1",
+    "code": "SC0",
+    "talent_spread": 0.1345,
+    "gain": 0.0759,
+    "noll_scully": 1.939,
+    "draw_rate": 0.2395,
+    "goals_per_fixture": 2.782,
+    "half_life": 550
+  },
+  {
+    "league": "England 1",
+    "code": "E0",
+    "talent_spread": 0.134,
+    "gain": 0.0644,
+    "noll_scully": 1.934,
+    "draw_rate": 0.2389,
+    "goals_per_fixture": 2.927,
+    "half_life": 250
+  },
+  {
+    "league": "Italy 1",
+    "code": "I1",
+    "talent_spread": 0.1313,
+    "gain": 0.0826,
+    "noll_scully": 1.903,
+    "draw_rate": 0.2721,
+    "goals_per_fixture": 2.605,
+    "half_life": 180
+  },
+  {
+    "league": "Turkey 1",
+    "code": "T1",
+    "talent_spread": 0.1284,
+    "gain": 0.0781,
+    "noll_scully": 1.845,
+    "draw_rate": 0.2474,
+    "goals_per_fixture": 2.849,
+    "half_life": 120
+  },
+  {
+    "league": "Greece 1",
+    "code": "G1",
+    "talent_spread": 0.123,
+    "gain": 0.1047,
+    "noll_scully": 1.751,
+    "draw_rate": 0.2632,
+    "goals_per_fixture": 2.539,
+    "half_life": 250
+  },
+  {
+    "league": "Germany 1",
+    "code": "D1",
+    "talent_spread": 0.1216,
+    "gain": 0.0649,
+    "noll_scully": 1.74,
+    "draw_rate": 0.249,
+    "goals_per_fixture": 3.176,
+    "half_life": 250
+  },
+  {
+    "league": "France 1",
+    "code": "F1",
+    "talent_spread": 0.1175,
+    "gain": 0.0633,
+    "noll_scully": 1.725,
+    "draw_rate": 0.2455,
+    "goals_per_fixture": 2.821,
+    "half_life": 180
+  },
+  {
+    "league": "Spain 1",
+    "code": "SP1",
+    "talent_spread": 0.1157,
+    "gain": 0.079,
+    "noll_scully": 1.746,
+    "draw_rate": 0.2616,
+    "goals_per_fixture": 2.595,
+    "half_life": 800
+  },
+  {
+    "league": "Belgium 1",
+    "code": "B1",
+    "talent_spread": 0.1135,
+    "gain": 0.0421,
+    "noll_scully": 1.702,
+    "draw_rate": 0.2495,
+    "goals_per_fixture": 2.844,
+    "half_life": 4000
+  },
+  {
+    "league": "Scotland 3",
+    "code": "SC2",
+    "talent_spread": 0.1117,
+    "gain": -0.0139,
+    "noll_scully": 1.738,
+    "draw_rate": 0.2567,
+    "goals_per_fixture": 2.859,
+    "half_life": 180
+  },
+  {
+    "league": "England 5 (National)",
+    "code": "EC",
+    "talent_spread": 0.1078,
+    "gain": 0.0408,
+    "noll_scully": 1.775,
+    "draw_rate": 0.252,
+    "goals_per_fixture": 2.819,
+    "half_life": 250
+  },
+  {
+    "league": "England 3",
+    "code": "E2",
+    "talent_spread": 0.1049,
+    "gain": 0.0211,
+    "noll_scully": 1.742,
+    "draw_rate": 0.2507,
+    "goals_per_fixture": 2.612,
+    "half_life": 365
+  },
+  {
+    "league": "Scotland 2",
+    "code": "SC1",
+    "talent_spread": 0.0882,
+    "gain": 0.0172,
+    "noll_scully": 1.464,
+    "draw_rate": 0.2911,
+    "goals_per_fixture": 2.588,
+    "half_life": 180
+  },
+  {
+    "league": "Italy 2",
+    "code": "I2",
+    "talent_spread": 0.0793,
+    "gain": -0.0205,
+    "noll_scully": 1.41,
+    "draw_rate": 0.32,
+    "goals_per_fixture": 2.474,
+    "half_life": 120
+  },
+  {
+    "league": "England 2",
+    "code": "E1",
+    "talent_spread": 0.079,
+    "gain": 0.0142,
+    "noll_scully": 1.467,
+    "draw_rate": 0.2605,
+    "goals_per_fixture": 2.536,
+    "half_life": 2000
+  },
+  {
+    "league": "France 2",
+    "code": "F2",
+    "talent_spread": 0.073,
+    "gain": -0.0057,
+    "noll_scully": 1.341,
+    "draw_rate": 0.276,
+    "goals_per_fixture": 2.446,
+    "half_life": 800
+  },
+  {
+    "league": "England 4",
+    "code": "E3",
+    "talent_spread": 0.0718,
+    "gain": 0.0081,
+    "noll_scully": 1.404,
+    "draw_rate": 0.2674,
+    "goals_per_fixture": 2.572,
+    "half_life": 180
+  },
+  {
+    "league": "Germany 2",
+    "code": "D2",
+    "talent_spread": 0.0709,
+    "gain": -0.0047,
+    "noll_scully": 1.302,
+    "draw_rate": 0.2549,
+    "goals_per_fixture": 2.982,
+    "half_life": 250
+  },
+  {
+    "league": "Spain 2",
+    "code": "SP2",
+    "talent_spread": 0.0601,
+    "gain": 0.0017,
+    "noll_scully": 1.319,
+    "draw_rate": 0.2922,
+    "goals_per_fixture": 2.371,
+    "half_life": 800
+  },
+  {
+    "league": "Scotland 4",
+    "code": "SC3",
+    "talent_spread": 0.0545,
+    "gain": -0.0138,
+    "noll_scully": 1.22,
+    "draw_rate": 0.2611,
+    "goals_per_fixture": 2.69,
+    "half_life": 250
+  }
+]

@@ -22,6 +22,7 @@ cards, and none of it is aggregated anywhere.
 | **Forecasting** | Settings frozen on 2022–24; on 2025–26 (n=525) log loss goes **1.0200 → 0.8192**, past Elo at 0.8753. Accuracy 44.6% → 65.7%. The time decay is the whole story — removing it costs 0.095 nats, more than the model's entire margin over Elo. | [PREDICTION.md](docs/PREDICTION.md) · [ja](docs/PREDICTION.ja.md) |
 | **Player ratings** | Adjusted plus-minus over 8,087 lineup segments. Knowing the players beats knowing only the clubs by **+3.73%** (cross-validated) and **+4.06%** (forward split), with the ridge penalties chosen *inside* each training fold. | [RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) |
 | **What the data cannot do** | Goal records carry a scorer and a minute and nothing else, so **penalties cannot be separated from open play** — no non-penalty rate is possible from this source. Goal events reconcile with the recorded score in **79%** of fixtures. | [FINDINGS.md](FINDINGS.md) |
+| **Comparing leagues** | Predictability is mostly a function of how far apart the clubs are: `gain = −0.092 + 1.257 × spread`, R² = **0.735** over 22 professional divisions. Noll-Scully, the standard balance measure, misreads a short season and says this league is ordinary when it is not. | [LEAGUE_COMPARISON.md](docs/LEAGUE_COMPARISON.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) |
 | **What may be published** | Names removed is not anonymous: club, position and appearances alone identify **56%** of a division uniquely, and 77% once goals are added. Measured, not assumed — `privacy-check` reproduces it. | [DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) |
 
 Two things were worked out here that the source documents nowhere: the four shot
@@ -55,6 +56,7 @@ local version adds the squad table and a matchday-by-player minutes grid.*
 | [docs/RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) | Adjusted plus-minus: what knowing the players adds over knowing the clubs, and the two mistakes that reverse the answer. |
 | [docs/SOURCE_SELECTION.md](docs/SOURCE_SELECTION.md) · [ja](docs/SOURCE_SELECTION.ja.md) | Why this league and not the tier above: what each federation publishes, and what its site says about being read by a program. |
 | [docs/DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
+| [docs/LEAGUE_COMPARISON.md](docs/LEAGUE_COMPARISON.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) | This federation's divisions measured against 22 professional leagues, and the two headline results that widening the sample destroyed. |
 | [docs/FIGURES.md](docs/FIGURES.md) · [ja](docs/FIGURES.ja.md) | Which chart each committed PNG is a picture of, and how to remake one. |
 | [CHANGELOG.md](CHANGELOG.md) | What changed and, where a published figure moved, why it moved. |
 
@@ -106,6 +108,7 @@ togakuren forecast --series "2026 1部"                # odds for the fixtures l
 togakuren backtest --league-only                     # how well those odds have done
 togakuren ratings --validate                         # what player identity is worth
 togakuren ratings                                    # adjusted plus-minus, locally
+togakuren compare --reference docs/reference-leagues.json   # each division as a league
 ```
 
 `--series` takes a series id or any set of search terms that narrows to one

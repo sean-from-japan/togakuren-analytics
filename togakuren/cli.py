@@ -2,13 +2,27 @@
 
 import argparse
 import csv
+import json
 import logging
 import sys
 from pathlib import Path
 
-from . import (__version__, analysis, dashboard, db, ingest, markdown, metrics, paths,
-               predict, privacy, rapm, report, sample, trends)
+from . import (__version__, analysis, compare, dashboard, db, ingest, markdown,
+               metrics, paths, predict, privacy, rapm, report, sample, trends)
 from .client import ApiError, Client
+
+
+def _positive(value):
+    """An argparse type for counts that cannot sensibly be zero.
+
+    ``--runs 0`` divided by zero, and ``--runs -5`` was worse: the simulation
+    loop simply did not run and every club came back with an expected zero
+    points, which reads as an answer rather than as a mistake.
+    """
+    number = int(value)
+    if number < 1:
+        raise argparse.ArgumentTypeError(f"must be 1 or more, not {number}")
+    return number
 
 
 def _database(args, path=None):
@@ -351,6 +365,61 @@ def cmd_backtest(args):
         print(f"{low:5.0%}-{high:<6.0%} {count:7,} {predicted:10.1%} {observed:9.1%}")
 
 
+def cmd_compare(args):
+    """Measure each division as a league in its own right.
+
+    Divisions are kept apart rather than pooled: a pyramid measured as one thing
+    reports the gap between its tiers, not the balance inside any of its leagues.
+    """
+    conn = _database(args)
+    matches = [match for match in predict.load(conn)
+               if match["played"] and match["type"] == "league"
+               and match["goals"][0] is not None]
+    grouped = {}
+    for match in matches:
+        grouped.setdefault(match["division"], []).append(match)
+
+    rows, skipped = [], []
+    for division, played in sorted(grouped.items()):
+        if len(played) < args.min_fixtures:
+            skipped.append((division, f"{len(played)} fixtures"))
+            continue
+        try:
+            row = compare.measure(played)
+        except ValueError as exc:
+            skipped.append((division, str(exc)))
+            continue
+        row["division"] = division
+        rows.append(row)
+    if not rows:
+        raise SystemExit("no division has enough seasons to measure; run `ingest` first")
+
+    print(f"{'division':14} {'clubs':>6} {'fx/club':>8} {'talent sd':>10} "
+          f"{'N-S':>5} {'draws':>7} {'goals':>6} {'gain':>8} {'half-life':>10}")
+    for row in rows:
+        print(f"{row['division'][:14]:14} {row['clubs']:6.0f} "
+              f"{row['fixtures_per_club']:8.0f} {row['talent_spread']:10.3f} "
+              f"{row['noll_scully']:5.2f} {row['draw_rate']:7.1%} "
+              f"{row['goals_per_fixture']:6.2f} {row['gain']:+8.4f} "
+              f"{row['half_life']:9}d")
+    for division, why in skipped:
+        print(f"{division[:14]:14} not measured: {why}")
+
+    if not args.reference:
+        return
+    reference = json.loads(Path(args.reference).read_text(encoding="utf-8"))
+    fitted = compare.line(reference)
+    print(f"\nAgainst {fitted['n']} reference leagues: "
+          f"gain = {fitted['intercept']:+.4f} + {fitted['slope']:.3f} x spread, "
+          f"residual sd {fitted['residual_sd']:.4f}\n")
+    print(f"{'division':14} {'expected':>9} {'actual':>8} {'residual':>9} {'in range':>9}")
+    for row in rows:
+        placed = compare.place(row, fitted)
+        print(f"{row['division'][:14]:14} {placed['expected_gain']:+9.4f} "
+              f"{row['gain']:+8.4f} {placed['residual_sd']:+8.2f}sd "
+              f"{'yes' if placed['inside_reference_spread'] else 'NO':>9}")
+
+
 def cmd_sample(args):
     """Player-level output over a synthetic season, safe to publish."""
     conn = _database(args, ":memory:")
@@ -470,6 +539,19 @@ def build_parser():
     profiles.add_argument("--out")
     profiles.set_defaults(func=cmd_profiles)
 
+    against = subparsers.add_parser(
+        "compare",
+        help="measure each division as a league: balance, match shape, predictability",
+    )
+    against.add_argument("--min-fixtures", type=_positive, default=140,
+                         help="skip a division with fewer played fixtures than this")
+    against.add_argument(
+        "--reference",
+        help="JSON list of {talent_spread, gain} for leagues to place these against; "
+             "see docs/LEAGUE_COMPARISON.md for how one is built",
+    )
+    against.set_defaults(func=cmd_compare)
+
     demo = subparsers.add_parser(
         "sample",
         help="write the player-level document over an invented season (no real person)",
@@ -494,7 +576,8 @@ def build_parser():
         "forecast", help="win/draw/loss probabilities for the fixtures still to play"
     )
     forecast.add_argument("--series", default="latest", help="series id, a search term, or 'latest'")
-    forecast.add_argument("--runs", type=int, default=10000, help="simulated seasons")
+    forecast.add_argument("--runs", type=_positive, default=10000,
+                          help="simulated seasons")
     forecast.set_defaults(func=cmd_forecast)
 
     backtest = subparsers.add_parser(

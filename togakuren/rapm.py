@@ -25,7 +25,6 @@ Ratings are per player. They stay on the machine that produced them, like every
 other player-level output here — see ``docs/DATA_POLICY.md``.
 """
 import collections
-import math
 import random
 
 from . import predict

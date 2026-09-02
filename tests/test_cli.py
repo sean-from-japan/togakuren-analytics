@@ -204,10 +204,43 @@ class Forecasting(Command):
         row = [line for line in output.splitlines() if "2099-04-15" in line][0]
         self.assertGreaterEqual(len(re.findall(r"\d+\.\d", row)), 3)
 
+    def test_a_run_count_below_one_is_refused_rather_than_silently_wrong(self):
+        """`--runs 0` divided by zero; `--runs -5` returned zeros as an answer."""
+        for value in ("0", "-5"):
+            with self.subTest(runs=value), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit):
+                    cli.main(["--db", str(self.db), "forecast", "--runs", value])
+
     def test_the_simulated_table_names_the_clubs(self):
         output = self.run_cli("forecast", "--series", "latest", "--runs", "50")
         self.assertIn("Alpha", output)
         self.assertIn("Beta", output)
+
+
+class Compare(Command):
+    def test_a_division_too_small_to_measure_is_named_rather_than_guessed_at(self):
+        with contextlib.redirect_stdout(io.StringIO()), \
+                self.assertRaises(SystemExit) as exit_:
+            cli.main(["--db", str(self.db), "compare"])
+        self.assertIn("enough seasons", str(exit_.exception))
+
+    def test_the_shipped_reference_set_is_usable(self):
+        """The file in docs/ has to keep the shape --reference expects."""
+        import json as json_
+
+        from togakuren import compare
+
+        path = (pathlib.Path(__file__).resolve().parent.parent
+                / "docs" / "reference-leagues.json")
+        rows = json_.loads(path.read_text(encoding="utf-8"))
+        self.assertGreaterEqual(len(rows), 3)
+        fitted = compare.line(rows)
+        # Predictability rises with spread; a negative slope would mean the
+        # reference set had been rebuilt wrongly.
+        self.assertGreater(fitted["slope"], 0)
+        for row in rows:
+            self.assertIn("league", row)
+            self.assertIsInstance(row["talent_spread"], float)
 
 
 class Failures(Command):
