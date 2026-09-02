@@ -37,6 +37,10 @@ Dates are the day the work landed on `main`.
 
 ### Fixed
 
+- **Commands now close the database they open.** Every one of the twelve opened a
+  connection and none of them closed it. Harmless on macOS and Linux; on Windows
+  an open SQLite handle keeps the file locked, so a caller could not remove the
+  directory around it. Found by running the new command tests on Windows CI.
 - `ratings --forward` raised a bare `ValueError` at the caller when a sample was
   too small to cut 60/40 inside a season. It now exits with a message. Found by
   the new command tests.
