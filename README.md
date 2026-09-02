@@ -249,10 +249,17 @@ the reasoning.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-113 tests, no network access, no fixtures taken from the federation — the test data
-is invented clubs and invented people. CI runs them on Linux, macOS and Windows
-against Python 3.9 and 3.13, and fails the build if any collected data is ever
-committed.
+215 tests, no network access, no fixtures taken from the federation — the test
+data is invented clubs and invented people. CI runs them on Linux, macOS and
+Windows against Python 3.9 and 3.13, and fails the build if any collected data is
+ever committed.
+
+Every command runs end to end in the suite, and the API client is exercised
+against a stubbed transport, so the retry rule, the request throttle and the
+token discovery are checked rather than assumed. Coverage is measured with the
+standard library's `trace`; 5.7% of statements are unreached, most of them the
+Windows and Linux branches of `paths.py`, which only run on the other two CI
+platforms.
 
 ## Licence
 

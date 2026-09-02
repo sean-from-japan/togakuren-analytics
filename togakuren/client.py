@@ -19,6 +19,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from . import __version__
+
 log = logging.getLogger(__name__)
 
 SITE = "https://www.f-togakuren.com"
@@ -28,9 +30,12 @@ COMMON_JS = f"{SITE}/wp-content/themes/togakuren/js/common.js"
 _TOKEN_RE = re.compile(r"""Authorization\s*=\s*["']Bearer\s+([0-9a-f]+)["']""")
 _BASE_RE = re.compile(r"""axios\.defaults\.baseURL\s*=\s*["']([^"']+)["']""")
 
+#: Sent on every request. The version is taken from the package rather than
+#: written out here, because a user agent that lies about its version is worse
+#: than one that says nothing.
 USER_AGENT = (
-    "togakuren-analytics/0.1 (+https://github.com/sean-from-japan/togakuren-analytics) "
-    "python-urllib"
+    f"togakuren-analytics/{__version__} "
+    "(+https://github.com/sean-from-japan/togakuren-analytics) python-urllib"
 )
 
 

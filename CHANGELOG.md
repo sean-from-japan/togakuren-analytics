@@ -24,6 +24,22 @@ Dates are the day the work landed on `main`.
   program.
 - Document link checking in the test suite: anchors, relative links, and that
   every `*.ja.md` has an English counterpart.
+- 52 tests for the API client and the command layer, the two least covered
+  modules — 17.5% of statements were unreached before, 5.7% after. The client is
+  exercised against a stubbed transport: token discovery, the retry rule (4xx
+  once, 5xx three times), the request throttle, and the on-disk cache. Every CLI
+  command now runs end to end through `main`.
+- A fixture for a season with a match still to play, so `forecast` is covered by
+  something other than its refusal to run.
+
+### Fixed
+
+- `ratings --forward` raised a bare `ValueError` at the caller when a sample was
+  too small to cut 60/40 inside a season. It now exits with a message. Found by
+  the new command tests.
+- `__version__` said 0.1.0 while `pyproject.toml` said 0.2.0, and the client's
+  user agent hard-coded 0.1. All three now come from one place, and a test keeps
+  them together.
 
 ### Changed
 
