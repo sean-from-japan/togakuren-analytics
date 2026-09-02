@@ -111,10 +111,20 @@ togakuren ratings                                    # adjusted plus-minus, loca
 `--series` takes a series id or any set of search terms that narrows to one
 series, so `"2026 1部"` is enough.
 
-### What the dashboard shows
+### report and dashboard are not the same view
 
-Both views are one self-contained file with no external assets — no CDN, no
-build step, no server.
+Both are one self-contained file with no external assets — no CDN, no build step,
+no server — and both cover the same season, so it is worth saying which to reach
+for.
+
+**`report`** renders every chart as SVG in Python and ships **no JavaScript at
+all**. It is the one to use when the page has to survive being printed, opened
+with scripting off, or read by something that is not a browser.
+
+**`dashboard`** builds its charts in the browser from a JSON payload, which is
+what buys the team selector and the per-player views. It needs JavaScript.
+
+The rest of this section describes the dashboard, which is the larger of the two.
 
 **League level**
 

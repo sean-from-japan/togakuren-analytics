@@ -2,7 +2,7 @@
 
 *[English](FIGURES.md)*
 
-`docs/figures/` の6枚のPNGは、このリポジトリで唯一「コマンド1本で再生成できないもの」です。そのため、それぞれが何を写したものかをここに明記しておきます。
+`docs/figures/` の6枚のPNGは、このリポジトリで唯一「コマンド1本で再生成できないもの」です。どうやって作ったかは [FINDINGS.ja.md](../FINDINGS.ja.md) に1行で書いてありますが、ここでは**どの図がどのチャートなのか**を明記します。1枚だけ差し替えるときに迷わないためです。
 
 **どれもプロット用ライブラリでは描いていません。** このプロジェクトのグラフはすべて、ページ自身のJSONペイロードからブラウザ上でSVGとして組み立てています（`togakuren/trends.py` と `togakuren/dashboard.py` の `svg()` ヘルパー）。依存パッケージがゼロなのはこのためです。PNGはその要素のスクリーンショットです。
 
@@ -20,9 +20,11 @@
 ## 作り直す手順
 
 ```bash
-togakuren trends    --out /tmp/trends.html      # または
-togakuren dashboard --out /tmp/dashboard.html
+togakuren trends --out /tmp/trends.html
+togakuren dashboard --privacy aggregate --out /tmp/dashboard.html
 ```
+
+dashboard 側の `--privacy aggregate` は省略できません。選手単位の表示がすべて落ちるので、コミットされる画像に写り込みうるものが最初から描画されません。
 
 ページを開き、グラフの描画が終わったら、上の表の要素だけを取り出します（開発者ツールでノードのSVGをコピーする方法でも、スクリーンショットでも構いません）。そのうえで**必ず256色に減色します**。
 
