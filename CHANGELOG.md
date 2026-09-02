@@ -31,6 +31,9 @@ Dates are the day the work landed on `main`.
   command now runs end to end through `main`.
 - A fixture for a season with a match still to play, so `forecast` is covered by
   something other than its refusal to run.
+- `docs/FIGURES.md`: which chart each committed PNG is a picture of, how to remake
+  one, and why the step is not automated. The six figures were the only thing
+  here that no command could reproduce and nothing said where they came from.
 
 ### Fixed
 
