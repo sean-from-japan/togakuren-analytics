@@ -55,6 +55,7 @@ local version adds the squad table and a matchday-by-player minutes grid.*
 | [docs/RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) | Adjusted plus-minus: what knowing the players adds over knowing the clubs, and the two mistakes that reverse the answer. |
 | [docs/SOURCE_SELECTION.md](docs/SOURCE_SELECTION.md) · [ja](docs/SOURCE_SELECTION.ja.md) | Why this league and not the tier above: what each federation publishes, and what its site says about being read by a program. |
 | [docs/DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
+| [docs/FIGURES.md](docs/FIGURES.md) · [ja](docs/FIGURES.ja.md) | Which chart each committed PNG is a picture of, and how to remake one. |
 | [CHANGELOG.md](CHANGELOG.md) | What changed and, where a published figure moved, why it moved. |
 
 The two generated documents come out of the tool in both languages
