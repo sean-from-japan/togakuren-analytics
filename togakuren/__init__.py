@@ -4,6 +4,6 @@ The package ships extraction and analysis code only. It never bundles match or
 roster data; see docs/DATA_POLICY.md for why.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = ["__version__"]

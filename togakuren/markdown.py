@@ -442,7 +442,10 @@ def season_trends(conn, lang="en", figures=("figures/fig-conversion.png",
     if not seasons:
         raise ValueError("no league seasons in this database")
     clubs = analysis.club_trajectories(conn)
-    moves = analysis.division_moves(conn, clubs)
+    # A club whose division stayed the same while the ladder moved under it
+    # (the 2025 reorganisation) has not changed division, so it belongs in
+    # neither column. See analysis.season_ladder.
+    moves = [m for m in analysis.division_moves(conn, clubs) if m["moved"]]
     years = sorted({row["year"] for row in seasons})
     when = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d")
 
@@ -469,8 +472,8 @@ def season_trends(conn, lang="en", figures=("figures/fig-conversion.png",
     ]
 
     parts += ["", f"## {text['grades_section']}", "", f"![{text['grades_section']}]({figures[1]})"]
-    for tier, name in ((1, "1部リーグ"), (2, "2部リーグ"), (3, "3部リーグ"), (5, "チャレンジリーグ")):
-        rows = analysis.grade_trend(conn, tier=tier)
+    for name in ("1部リーグ", "2部リーグ", "3部リーグ", "4部リーグ", "チャレンジリーグ"):
+        rows = analysis.grade_trend(conn, division=name)
         if not rows:
             continue
         parts += ["", f"### {name}", "", _table(

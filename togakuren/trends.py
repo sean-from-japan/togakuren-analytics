@@ -220,7 +220,7 @@ divisionLines(document.getElementById("shots-line"), "shots_per_game", "1試合�
 divisionLines(document.getElementById("conv-line"), "conversion", "決定率", 3);
 moves(document.getElementById("moves"));
 
-let tier = "1";
+let tier = "1部リーグ";
 function selectTier(value) {
   tier = value;
   for (const button of document.querySelectorAll("#tiers button")) {
@@ -265,14 +265,17 @@ def build(conn, focus_team_id=None):
     if not seasons:
         raise ValueError("no league seasons in this database")
     clubs = [club for club in analysis.club_trajectories(conn) if club["seasons"]]
-    moves = analysis.division_moves(conn, clubs)
+    # A club whose division stayed the same while the ladder moved under it
+    # (the 2025 reorganisation) has not changed division, so it belongs in
+    # neither column. See analysis.season_ladder.
+    moves = [m for m in analysis.division_moves(conn, clubs) if m["moved"]]
     years = sorted({season["year"] for season in seasons})
 
     grades = {}
-    for tier in (1, 2, 3, 5):
-        rows = analysis.grade_trend(conn, tier=tier)
+    for division in ("1部リーグ", "2部リーグ", "3部リーグ", "4部リーグ", "チャレンジリーグ"):
+        rows = analysis.grade_trend(conn, division=division)
         if rows:
-            grades[str(tier)] = rows
+            grades[division] = rows
     grades["all"] = analysis.grade_trend(conn)
 
     payload = {
@@ -292,7 +295,8 @@ def build(conn, focus_team_id=None):
     )
     tier_buttons = "".join(
         f'<button type="button" data-tier="{key}" aria-pressed="false">{label}</button>'
-        for key, label in (("1", "1部"), ("2", "2部"), ("3", "3部"), ("5", "チャレンジ"), ("all", "全部"))
+        for key, label in (("1部リーグ", "1部"), ("2部リーグ", "2部"), ("3部リーグ", "3部"),
+                           ("4部リーグ", "4部"), ("チャレンジリーグ", "チャレンジ"), ("all", "全部"))
         if key in grades
     )
 
@@ -311,8 +315,9 @@ def build(conn, focus_team_id=None):
         )
     season_rows = "".join(season_row_parts)
 
-    promoted = [m for m in moves if m["direction"] == "promoted" and m["complete_after"] > 0.95]
-    relegated = [m for m in moves if m["direction"] == "relegated" and m["complete_after"] > 0.95]
+    done = [m for m in moves if m["complete_after"] > 0.95]
+    promoted = [m for m in done if m["direction"] == "promoted"]
+    relegated = [m for m in done if m["direction"] == "relegated"]
     summary = ""
     for label, group in (("昇格した翌シーズン", promoted), ("降格した翌シーズン", relegated)):
         if not group:

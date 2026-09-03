@@ -401,12 +401,47 @@ def team_history(conn, team_id):
 
 # --- across seasons -------------------------------------------------------
 
-#: League tiers, shallowest number first. The federation renamed nothing across
-#: 2021-2026, so a plain lookup is enough.
-TIERS = {"1部リーグ": 1, "2部リーグ": 2, "3部リーグ": 3, "4部リーグ": 4, "チャレンジリーグ": 5}
+#: Numbered divisions carry their level in their name.
+NUMBERED_DIVISIONS = {"1部リーグ": 1, "2部リーグ": 2, "3部リーグ": 3, "4部リーグ": 4}
+
+#: The Challenge League has no number, and sat at a different level in
+#: different years. See :func:`season_ladder`.
+CHALLENGE_DIVISION = "チャレンジリーグ"
 
 #: Sorts last, and is excluded from anything that reasons about direction.
 UNKNOWN_TIER = 9
+
+
+def season_ladder(conn):
+    """The level each division occupied, year by year.
+
+    A fixed division-name-to-level map is wrong here, because the competition
+    was rebuilt three times inside this dataset and one division's name does
+    not carry its level. Tokyo ran four numbered divisions to 2021; in 2022 the
+    bottom two were merged into a Challenge League, making it the *third*
+    level; in 2023 the league merged with Kanagawa to become the
+    Tokyo/Kanagawa division of the Kanto league; in 2025 a third division was
+    inserted *above* the Challenge League, pushing it to the *fourth* level;
+    and in 2026 the Challenge League was abolished.
+
+    So the Challenge League sits one below the deepest numbered division that
+    ran that season, and a club moving from the 2021 fourth division into the
+    2022 Challenge League went *up* a level while its division name went down
+    the alphabet. Reading that off a fixed map gets 15 of 72 division changes
+    pointing the wrong way: seven promotions filed as relegations, six lateral
+    moves filed as relegations, and two lateral moves filed as promotions. What
+    that did to the published figures is in docs/LEAGUE_STRUCTURE.md.
+    """
+    running = defaultdict(set)
+    for series in league_series(conn):
+        running[series["year"]].add(series["division"])
+    ladder = {}
+    for year, divisions in running.items():
+        levels = {d: NUMBERED_DIVISIONS[d] for d in divisions if d in NUMBERED_DIVISIONS}
+        if CHALLENGE_DIVISION in divisions:
+            levels[CHALLENGE_DIVISION] = max(levels.values(), default=0) + 1
+        ladder[year] = levels
+    return ladder
 
 
 def league_series(conn):
@@ -451,6 +486,7 @@ def season_summary(conn):
     progress is visibly not comparable with a finished one.
     """
     rows = []
+    ladder = season_ladder(conn)
     for series in league_series(conn):
         totals = conn.execute(
             """
@@ -481,7 +517,8 @@ def season_summary(conn):
         rows.append(
             {
                 "series_id": series["id"], "year": series["year"],
-                "division": series["division"], "tier": TIERS.get(series["division"], UNKNOWN_TIER),
+                "division": series["division"],
+                "tier": ladder.get(series["year"], {}).get(series["division"], UNKNOWN_TIER),
                 "teams": totals["teams"], "games": games,
                 "complete": (series["completed"] or 0) / series["games"] if series["games"] else 0,
                 "has_player_data": bool(series["has_player_data"]),
@@ -496,16 +533,21 @@ def season_summary(conn):
     return rows
 
 
-def grade_trend(conn, tier=None):
+def grade_trend(conn, division=None):
     """Minutes and scoring rate by academic year, season by season.
 
-    Pass ``tier`` to stay inside one division: pooling every division mixes
+    Pass ``division`` to stay inside one of them: pooling every division mixes
     populations, and a pattern that shows up in one of them can vanish once the
     rest are folded in.
+
+    The filter is the division's name rather than its level, because the level
+    is not stable across seasons — the Challenge League was the third from 2022
+    and the fourth from 2025 (see :func:`season_ladder`), so filtering on a
+    level would put two different divisions in one table.
     """
     wanted = [
         s for s in league_series(conn)
-        if s["has_player_data"] and (tier is None or TIERS.get(s["division"]) == tier)
+        if s["has_player_data"] and (division is None or s["division"] == division)
     ]
     by_year = defaultdict(lambda: defaultdict(lambda: {"minutes": 0, "goals": 0, "players": set()}))
     ids = {s["id"]: s["year"] for s in wanted}
@@ -569,6 +611,7 @@ def club_trajectories(conn):
     number falling between two consecutive rows.
     """
     series = {s["id"]: s for s in league_series(conn)}
+    ladder = season_ladder(conn)
     clubs = defaultdict(lambda: {"name": None, "seasons": []})
     for row in conn.execute(
         """
@@ -587,7 +630,7 @@ def club_trajectories(conn):
         club["seasons"].append(
             {
                 "year": info["year"], "division": info["division"],
-                "tier": TIERS.get(info["division"], UNKNOWN_TIER),
+                "tier": ladder.get(info["year"], {}).get(info["division"], UNKNOWN_TIER),
                 "played": row["played"], "win": row["win"], "draw": row["draw"],
                 "lose": row["lose"], "points": row["points"],
                 "points_per_game": round(row["points"] / row["played"], 3),
@@ -628,6 +671,11 @@ def division_moves(conn, trajectories=None):
                     "from_year": before["year"], "from_division": before["division"],
                     "to_year": after["year"], "to_division": after["division"],
                     "direction": "promoted" if after["tier"] < before["tier"] else "relegated",
+                    # 2025 inserted a third division above the Challenge League.
+                    # Its clubs dropped a level without changing division or
+                    # losing a match, which is a reorganisation rather than a
+                    # relegation; the headline averages leave these out.
+                    "moved": before["division"] != after["division"],
                     "ppg_before": before["points_per_game"],
                     "ppg_after": after["points_per_game"],
                     "delta": round(after["points_per_game"] - before["points_per_game"], 3),

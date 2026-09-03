@@ -12,6 +12,13 @@ togakuren backtest --league-only --start 2025   # the held-out block below
 togakuren forecast --series "2026 1部"          # the fixtures still to play
 ```
 
+One thing is not accounted for below. The league merged with Kanagawa's in 2023
+and the club pool changed with it, so the tuning window straddles a change of
+competition ([LEAGUE_STRUCTURE.md](LEAGUE_STRUCTURE.md)). The 180-day half-life
+happens to discount 2022 heavily by the time the model is predicting 2023
+onwards, which limits the damage — but that is a coincidence of the setting, not
+a correction, and nobody has measured what the merger does to these numbers.
+
 ## The models
 
 | | |

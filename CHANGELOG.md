@@ -2,6 +2,57 @@
 
 Dates are the day the work landed on `main`.
 
+## 0.3.0 — 2026-09-02
+
+### Fixed
+
+- **Division levels are now read from the divisions that actually ran each
+  season, not from a fixed name-to-level map.** The competition was rebuilt
+  three times between 2021 and 2026 and the Challenge League's level is not in
+  its name: it was the third level from 2022 and the fourth from 2025, after a
+  third division was inserted above it. The old map put it at 5 in every year,
+  which reversed the direction of **15 of 72 division changes (21%)** — seven
+  promotions filed as relegations, six lateral moves filed as relegations, and
+  two lateral moves filed as promotions. `analysis.season_ladder` replaces
+  `analysis.TIERS`. See [docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md).
+- `division_moves` now carries `moved`, false for the five Challenge League
+  clubs that lost a level in the 2025 reorganisation without changing division
+  or playing a match. A reorganisation is not a relegation, and `trends` and
+  `profiles` leave them out of both the averages and the chart.
+- `grade_trend` filters on the division's name rather than its level, which is
+  what its callers were labelling their tables with all along. Filtering on a
+  level put the 2022–24 Challenge League and the 2025–26 third division into one
+  table and dropped the Challenge League heading entirely.
+- `trends --format md --lang ja` wrote to `docs/SEASON_TRENDS.md`, silently
+  overwriting the English document. It now appends the language suffix, as
+  `profiles` already did.
+
+### Changed
+
+- **The promotion and relegation figures move, and one claim is withdrawn.**
+  Promotion: 27 cases at −1.04 becomes 32 at −0.97, 29 of 32 worse, and it holds
+  inside each reorganisation separately. Relegation: 30 cases at +0.53 becomes
+  17 at **+1.24**, 1 of 17 worse. The asymmetry FINDINGS reported — promotion
+  costs a full point, relegation returns half, three in ten keep falling — was
+  an artefact of the mislabelled cases and is retracted.
+- `docs/figures/fig-promotion.png` re-shot: the correction recolours fifteen
+  points and removes five, so the old picture contradicted the corrected text.
+  915 × 640, replacing 992 × 539.
+- **The README is now Japanese**, with the English text moved to
+  `README.en.md`. Nearly all of this league's readers read Japanese, and every
+  other document in the repository already shipped in both languages.
+- FINDINGS drops the section on one club crossing three tiers in five years.
+  The rise is a recruitment decision by the club, not something measured here,
+  so it does not belong among the results.
+
+### Added
+
+- `docs/LEAGUE_STRUCTURE.md` and `.ja.md`: what ran in each season, what each
+  reorganisation did to the club pool, how large the 2023 discontinuity is
+  (a first-division club that stood still gained 0.83 points a game across it,
+  five times the movement at any other boundary), and what the correction did
+  to the published figures.
+
 ## 0.2.0 — 2026-09-01
 
 ### Added

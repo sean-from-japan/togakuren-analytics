@@ -144,7 +144,10 @@ def cmd_trends(args):
         body = markdown.season_trends(conn, lang=args.lang)
     else:
         body = trends.build(conn, focus_team_id=args.club)
-    out = Path(args.out or (f"docs/SEASON_TRENDS.md" if args.format == "md"
+    # Without the language suffix, `--lang ja` silently overwrites the English
+    # document, which is how the two came to disagree once already.
+    suffix = "" if args.lang == "en" else f".{args.lang}"
+    out = Path(args.out or (f"docs/SEASON_TRENDS{suffix}.md" if args.format == "md"
                             else "reports/trends.html"))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(body, encoding="utf-8")
