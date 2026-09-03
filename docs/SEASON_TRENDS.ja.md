@@ -33,11 +33,11 @@
 
 選手単位の記録は2022年から。2021年は結果のみのため、シュート数と決定率は少数の不完全な記録から推定せず、空欄にしている。
 
-![シーズン一覧](figures/fig-conversion.png)
+![シーズン一覧](figures/ja/fig-conversion.png)
 
 ## 学年別の推移
 
-![学年別の推移](figures/fig-grades.png)
+![学年別の推移](figures/ja/fig-grades.png)
 
 ### 1部リーグ
 
@@ -127,7 +127,7 @@
 
 ## 昇降格
 
-![昇降格](figures/fig-promotion.png)
+![昇降格](figures/ja/fig-promotion.png)
 
 - 昇格: 32件、1試合あたり勝点は平均 -0.97。
 - 降格: 17件、1試合あたり勝点は平均 +1.24。

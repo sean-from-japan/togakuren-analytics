@@ -85,6 +85,32 @@ back to a named person using the federation's own squad lists — whatever the n
 column has been replaced with. More than half the table is uniquely identifiable
 from three ordinary analytical columns.
 
+## The school column is the one that finishes the job
+
+`squad_members.former_team` holds the high school or club youth side a player
+arrived from. It is filled in for 97% of squad rows and it is the input to the
+preseason model in [../FINDINGS.en.md](../FINDINGS.en.md), so it is worth being
+exact about what it costs:
+
+| Quasi-identifiers | k | Rows unique on them |
+|---|---|---|
+| school | 1 | 73 of 189 (39%) |
+| team + school | 1 | 106 of 189 (56%) |
+| team + position + appearances + school | 1 | 184 of 189 (97%) |
+
+The school on its own identifies two players in five. Added to the three columns
+any analysis already wants, it takes the division from 56% unique to **97%** —
+effectively every row. Pseudonyms cannot survive that, so the rule is not "be
+careful with it":
+
+- **No per-player output carries a school**, in any privacy mode, including
+  `pseudonym`.
+- Club-level aggregates of it are fine, and are what the preseason model
+  publishes: a squad's average, never a player's row.
+- A per-school table has to pool every season and drop schools with fewer than
+  five players. In a single division of one season, 95% of the schools present
+  have fewer than five, so that table does not exist.
+
 Run it on your own extract:
 
 ```bash

@@ -7,6 +7,10 @@ and the club's history across divisions redraw in place.
 
 Still one self-contained file with no external assets, because the interesting
 version of it contains names and must never need uploading to render.
+
+The page comes in English and Japanese. Both are written rather than translated,
+and every string the charts draw arrives in the JSON payload as ``DATA.t``, so
+the drawing code holds no language of its own.
 """
 
 import html
@@ -14,6 +18,26 @@ import json
 from datetime import datetime, timezone
 
 from . import analysis, metrics, privacy
+
+#: The federation's divisions, deepest last. The Challenge League has no number
+#: in its name and its level moved twice, so the order here is the order they
+#: are drawn in, not a level map — analysis.season_ladder owns the levels.
+DIVISIONS = ("1部リーグ", "2部リーグ", "3部リーグ", "4部リーグ", "チャレンジリーグ")
+
+#: Division names are the federation's own, and the Japanese pages keep them.
+#: An English chart axis is not a citation, so it gets a readable label.
+DIVISION_LABELS_EN = {
+    "1部リーグ": "Div 1", "2部リーグ": "Div 2", "3部リーグ": "Div 3",
+    "4部リーグ": "Div 4", "チャレンジリーグ": "Challenge",
+}
+
+
+def division_label(division, lang):
+    """The name to print for a division, in one language."""
+    if lang == "ja":
+        return division
+    return DIVISION_LABELS_EN.get(division, division)
+
 
 CSS = """
 :root { color-scheme: light dark;
@@ -72,10 +96,128 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
   color:var(--muted); font-size:.79rem; }
 """
 
+TEXT = {
+    "en": {
+        "html_lang": "en",
+        "title": "{division} {year} — dashboard",
+        "subtitle": "{year} · {teams} clubs · generated {when}",
+        "h_league": "The division",
+        "h_bubbles": "Position × shot volume × goals",
+        "bubbles_title": "Position against shot volume",
+        "bubbles_y": "Shots/game",
+        "bubbles_x": "position →",
+        "bubbles_key": "circle area = goals scored",
+        "bubbles_tip": "{team} — {rank} / {shots} shots per game / {goals} goals",
+        "bubbles_note": ("Final position on the x axis, shots per game on the y, total goals as "
+                         "circle area. A side that shoots a lot without scoring separates from "
+                         "one that converts a handful of chances."),
+        "h_curve": "Points by matchday",
+        "curve_title": "Points accumulated by matchday",
+        "curve_x": "matchday →",
+        "h_opponents": "Where the goals came from",
+        "opponents_title": "Goals split by the opponent's half of the table",
+        "opponents_row": "{top}+{bottom}  {share} from below",
+        # Room the row labels need on the right, which is language-sized.
+        "opponents_gap": 132,
+        "opponents_note": "Blue is goals against the top half, orange against the bottom half.",
+        "h_radars": "Squad character (six indices)",
+        "radar_title": "{team}: six indices",
+        "radars_note": ("Each index is scaled inside this division (0–100). The numbers on the "
+                        "vertices key to the list below, and the dashed outline is the division "
+                        "mean — an index whose mean is far from 50 has the field bunched at one "
+                        "end. Click a club to select it."),
+        "axis_mean": "division mean {mean:.0f}",
+        "h_history": "Earlier seasons, tracked across divisions",
+        "cols_history": ["Season", "Division", "P", "W-D-L", "Pts", "Pts/game"],
+        "cols_squad": ["Player", "Yr", "Pos", "Apps", "Starts", "Min", "Shots", "Goals",
+                       "Shots/90", "Conv"],
+        "card_points": "points",
+        "card_scored": "scored",
+        "card_conceded": "conceded",
+        "card_shots": "shots/game",
+        "card_conversion": "conversion",
+        "card_used": "players used",
+        "card_core": "minutes taken by the top eleven",
+        "card_grade": "mean academic year",
+        "grades_title": "Minutes by academic year",
+        "grades_bar": "{minutes} min / {goals} goals",
+        "grades_axis": "year {grade} ({players})",
+        "h_heat": "Minutes by matchday (matchday × player)",
+        "heat_total": "total",
+        "heat_legend": "minutes",
+        "heat_tip": "matchday {section}, {minutes} min",
+        "heat_note": ("Most-used players at the top. A settled side is a solid block; a rotated "
+                      "one is mottled."),
+        "h_squad": "Squad",
+        "year_suffix": "",
+        "footer": ("Source: the Tokyo University Football Association's public content API. "
+                   "Generated locally, and it holds nothing the federation's own site does not "
+                   "already publish."),
+    },
+    "ja": {
+        "html_lang": "ja",
+        "title": "{division} {year} — dashboard",
+        "subtitle": "{year} · {teams}チーム · 生成 {when}",
+        "h_league": "リーグ全体",
+        "h_bubbles": "順位 × シュート数 × 得点",
+        "bubbles_title": "順位とシュート数",
+        "bubbles_y": "シュート/試合",
+        "bubbles_x": "順位 →",
+        "bubbles_key": "円の面積 = 総得点",
+        "bubbles_tip": "{team} — {rank}位 / 1試合平均シュート{shots}本 / {goals}得点",
+        "bubbles_note": ("横軸が最終順位、縦軸が1試合あたりシュート数、円の面積が総得点。"
+                         "順位の割にシュートが多いチームと、少ない本数で決めているチームが"
+                         "同じ図の中で分かれる。"),
+        "h_curve": "勝点の積み上がり",
+        "curve_title": "節ごとの累積勝点",
+        "curve_x": "節 →",
+        "h_opponents": "得点した相手（上位/下位）",
+        "opponents_title": "対戦相手の順位帯別得点",
+        "opponents_row": "{top}+{bottom}  {share} 下位",
+        "opponents_gap": 96,
+        "opponents_note": "青が上位陣から、橙が下位陣から奪った得点。",
+        "h_radars": "チームの特徴（6指標）",
+        "radar_title": "{team}の特徴",
+        "radars_note": ("各指標はこのリーグ内での相対値（0〜100）。頂点の番号は下のリストの"
+                        "番号に対応する。点線はリーグ平均で、平均が50から離れている指標は、"
+                        "上位に偏っているか下位に長い尾を引いている。"
+                        "クリックでそのチームに切り替わる。"),
+        "axis_mean": "リーグ平均 {mean:.0f}",
+        "h_history": "過去シーズン（部をまたいで追跡）",
+        "cols_history": ["年度", "部", "試合", "勝-分-敗", "勝点", "1試合平均"],
+        "cols_squad": ["選手", "学年", "ポジション", "出場", "先発", "出場時間", "シュート",
+                       "得点", "90分あたりシュート", "決定率"],
+        "card_points": "勝点",
+        "card_scored": "得点",
+        "card_conceded": "失点",
+        "card_shots": "シュート/試合",
+        "card_conversion": "決定率",
+        "card_used": "起用人数",
+        "card_core": "主力11人の出場時間比率",
+        "card_grade": "平均学年",
+        "grades_title": "学年別の出場時間",
+        "grades_bar": "{minutes}分 / {goals}得点",
+        "grades_axis": "{grade}年 ({players})",
+        "h_heat": "節ごとの出場時間（節 × 選手）",
+        "heat_total": "計",
+        "heat_legend": "出場時間",
+        "heat_tip": "第{section}節 {minutes}分",
+        "heat_note": ("上ほど出場時間が長い選手。固定メンバーのチームは縦に濃く揃い、"
+                      "ターンオーバーの多いチームはまだらになる。"),
+        "h_squad": "選手一覧",
+        "year_suffix": "年",
+        "footer": ("出典: 東京都大学サッカー連盟 公開コンテンツAPI。ローカル生成のファイルであり、"
+                   "連盟サイトが公開している以上の情報は含まない。"),
+    },
+}
+
 SCRIPT = r"""
 const DATA = JSON.parse(document.getElementById("payload").textContent);
 const NS = "http://www.w3.org/2000/svg";
 const AXES = DATA.axes;
+const T = DATA.t;
+const fill = (template, values) =>
+  template.replace(/\{(\w+)\}/g, (_, key) => values[key] == null ? "" : values[key]);
 const fmt = (v, d = 1) => (v == null ? "-" : Number(v).toFixed(d));
 
 function el(name, attrs, text) {
@@ -93,16 +235,16 @@ function svg(width, height, label) {
 /* Rank on x, shot volume on y, goals as area. Three axes at once, so a side
    that shoots a lot without scoring separates from one that does not shoot. */
 function bubbles(host, teams, selected) {
-  const W = 620, H = 330, L = 72, R = 18, T = 26, B = 42;
-  const node = svg(W, H, "順位とシュート数");
+  const W = 620, H = 330, L = 72, R = 18, top = 26, B = 42;
+  const node = svg(W, H, T.bubbles_title);
   const maxRank = teams.length;
   const maxY = Math.max(...teams.map(t => t.shots_per_game)) * 1.12 || 1;
   const maxGoals = Math.max(...teams.map(t => t.goals_for)) || 1;
   const x = r => L + (W - L - R) * (r - 1) / Math.max(1, maxRank - 1);
-  const y = v => T + (H - T - B) * (1 - v / maxY);
+  const y = v => top + (H - top - B) * (1 - v / maxY);
 
   node.appendChild(el("text", { x: 0, y: 12, "font-size": 11, fill: "currentColor",
-    "fill-opacity": .6 }, "シュート/試合"));
+    "fill-opacity": .6 }, T.bubbles_y));
   const ticks = [];
   for (let i = 0; i <= 4; i++) {
     const value = maxY * i / 4;
@@ -116,7 +258,8 @@ function bubbles(host, teams, selected) {
     const circle = el("circle", { cx: x(team.rank), cy: y(team.shots_per_game), r: radius,
       fill: on ? "var(--warm)" : "var(--accent)", "fill-opacity": on ? .55 : .3,
       stroke: on ? "var(--warm)" : "var(--accent)", "stroke-width": on ? 2 : 1, cursor: "pointer" });
-    circle.appendChild(el("title", {}, `${team.team} — ${team.rank}位 / 1試合平均シュート${fmt(team.shots_per_game)}本 / ${team.goals_for}得点`));
+    circle.appendChild(el("title", {}, fill(T.bubbles_tip, { team: team.team,
+      rank: team.rank, shots: fmt(team.shots_per_game), goals: team.goals_for })));
     circle.addEventListener("click", () => select(team.team_pk));
     node.appendChild(circle);
     node.appendChild(el("text", { x: x(team.rank), y: y(team.shots_per_game) + 3.5,
@@ -128,19 +271,19 @@ function bubbles(host, teams, selected) {
       "text-anchor": "end", fill: "currentColor", "fill-opacity": .55 }, fmt(value)));
   }
   node.appendChild(el("text", { x: (L + W - R) / 2, y: H - 8, "font-size": 11,
-    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, "順位 →"));
+    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, T.bubbles_x));
   node.appendChild(el("text", { x: W - R, y: H - 8, "font-size": 10, "text-anchor": "end",
-    fill: "currentColor", "fill-opacity": .5 }, "円の面積 = 総得点"));
+    fill: "currentColor", "fill-opacity": .5 }, T.bubbles_key));
   host.replaceChildren(node);
 }
 
 function radar(team, size, selected) {
-  /* The labelled version needs room outside the circle for six Japanese
-     names, so it gets a wider box with the circle still centred in it. */
+  /* The labelled version needs room outside the circle for six axis names,
+     so it gets a wider box with the circle still centred in it. */
   const big = size > 200;
   const W = big ? Math.round(size * 1.45) : size;
   const c = W / 2, cy = size / 2, radius = size * 0.34;
-  const node = svg(W, size, `${team.team}の特徴`);
+  const node = svg(W, size, fill(T.radar_title, { team: team.team }));
   const angleOf = i => -Math.PI / 2 + i * 2 * Math.PI / AXES.length;
   const ringPoints = ring => AXES.map((_, i) => {
     const angle = angleOf(i);
@@ -169,8 +312,8 @@ function radar(team, size, selected) {
   node.appendChild(el("polygon", { points: shape(team.axes),
     fill: on ? "var(--warm)" : "var(--accent)", "fill-opacity": .28,
     stroke: on ? "var(--warm)" : "var(--accent)", "stroke-width": 1.6 }));
-  /* Numbers, not names: the small charts have no room for six Japanese
-     labels, and the number keys back to the list under the grid. */
+  /* Numbers, not names: the small charts have no room for six axis labels,
+     and the number keys back to the list under the grid. */
   AXES.forEach((axis, i) => {
     const angle = angleOf(i), gap = big ? 10 : 9;
     const dx = Math.cos(angle), anchor = big && Math.abs(dx) > .3
@@ -200,12 +343,12 @@ function radarGrid(host, teams, selected) {
 }
 
 function curve(host, selected) {
-  const W = 620, H = 300, L = 34, R = 96, T = 20, B = 32;
-  const node = svg(W, H, "節ごとの累積勝点");
+  const W = 620, H = 300, L = 34, R = 96, top = 20, B = 32;
+  const node = svg(W, H, T.curve_title);
   const maxSection = Math.max(...DATA.curve.flatMap(t => t.points.map(p => p[0])));
   const maxPoints = Math.max(...DATA.curve.flatMap(t => t.points.map(p => p[1]))) || 1;
   const x = s => L + (W - L - R) * (s - 1) / Math.max(1, maxSection - 1);
-  const y = p => T + (H - T - B) * (1 - p / maxPoints);
+  const y = p => top + (H - top - B) * (1 - p / maxPoints);
 
   node.appendChild(el("line", { x1: L, x2: W - R, y1: y(0), y2: y(0),
     stroke: "currentColor", "stroke-opacity": .2 }));
@@ -230,17 +373,17 @@ function curve(host, selected) {
       fill: "currentColor", "fill-opacity": end.on ? .95 : .4 }, end.team.team.slice(0, 8)));
   }
   node.appendChild(el("text", { x: (L + W - R) / 2, y: H - 6, "font-size": 11,
-    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, "節 →"));
+    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, T.curve_x));
   host.replaceChildren(node);
 }
 
 function stacked(host, rows, selected) {
-  const rowH = 21, L = 118, W = 560, T = 8;
-  const node = svg(W, T + rows.length * rowH + 6, "対戦相手の順位帯別得点");
+  const rowH = 21, L = 118, W = 560, top = 8;
+  const node = svg(W, top + rows.length * rowH + 6, T.opponents_title);
   const peak = Math.max(...rows.map(r => r.vs_top + r.vs_bottom)) || 1;
-  const span = W - L - 96;
+  const span = W - L - T.opponents_gap;
   rows.forEach((row, i) => {
-    const y = T + i * rowH;
+    const y = top + i * rowH;
     const on = row.team_pk === selected;
     node.appendChild(el("text", { x: L - 6, y: y + 12, "font-size": 10.5, "text-anchor": "end",
       fill: "currentColor", "fill-opacity": on ? 1 : .7 }, row.team.slice(0, 9)));
@@ -251,13 +394,15 @@ function stacked(host, rows, selected) {
       fill: "var(--warm)", "fill-opacity": on ? .95 : .55 }));
     node.appendChild(el("text", { x: L + topW + bottomW + 6, y: y + 13, "font-size": 10,
       fill: "currentColor", "fill-opacity": .6 },
-      `${row.vs_top}+${row.vs_bottom}  ${Math.round(row.bottom_share * 100)}% 下位`));
+      fill(T.opponents_row, { top: row.vs_top, bottom: row.vs_bottom,
+        share: Math.round(row.bottom_share * 100) + "%" })));
   });
   host.replaceChildren(node);
 }
 
 function heat(host, team) {
   const matrix = DATA.matrix[team.team_pk];
+  if (!host) return;
   if (!matrix || !matrix.players.length) { host.replaceChildren(); return; }
   const table = document.createElement("table");
   table.className = "heat";
@@ -269,7 +414,7 @@ function heat(host, team) {
     head.appendChild(cell);
   }
   const total = document.createElement("th");
-  total.textContent = "計";
+  total.textContent = T.heat_total;
   head.appendChild(total);
 
   const body = table.createTBody();
@@ -277,7 +422,8 @@ function heat(host, team) {
     const row = body.insertRow();
     const name = row.insertCell();
     name.className = "l";
-    name.textContent = `${player.label}${player.grade ? " " + player.grade + "年" : ""}${player.position ? " " + player.position : ""}`;
+    name.textContent = `${player.label}${player.grade ? " " + player.grade + T.year_suffix : ""}`
+      + `${player.position ? " " + player.position : ""}`;
     for (const section of matrix.sections) {
       const minutes = player.minutes[section] || 0;
       const cell = row.insertCell();
@@ -286,7 +432,7 @@ function heat(host, team) {
       box.style.background = minutes
         ? `color-mix(in srgb, var(--accent) ${18 + 72 * minutes / 90}%, transparent)`
         : "var(--panel)";
-      box.title = `第${section}節 ${minutes}分`;
+      box.title = fill(T.heat_tip, { section, minutes });
       cell.appendChild(box);
     }
     const sum = row.insertCell();
@@ -297,30 +443,35 @@ function heat(host, team) {
 }
 
 function grades(host, team) {
-  const W = 380, H = 128, L = 30, T = 24, B = 26;
-  const node = svg(W, H, "学年別の出場時間と得点");
+  const W = 380, H = 128, L = 30, top = 24, B = 26;
+  const node = svg(W, H, T.grades_title);
   const entries = ["1", "2", "3", "4"].map(g => [g, team.grades[g] || { minutes: 0, goals: 0, players: 0 }]);
   const peak = Math.max(...entries.map(e => e[1].minutes)) || 1;
   const slot = (W - L - 12) / entries.length;
-  const plot = H - T - B;
+  const plot = H - top - B;
   entries.forEach(([grade, value], i) => {
     const barH = plot * value.minutes / peak;
     const x = L + i * slot;
-    node.appendChild(el("rect", { x: x + slot * .18, y: T + plot - barH, width: slot * .64,
+    node.appendChild(el("rect", { x: x + slot * .18, y: top + plot - barH, width: slot * .64,
       height: Math.max(barH, 1), rx: 2, fill: "var(--plum)", "fill-opacity": .75 }));
-    node.appendChild(el("text", { x: x + slot / 2, y: T + plot - barH - 4, "font-size": 9.5,
+    node.appendChild(el("text", { x: x + slot / 2, y: top + plot - barH - 4, "font-size": 9.5,
       "text-anchor": "middle", fill: "currentColor", "fill-opacity": .65 },
-      `${value.minutes}分 / ${value.goals}得点`));
-    node.appendChild(el("text", { x: x + slot / 2, y: T + plot + 14, "font-size": 10.5,
+      fill(T.grades_bar, { minutes: value.minutes, goals: value.goals })));
+    node.appendChild(el("text", { x: x + slot / 2, y: top + plot + 14, "font-size": 10.5,
       "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 },
-      `${grade}年 (${value.players})`));
+      fill(T.grades_axis, { grade, players: value.players })));
   });
   node.appendChild(el("text", { x: 0, y: 12, "font-size": 11, "font-weight": 600,
-    fill: "currentColor" }, "学年別の出場時間"));
+    fill: "currentColor" }, T.grades_title));
   host.replaceChildren(node);
 }
 
 function table(host, headers, rows, leftColumns = 1) {
+  /* Aggregate mode omits the per-player sections entirely, so two of the four
+     callers below have no element to draw into. Without this guard the first
+     one threw and took every later call in select() down with it, which is how
+     the club history table came to be blank on every aggregate dashboard. */
+  if (!host) return;
   const node = document.createElement("table");
   const head = node.createTHead().insertRow();
   headers.forEach((label, i) => {
@@ -375,24 +526,26 @@ function select(teamPk) {
 
   document.getElementById("radar-big").replaceChildren(radar(team, 300, teamPk));
   cards(document.getElementById("team-cards"), [
-    ["勝点", team.points], ["得点", team.goals_for], ["失点", team.goals_against],
-    ["シュート/試合", fmt(team.shots_per_game)], ["決定率", fmt(team.conversion, 3)],
-    ["起用人数", team.players_used], ["主力11人の出場時間比率", Math.round(team.core_share * 100) + "%"],
-    ["平均学年", fmt(team.mean_grade, 2)],
+    [T.card_points, team.points], [T.card_scored, team.goals_for],
+    [T.card_conceded, team.goals_against],
+    [T.card_shots, fmt(team.shots_per_game)], [T.card_conversion, fmt(team.conversion, 3)],
+    [T.card_used, team.players_used],
+    [T.card_core, Math.round(team.core_share * 100) + "%"],
+    [T.card_grade, fmt(team.mean_grade, 2)],
   ]);
   grades(document.getElementById("grades"), team);
   heat(document.getElementById("heat"), team);
 
   table(document.getElementById("history"),
-    ["年度", "部", "試合", "勝-分-敗", "勝点", "1試合平均"],
+    T.cols_history,
     (DATA.history[team.team_id] || []).map(h =>
-      [h.year, h.division, h.played, `${h.win}-${h.draw}-${h.lose}`, h.points, fmt(h.points_per_game, 2)]),
+      [h.year, h.label, h.played, `${h.win}-${h.draw}-${h.lose}`, h.points, fmt(h.points_per_game, 2)]),
     2);
 
   const squad = DATA.squads[teamPk] || [];
   table(document.getElementById("squad"),
-    ["選手", "学年", "ポジション", "出場", "先発", "出場時間", "シュート", "得点", "90分あたりシュート", "決定率"],
-    squad.map(p => [p.label, p.grade ? p.grade + "年" : "-", p.position || "-",
+    T.cols_squad,
+    squad.map(p => [p.label, p.grade ? p.grade + T.year_suffix : "-", p.position || "-",
       p.apps, p.starts, p.minutes, p.shots, p.goals, fmt(p.shots_per_90, 2), fmt(p.conversion, 3)]), 3);
 }
 
@@ -407,8 +560,11 @@ def _e(value):
     return html.escape("" if value is None else str(value))
 
 
-def build(conn, series_id, mode="full", salt=None, min_minutes=0):
+def build(conn, series_id, mode="full", salt=None, min_minutes=0, lang="en"):
     """Render the dashboard for one series and return the HTML source."""
+    if lang not in TEXT:
+        raise ValueError(f"unsupported language: {lang}")
+    text = TEXT[lang]
     series = conn.execute("SELECT * FROM series WHERE id = ?", (series_id,)).fetchone()
     if series is None:
         raise ValueError(f"series {series_id!r} is not in this database")
@@ -492,15 +648,20 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
     history = {}
     for row in profile:
         if row["team_id"]:
-            history[row["team_id"]] = analysis.team_history(conn, row["team_id"])
+            seasons = analysis.team_history(conn, row["team_id"])
+            for season in seasons:
+                season["label"] = division_label(season["division"], lang)
+            history[row["team_id"]] = seasons
 
+    axes = [
+        {"key": key,
+         "label": analysis.FINGERPRINT_AXES_JA[key][0] if lang == "ja" else label,
+         "hint": analysis.FINGERPRINT_AXES_JA[key][1] if lang == "ja" else hint}
+        for key, label, hint in analysis.FINGERPRINT_AXES
+    ]
     payload = {
-        # The page is Japanese, so the radar reads in Japanese too.
-        "axes": [
-            {"key": key, "label": analysis.FINGERPRINT_AXES_JA[key][0],
-             "hint": analysis.FINGERPRINT_AXES_JA[key][1]}
-            for key, _, _ in analysis.FINGERPRINT_AXES
-        ],
+        "axes": axes,
+        "t": text,
         "axis_means": axis_means,
         "teams": teams,
         "curve": analysis.points_curve(conn, series_id),
@@ -532,22 +693,24 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
         f'{row["rank"]}. {_e(row["team"])}</button>'
         for row in profile
     )
+    joiner = "" if lang == "ja" else " "
     axis_list = "".join(
-        f"<li><b>{_e(analysis.FINGERPRINT_AXES_JA[key][0])}</b> — "
-        f"{_e(analysis.FINGERPRINT_AXES_JA[key][1])}"
-        f"（リーグ平均 {axis_means[key]:.0f}）</li>"
-        for key, _, _ in analysis.FINGERPRINT_AXES
+        f"<li><b>{_e(axis['label'])}</b> — {_e(axis['hint'])}"
+        f"{joiner}({_e(text['axis_mean'].format(mean=axis_means[axis['key']]))})</li>"
+        for axis in axes
     )
+    minutes = "分" if lang == "ja" else " min"
     player_sections = (
-        """
-<h3>節ごとの出場時間（節 × 選手）</h3>
+        f"""
+<h3>{_e(text['h_heat'])}</h3>
 <div class="scroll" id="heat"></div>
-<div class="legend"><span>出場時間</span><i style="background:var(--panel)"></i>0分
-  <i style="background:color-mix(in srgb, var(--accent) 54%, transparent)"></i>45分
-  <i style="background:color-mix(in srgb, var(--accent) 90%, transparent)"></i>90分</div>
-<p class="note">上ほど出場時間が長い選手。固定メンバーのチームは縦に濃く揃い、ターンオーバーの多いチームはまだらになる。</p>
+<div class="legend"><span>{_e(text['heat_legend'])}</span>
+  <i style="background:var(--panel)"></i>0{minutes}
+  <i style="background:color-mix(in srgb, var(--accent) 54%, transparent)"></i>45{minutes}
+  <i style="background:color-mix(in srgb, var(--accent) 90%, transparent)"></i>90{minutes}</div>
+<p class="note">{_e(text['heat_note'])}</p>
 
-<h3>選手一覧</h3>
+<h3>{_e(text['h_squad'])}</h3>
 <div id="squad"></div>
 """
         if show_players
@@ -555,36 +718,35 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
     )
 
     generated = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M")
+    division = series["short_name"] or series["name"]
     return f"""<!doctype html>
-<html lang="ja"><head>
+<html lang="{text['html_lang']}"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{_e(series['short_name'] or series['name'])} {_e(series['year'])} — dashboard</title>
+<title>{_e(text['title'].format(division=division, year=series['year']))}</title>
 <style>{CSS}</style>
 </head><body><main>
 <h1>{_e(series['name'])}</h1>
-<p class="sub">{_e(series['year'])} · {len(profile)}チーム · 生成 {_e(generated)} · togakuren-analytics</p>
+<p class="sub">{_e(text['subtitle'].format(year=series['year'], teams=len(profile), when=generated))}
+ · togakuren-analytics</p>
 {banner}
 
 <div class="tabs">{buttons}</div>
 
-<h2>リーグ全体</h2>
-<h3>順位 × シュート数 × 得点</h3>
+<h2>{_e(text['h_league'])}</h2>
+<h3>{_e(text['h_bubbles'])}</h3>
 <div id="bubbles"></div>
-<p class="note">横軸が最終順位、縦軸が1試合あたりシュート数、円の面積が総得点。
-順位の割にシュートが多いチームと、少ない本数で決めているチームが同じ図の中で分かれる。</p>
+<p class="note">{_e(text['bubbles_note'])}</p>
 
 <div class="grid">
-  <div><h3>勝点の積み上がり</h3><div id="curve"></div></div>
-  <div><h3>得点した相手（上位/下位）</h3><div id="opponents"></div>
-  <p class="note">青が上位陣から、橙が下位陣から奪った得点。</p></div>
+  <div><h3>{_e(text['h_curve'])}</h3><div id="curve"></div></div>
+  <div><h3>{_e(text['h_opponents'])}</h3><div id="opponents"></div>
+  <p class="note">{_e(text['opponents_note'])}</p></div>
 </div>
 
-<h3>チームの特徴（6指標）</h3>
+<h3>{_e(text['h_radars'])}</h3>
 <div class="radars" id="radars"></div>
-<p class="note">各指標はこのリーグ内での相対値（0〜100）。頂点の番号は下のリストの番号に対応する。
-点線はリーグ平均で、平均が50から離れている指標は、上位に偏っているか下位に長い尾を引いている。
-クリックでそのチームに切り替わる。</p>
+<p class="note">{_e(text['radars_note'])}</p>
 <ol class="note axis-key">{axis_list}</ol>
 
 <h2 id="team-name"></h2>
@@ -593,14 +755,11 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
   <div><div class="cards" id="team-cards"></div><div id="grades"></div></div>
 </div>
 
-<h3>過去シーズン（部をまたいで追跡）</h3>
+<h3>{_e(text['h_history'])}</h3>
 <div id="history"></div>
 {player_sections}
 
-<footer>
-出典: 東京都大学サッカー連盟 公開コンテンツAPI。ローカル生成のファイルであり、
-連盟サイトが公開している以上の情報は含まない。
-</footer>
+<footer>{_e(text['footer'])}</footer>
 </main>
 <script id="payload" type="application/json">{json.dumps(payload, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script>
 <script>{SCRIPT}</script>

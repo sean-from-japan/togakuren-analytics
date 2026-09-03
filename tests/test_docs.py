@@ -87,6 +87,33 @@ class Links(unittest.TestCase):
                 self.assertFalse(stem.with_name(stem.name + ".ja.md").exists())
 
 
+class Figures(unittest.TestCase):
+    """The two language sets are separate files and drift apart silently.
+
+    A missing English figure is a broken image on GitHub and nothing else here
+    notices, because the link checker only sees the files a document happens to
+    reference.
+    """
+
+    def test_both_language_sets_hold_the_same_figures(self):
+        english = {path.name for path in (ROOT / "docs" / "figures" / "en").glob("*.png")}
+        japanese = {path.name for path in (ROOT / "docs" / "figures" / "ja").glob("*.png")}
+        self.assertTrue(english)
+        self.assertEqual(english, japanese)
+
+    def test_no_figure_sits_outside_a_language_folder(self):
+        stray = sorted(path.name for path in (ROOT / "docs" / "figures").glob("*.png"))
+        self.assertEqual(stray, [])
+
+    def test_each_document_points_at_its_own_language(self):
+        for suffix, wrong in (("en", "/figures/ja/"), ("ja", "/figures/en/")):
+            for path in ROOT.rglob(f"*.{suffix}.md"):
+                if ".git" in path.parts or path.name.startswith("FIGURES"):
+                    continue
+                with self.subTest(document=path.name):
+                    self.assertNotIn(wrong, path.read_text(encoding="utf-8"))
+
+
 class JapaneseCopy(unittest.TestCase):
     """Keep previously corrected literal translations out of public output."""
 

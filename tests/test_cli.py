@@ -261,6 +261,57 @@ class Compare(Command):
             self.assertIsInstance(row["talent_spread"], float)
 
 
+class Intake(Command):
+    def setUp(self):
+        super().setUp()
+        self.seasons_db = self.root / "seasons.sqlite3"
+        conn = db.connect(self.seasons_db)
+        fixtures.seed_seasons(conn)
+        conn.close()
+
+    def seasons_cli(self, *argv):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(cli.main(["--db", str(self.seasons_db), *argv]), 0)
+        return out.getvalue()
+
+    def test_validate_scores_the_squad_list_against_the_table(self):
+        out = self.seasons_cli("intake", "--validate")
+        self.assertIn("last season's table", out)
+        self.assertIn("the squad list alone", out)
+        self.assertIn("championship", out)
+        self.assertIn("stayed", out)
+
+    def test_a_division_is_ranked_before_the_season_it_ranks(self):
+        out = self.seasons_cli("intake", "--year", "2003", "--level", "1")
+        self.assertIn("before kick-off", out)
+        self.assertIn("correlation over the 6 clubs", out)
+
+    def test_completed_only_drops_the_most_recent_season(self):
+        every = self.seasons_cli("intake", "--validate")
+        older = self.seasons_cli("intake", "--validate", "--completed-only")
+        self.assertIn("2003", every)
+        self.assertNotIn("2003", older)
+
+    def test_a_season_with_nothing_to_rank_says_so(self):
+        with contextlib.redirect_stdout(io.StringIO()), \
+                self.assertRaises(SystemExit) as exit_:
+            cli.main(["--db", str(self.seasons_db), "intake", "--year", "2001"])
+        self.assertIn("nothing to rank", str(exit_.exception))
+
+    def test_a_two_club_season_is_refused_rather_than_standardised(self):
+        """A division needs a spread before a z-score against it means anything.
+
+        The fixture is two clubs, which is below the floor, so the command says
+        there is nothing to work with instead of reporting zeros.
+        """
+        for argv in (["intake"], ["intake", "--validate"]):
+            with contextlib.redirect_stdout(io.StringIO()), \
+                    self.assertRaises(SystemExit) as exit_:
+                cli.main(["--db", str(self.db), *argv])
+            self.assertIn("squad list", str(exit_.exception))
+
+
 class Failures(Command):
     def test_an_unknown_series_exits_rather_than_traces(self):
         with self.assertRaises(SystemExit):

@@ -21,9 +21,10 @@ Checked 2026-09-01.
 | `robots.txt` | Disallows `/wp-admin/` only. |
 
 The depth is what makes the analysis possible. Every result in
-[FINDINGS.en.md](../FINDINGS.en.md) — the cost of promotion, the year-group study, the
-gap between league position and shot volume — needs match-level records for
-several seasons. Results tables alone would not produce any of them.
+[FINDINGS.en.md](../FINDINGS.en.md) — the preseason model built on the squad
+lists, what a division change does to predictability, the year-group study —
+needs squad and match-level records for several seasons. Results tables alone
+would not produce any of them.
 
 ## The tier above: the Kanto regional league
 
