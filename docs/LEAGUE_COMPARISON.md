@@ -11,6 +11,13 @@ togakuren compare
 togakuren compare --reference docs/reference-leagues.json
 ```
 
+**A division here is not a fixed thing across seasons.** The competition was
+rebuilt three times between 2021 and 2026, and the clubs in "2部" in 2022 are
+not the population that name refers to in 2026. Every figure below is measured
+within one season of one division, which is the right unit; anything read as a
+trend down a column is reading across reorganisations.
+[LEAGUE_STRUCTURE.md](LEAGUE_STRUCTURE.md) has the accounting.
+
 ## The two quantities
 
 **Talent spread.** [Noll and Scully's

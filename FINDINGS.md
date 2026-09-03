@@ -2,7 +2,7 @@
 
 *[日本語版](FINDINGS.ja.md)*
 
-Six things the Tokyo University Football Association's own pages do not show,
+Five things the Tokyo University Football Association's own pages do not show,
 taken from its published match records: results from 2021 and player-level
 records for the five seasons from 2022.
 
@@ -26,8 +26,7 @@ Ordered by how much the number said that was not already obvious.
 | [5](#5-conversion-rises-as-the-division-falls-except-in-the-second) | Conversion by division | Conversion rises as the division falls, **except** that the second division fell below the first in 2025 and has not come back. No explanation survived checking, so none is offered. |
 | [3](#3-league-position-and-shot-volume-are-only-loosely-related) | Position against shots | Below third place the two come apart: 5 of 12 clubs sit three or more places from where their shot count would put them. |
 | [4](#4-squad-character-has-a-shape) | Squad character | How much of a season a club gives to eleven players, and which opponents its goals come from, separate clubs the table does not. |
-| [6](#6-a-club-can-cross-three-tiers-in-five-years) | Movement | Second division → challenge league → second division champion → first division runner-up, in five years. |
-| [1](#1-promotion-costs-a-point-a-game-relegation-gives-back-half) | Promotion | The **expected** result, kept for its size rather than its direction: −1.04 points per game in 26 of 27 cases. Read it for the asymmetry with relegation, which only gives back half. |
+| [1](#1-promotion-costs-a-point-a-game) | Promotion | The **expected** result, kept for its size rather than its direction: −0.97 points per game in 29 of 32 cases. Read it for the **retraction** — the asymmetry with relegation this section used to claim was an artefact of reading one division's level off its name. |
 
 ## The dataset
 
@@ -65,27 +64,52 @@ withheld for that season rather than computed from a rounding error.
 is drawn faintly in the charts, and it is excluded from the promotion and
 relegation averages.
 
-## 1. Promotion costs a point a game. Relegation gives back half
+**These are not six seasons of one competition.** Tokyo ran its own four-division
+league to 2021 and restructured to three in 2022; in 2023 it merged with the
+Kanagawa prefectural league and was reconstituted as the Tokyo/Kanagawa division
+of the Kanto league, losing six of its twelve first-division clubs upward in the
+process; a third division was inserted in 2025 and the Challenge League abolished
+in 2026. A first-division club that did nothing at all gained 0.83 points a game
+across the 2023 boundary — five times the movement at any other. Anything below
+that pools seasons is pooling different competitions, and
+[docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md) is the accounting.
+
+## 1. Promotion costs a point a game
 
 ![Points per game before and after a division change](docs/figures/fig-promotion.png)
 
 Promotion and relegation are the one natural experiment this dataset offers: the
-same squad, one season later, against different opposition. Fifty-seven completed
-cases across five seasons.
+same squad, one season later, against different opposition. Forty-nine completed
+cases across five seasons — once the ladder is read correctly, which turned out
+to be the whole difficulty. See
+[docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md).
 
 | | Cases | Change in points per game | Got worse |
 |---|---|---|---|
-| Promoted | 27 | **−1.04** | **26 of 27** |
-| Relegated | 30 | **+0.53** | 9 of 30 |
+| Promoted | 32 | **−0.97** | **29 of 32** |
+| Relegated | 17 | **+1.24** | 1 of 17 |
 
-Twenty-six of twenty-seven promoted sides did worse the following season. The one
-exception went from 1.50 to 1.65 points per game moving from the third division
-to the second in 2022 — the shallowest step available.
+Twenty-nine of thirty-two promoted sides did worse the following season. The
+three exceptions all took the shallowest step available in the 2022
+restructure — a fourth-division or third-division side moving one level in a
+season where the bottom two divisions were being merged anyway.
 
-The asymmetry is the interesting part. If a division change were simply a change
-of difficulty, going up and coming down would cost and return roughly the same
-amount. They do not: promotion takes a full point per game and relegation returns
-half of it, and three relegated sides in ten kept falling.
+The result holds inside each reorganisation separately: −0.96 across the 2022
+restructure, −0.94 across the 2023 merger with Kanagawa, −1.18 across the 2025
+insertion of a third division, and −0.95 at the boundaries where the ladder did
+not move at all. That split is the point. If the number were a by-product of the
+league being rebuilt, it would not survive being cut by which rebuild it came
+from.
+
+**This section used to claim an asymmetry, and that claim is withdrawn.** It
+said promotion takes a full point per game while relegation returns only half of
+it, and that three relegated sides in ten keep falling. Both halves were an
+artefact. The Challenge League has no number in its name, and it was the third
+level from 2022 and the fourth from 2025; reading it off a fixed map filed
+thirteen clubs that had moved level or upward in 2022 under "relegated". They had
+not improved, and they were holding the relegation average down to +0.53.
+Corrected, relegation returns slightly more than promotion costs, and one
+relegated side in seventeen got worse rather than nine in thirty.
 
 ## 2. Year groups have no structure beyond "fourth years score"
 
@@ -179,22 +203,13 @@ finish at higher rates — Challenge League converted at 0.233 in 2022 against
 it exists here.
 
 The second division does not. It sat above the first division for three seasons
-and then crossed under it in 2025 and stayed there. The 2024 second division ran
-nineteen teams against the usual ten to twelve, so a restructuring is the obvious
-suspect, but this dataset cannot show it and the claim is left open.
-
-## 6. A club can cross three tiers in five years
-
-![Oubirin's trajectory](docs/figures/fig-trajectory.png)
-
-桜美林大学: second division in 2021 (11 points), Challenge League in 2022, then
-**13 wins from 13** in the 2023 Challenge League, second-division champions in
-2024, first division in 2025, and second in the first division in 2026.
-
-Club identity is stable across divisions in the federation's own data, so a
-trajectory like this needs no name matching. It is also the reason a single
-season's table says so little about a programme: three of the twelve sides in the
-2026 first division were in a lower division two years earlier.
+and then crossed under it in 2025 and stayed there. The reorganisation that runs
+through the middle of this table is now documented — the 2024 second division of
+nineteen clubs was the staging year before a third division was created, and the
+Challenge League it is being compared against changed level in 2025 and stopped
+existing in 2026 ([docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md)). Knowing
+that does not explain the crossing: the 2025 second division was ten clubs, the
+same size it had been in most seasons. The claim is still open.
 
 ## What is not in this document
 
@@ -219,8 +234,10 @@ reasoning and the measurements.
 
 ## Related documents
 
-- [docs/SEASON_TRENDS.md](docs/SEASON_TRENDS.md) — every table behind sections 1, 2, 5 and 6,
-  including all 57 division changes and every club's path through the tiers.
+- [docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md) — the three reorganisations inside
+  this dataset, what they did to section 1, and the one claim they retracted.
+- [docs/SEASON_TRENDS.md](docs/SEASON_TRENDS.md) — every table behind sections 1, 2 and 5,
+  including every division change and every club's path through the tiers.
 - [docs/seasons/](docs/seasons/) — one document per season and division, 2021–2026.
 - [docs/PLAYER_ANALYSIS_SAMPLE.md](docs/PLAYER_ANALYSIS_SAMPLE.md) — what the player-level
   output looks like, over an invented season.
@@ -230,7 +247,7 @@ reasoning and the measurements.
 ```bash
 pip install .
 togakuren ingest                                 # about 40 seconds
-togakuren trends                                 # sections 1, 2, 5, 6
+togakuren trends                                 # sections 1, 2 and 5
 togakuren dashboard --series "2026 1部"          # sections 3, 4
 togakuren privacy-check --series "2026 1部"      # the last section
 togakuren trends --format md                     # docs/SEASON_TRENDS.md

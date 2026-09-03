@@ -1,198 +1,188 @@
 # togakuren-analytics
 
+*[English version](README.en.md)*
+
 [![tests](https://github.com/sean-from-japan/togakuren-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/sean-from-japan/togakuren-analytics/actions/workflows/ci.yml)
 ![python](https://img.shields.io/badge/python-3.9%20%E2%80%93%203.13-blue)
 ![dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 ![licence](https://img.shields.io/badge/licence-MIT-blue)
 
-Match records from the Tokyo University Football Association
-(東京都大学サッカー連盟), turned into a database and a set of measurements.
-**2,312 fixtures, 53 clubs, 2021–2026 (player-level records from 2022), no
-dependencies outside the standard library, and no collected data in the
-repository.**
+東京都大学サッカー連盟の試合記録を、データベースと一組の指標に変換したツールです。
+**2,312試合・53クラブ・2021〜2026年（選手単位の記録は2022年から）、標準ライブラリ以外の
+依存なし、収集したデータはリポジトリに一切含みません。**
 
-The federation's site shows fixtures, a table and a top-scorers list. The records
-underneath hold per-player shot counts, lineups, timed substitutions and coded
-cards, and none of it is aggregated anywhere.
+この6シーズンは、**1つの大会の6シーズンではありません。** 2023年に神奈川県大学リーグと
+統合し、6年のあいだに3回作り直されています。これを取り違えたせいで結果を1つ撤回したため、
+経緯は [docs/LEAGUE_STRUCTURE.ja.md](docs/LEAGUE_STRUCTURE.ja.md) に独立した文書として
+まとめてあります。
 
-## What came out of it
+連盟のサイトが表示しているのは日程・順位表・得点ランキングです。その裏にある記録には
+選手ごとのシュート数、先発メンバー、時刻つきの交代、反則種別つきのカードが入っていますが、
+どこにも集計されていません。
 
-| | result | where |
+## 何が出たか
+
+| | 結果 | 場所 |
 |---|---|---|
-| **Forecasting** | Settings frozen on 2022–24; on 2025–26 (n=525) log loss goes **1.0200 → 0.8192**, past Elo at 0.8753. Accuracy 44.6% → 65.7%. The time decay is the whole story — removing it costs 0.095 nats, more than the model's entire margin over Elo. | [PREDICTION.md](docs/PREDICTION.md) · [ja](docs/PREDICTION.ja.md) |
-| **Player ratings** | Adjusted plus-minus over 8,087 lineup segments. Knowing the players beats knowing only the clubs by **+3.73%** (cross-validated) and **+4.06%** (forward split), with the ridge penalties chosen *inside* each training fold. | [RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) |
-| **What the data cannot do** | Goal records carry a scorer and a minute and nothing else, so **penalties cannot be separated from open play** — no non-penalty rate is possible from this source. Goal events reconcile with the recorded score in **79%** of fixtures. | [FINDINGS.md](FINDINGS.md) |
-| **Comparing leagues** | Predictability is mostly a function of how far apart the clubs are: `gain = −0.092 + 1.257 × spread`, R² = **0.735** over 22 professional divisions. Noll-Scully, the standard balance measure, misreads a short season and says this league is ordinary when it is not. | [LEAGUE_COMPARISON.md](docs/LEAGUE_COMPARISON.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) |
-| **What may be published** | Names removed is not anonymous: club, position and appearances alone identify **56%** of a division uniquely, and 77% once goals are added. Measured, not assumed — `privacy-check` reproduces it. | [DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) |
+| **勝敗予測** | 設定は2022〜24年だけで決めて以降触っていません。2025〜26年（n=525）で対数損失 **1.0200 → 0.8192**、Elo の 0.8753 を上回ります。正解率 44.6% → 65.7%。**効いているのは時間減衰**で、これを外すと0.095 nats悪化し、Eloに対する優位分をまるごと失います。 | [PREDICTION.ja.md](docs/PREDICTION.ja.md) · [en](docs/PREDICTION.md) |
+| **選手レーティング** | 8,087の出場区間に対する調整プラスマイナス。クラブだけを知っている場合に対し、選手を知っていることの上乗せは **+3.73%**（交差検証）と **+4.06%**（前方分割）。リッジの罰則は各学習フォールドの*内側*で選んでいます。 | [RATINGS.ja.md](docs/RATINGS.ja.md) · [en](docs/RATINGS.md) |
+| **リーグの構造が数字にしたこと** | 6シーズンで3回の再編があり、ある部の階層は名前に入っていません。固定の対応表から読んだ結果、**部の異動の21%が逆向き**になり、昇格と降格のあいだに存在しない非対称性を作り出していました。 | [LEAGUE_STRUCTURE.ja.md](docs/LEAGUE_STRUCTURE.ja.md) · [en](docs/LEAGUE_STRUCTURE.md) |
+| **このデータで測れないこと** | 得点の記録は得点者と時刻しか持たないため、**PKを流れの中の得点と分離できません**。この出典からnon-penaltyの決定率は作れません。得点イベントと記録スコアが一致するのは**79%**の試合です。 | [FINDINGS.ja.md](FINDINGS.ja.md) |
+| **リーグ間の比較** | 予測しやすさはほぼ戦力差の関数です。`gain = −0.092 + 1.257 × 戦力差`、欧州プロ22部門でR² **0.735**。標準的な均衡指標であるNoll-Scullyは短いシーズンを読み違え、このリーグを平凡だと言います。 | [LEAGUE_COMPARISON.ja.md](docs/LEAGUE_COMPARISON.ja.md) · [en](docs/LEAGUE_COMPARISON.md) |
+| **何を公開してよいか** | 名前を消しても匿名にはなりません。チーム・ポジション・出場数だけで1部の**56%**が一意に定まり、得点を足すと77%になります。仮定ではなく実測で、`privacy-check` が誰でも再現できます。 | [DATA_POLICY.ja.md](docs/DATA_POLICY.ja.md) · [en](docs/DATA_POLICY.md) |
 
-Two things were worked out here that the source documents nowhere: the four shot
-columns are halves and extra time rather than quarters (the fourth is never used
-in five seasons), and minutes played are not recorded at all — they are rebuilt
-from the eleven, the bench and free-text substitution times, which include `HT`,
-`90+2` and a full-width `90⁺5`.
+出典がどこにも書いていない仕様を2つ、自分で確定させています。**シュートの4列は4等分の
+期間ではなく前半・後半・延長前後半**であること（4列目は5シーズン通じて一度も使われていない）、
+そして**出場時間はそもそも記録されていない**こと。後者は先発11人・ベンチ・自由入力の交代時刻
+（`HT`・`90+2`・全角の `90⁺5` が実在します）から復元しています。
 
-**No collected data is committed here.** The repository is code, and the people
-in this dataset are amateur students — see
-[docs/DATA_POLICY.md](docs/DATA_POLICY.md). CI fails if collected data appears in
-a commit.
+**収集したデータはここにコミットしていません。** このリポジトリはコードのみで、この
+データセットに載っているのはアマチュアの学生です。方針は
+[docs/DATA_POLICY.ja.md](docs/DATA_POLICY.ja.md) にあります。収集データがコミットされた
+場合はCIが落ちます。
 
-📊 **[Findings](FINDINGS.md)** ([日本語](FINDINGS.ja.md)) — six results with the
-charts, including two that came out against expectation.
+📊 **[分析結果](FINDINGS.ja.md)** ([English](FINDINGS.md)) — 図つきで5件。
+うち2件は予想と逆の結果で、1件は撤回したものです。
 
-![Example dashboard](docs/example-dashboard.png)
+![ダッシュボードの例](docs/example-dashboard.png)
 
-*Above: the dashboard in aggregate mode, which omits every per-player view. The
-local version adds the squad table and a matchday-by-player minutes grid.*
+*上図は集計モード（`--privacy aggregate`）のダッシュボードで、選手単位のビューをすべて
+省いたものです。手元で動かす版にはこれに加えて名簿表と、節×選手の出場時間グリッドが付きます。*
 
-## Documents
+## ドキュメント
 
 | | |
 |---|---|
-| [FINDINGS.md](FINDINGS.md) · [ja](FINDINGS.ja.md) | Six results with the charts. Start here. |
-| [docs/SEASON_TRENDS.md](docs/SEASON_TRENDS.md) · [ja](docs/SEASON_TRENDS.ja.md) | Every season in one place: league level, year groups, all 57 division changes, every club's path. Generated. |
-| [docs/seasons/](docs/seasons/) | One document per league season and division, 2021–2026: table, indices, year groups, history. 40 documents, generated. |
-| [docs/PLAYER_ANALYSIS_SAMPLE.md](docs/PLAYER_ANALYSIS_SAMPLE.md) · [ja](docs/PLAYER_ANALYSIS_SAMPLE.ja.md) | What the player-level output looks like, over an **invented** season. Generated. |
-| [docs/PREDICTION.md](docs/PREDICTION.md) · [ja](docs/PREDICTION.ja.md) | Forecasting the fixtures still to play, scored against the class prior on seasons the settings were not chosen on. |
-| [docs/RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) | Adjusted plus-minus: what knowing the players adds over knowing the clubs, and the two mistakes that reverse the answer. |
-| [docs/SOURCE_SELECTION.md](docs/SOURCE_SELECTION.md) · [ja](docs/SOURCE_SELECTION.ja.md) | Why this league and not the tier above: what each federation publishes, and what its site says about being read by a program. |
-| [docs/DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
-| [docs/LEAGUE_COMPARISON.md](docs/LEAGUE_COMPARISON.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) | This federation's divisions measured against 22 professional leagues, and the two headline results that widening the sample destroyed. |
-| [docs/FIGURES.md](docs/FIGURES.md) · [ja](docs/FIGURES.ja.md) | Which chart each committed PNG is a picture of, and how to remake one. |
-| [CHANGELOG.md](CHANGELOG.md) | What changed and, where a published figure moved, why it moved. |
+| [FINDINGS.ja.md](FINDINGS.ja.md) · [en](FINDINGS.md) | 図つきの結果5件。まずここから。 |
+| [docs/LEAGUE_STRUCTURE.ja.md](docs/LEAGUE_STRUCTURE.ja.md) · [en](docs/LEAGUE_STRUCTURE.md) | このデータセットに含まれる3回の再編、それぞれがクラブの顔ぶれに何をしたか、そして撤回した結果。 |
+| [docs/SEASON_TRENDS.ja.md](docs/SEASON_TRENDS.ja.md) · [en](docs/SEASON_TRENDS.md) | 全シーズンを1ページに。リーグ水準、学年、部の異動の全件、全クラブの推移。自動生成。 |
+| [docs/seasons/](docs/seasons/) | 2021〜2026年の各シーズン・各部につき1本。順位表、各種指標、学年、履歴。40本、自動生成。 |
+| [docs/PLAYER_ANALYSIS_SAMPLE.ja.md](docs/PLAYER_ANALYSIS_SAMPLE.ja.md) · [en](docs/PLAYER_ANALYSIS_SAMPLE.md) | 選手単位の出力がどう見えるか。**架空の**シーズンで。自動生成。 |
+| [docs/PREDICTION.ja.md](docs/PREDICTION.ja.md) · [en](docs/PREDICTION.md) | 未消化の試合の予測と、設定を選んでいないシーズンでのクラスpriorに対する採点。 |
+| [docs/RATINGS.ja.md](docs/RATINGS.ja.md) · [en](docs/RATINGS.md) | 調整プラスマイナス。選手を知ることがクラブを知ることに何を足すか、そして答えを逆にする2つの誤り。 |
+| [docs/SOURCE_SELECTION.ja.md](docs/SOURCE_SELECTION.ja.md) · [en](docs/SOURCE_SELECTION.md) | なぜこのリーグで、なぜ1つ上のリーグではないのか。各連盟が何を公開し、プログラムからの読み取りについて何と書いているか。 |
+| [docs/DATA_POLICY.ja.md](docs/DATA_POLICY.ja.md) · [en](docs/DATA_POLICY.md) | 何を公開してよく、何がだめで、その判断の根拠になる実測値。 |
+| [docs/LEAGUE_COMPARISON.ja.md](docs/LEAGUE_COMPARISON.ja.md) · [en](docs/LEAGUE_COMPARISON.md) | この連盟の各部をプロ22リーグと並べたもの。標本を広げた結果、消えた2つの見出し。 |
+| [docs/FIGURES.ja.md](docs/FIGURES.ja.md) · [en](docs/FIGURES.md) | コミット済みの各PNGがどのチャートの写真なのか、どう撮り直すか。 |
+| [CHANGELOG.md](CHANGELOG.md) | 何が変わったか。公開済みの図が動いた場合はその理由も。 |
 
-The two generated documents come out of the tool in both languages
-(`--lang en|ja`), so only prose is ever translated by hand and the numbers
-cannot drift between versions. Regenerate them with:
+自動生成のドキュメントは `--lang en|ja` で両言語とも出力されます。手で翻訳するのは
+散文だけなので、版のあいだで数字がずれることはありません。再生成は次のとおりです。
 
 ```bash
-togakuren trends --format md --out docs/SEASON_TRENDS.md
-togakuren profiles --all                 # docs/seasons/, both languages
+togakuren trends --format md             # docs/SEASON_TRENDS.md。日本語版は --lang ja
+togakuren profiles --all                 # docs/seasons/、両言語
 togakuren sample --out docs/PLAYER_ANALYSIS_SAMPLE.md
 ```
 
-Seasons before 2026 are over, so their documents never change: the same code
-over the same records reproduces them byte for byte. That is why they are
-committed rather than left to be regenerated.
+2026年より前のシーズンは終了しているため、そのドキュメントは変化しません。同じコードを
+同じ記録にかければバイト単位で再現されます。生成に任せずコミットしてあるのはそのためです。
 
-## Install
+## インストール
 
-Python 3.9 or newer. No dependencies — standard library only, including the
-charts.
+Python 3.9以降。依存なし（チャートを含めて標準ライブラリのみ）。
 
 ```bash
 git clone https://github.com/sean-from-japan/togakuren-analytics
 cd togakuren-analytics
-pip install .          # or run it in place with python3 -m togakuren
+pip install .          # その場で動かすなら python3 -m togakuren
 ```
 
-## Use
+## 使い方
 
 ```bash
-# every season the federation still publishes (~2,300 fixtures, about 40 seconds)
+# 連盟が公開している全シーズン（約2,300試合、40秒程度）
 togakuren ingest
 
-# or just one year
+# 1年だけなら
 togakuren ingest --year 2026
 
-togakuren list                                       # what is loaded
-togakuren dashboard --series "2026 1部"              # interactive, team selector
-togakuren report --series "2026 1部"                 # flat standalone HTML
-togakuren export --series "2026 1部" --out d1.csv    # per-player season rows
-togakuren trends                                     # every season at once
-togakuren profiles --series "2026 1部"               # one division as Markdown
-togakuren profiles --all                             # every completed season
-togakuren sample                                     # player-level output, invented data
-togakuren privacy-check --series "2026 1部"          # how identifiable an export is
+togakuren list                                       # 読み込み済みの一覧
+togakuren dashboard --series "2026 1部"              # 対話的、チーム選択つき
+togakuren report --series "2026 1部"                 # 単体で完結するHTML
+togakuren export --series "2026 1部" --out d1.csv    # 選手×シーズンの行
+togakuren trends                                     # 全シーズンを一度に
+togakuren profiles --series "2026 1部"               # 1つの部をMarkdownで
+togakuren profiles --all                             # 終了した全シーズン
+togakuren sample                                     # 架空データでの選手単位の出力
+togakuren privacy-check --series "2026 1部"          # 出力がどれだけ個人に戻せるか
 
-togakuren forecast --series "2026 1部"                # odds for the fixtures left to play
-togakuren backtest --league-only                     # how well those odds have done
-togakuren ratings --validate                         # what player identity is worth
-togakuren ratings                                    # adjusted plus-minus, locally
-togakuren compare --reference docs/reference-leagues.json   # each division as a league
+togakuren forecast --series "2026 1部"                # 残り試合の勝敗確率
+togakuren backtest --league-only                      # その確率の当たり具合
+togakuren ratings --validate                          # 選手を識別することの価値
+togakuren ratings                                     # 調整プラスマイナス（手元のみ）
+togakuren compare --reference docs/reference-leagues.json   # 各部を1つのリーグとして
 ```
 
-`--series` takes a series id or any set of search terms that narrows to one
-series, so `"2026 1部"` is enough.
+`--series` はシリーズIDでも、1つに絞り込める検索語の並びでも受け付けます。
+`"2026 1部"` で足ります。
 
-### report and dashboard are not the same view
+### report と dashboard は別のものです
 
-Both are one self-contained file with no external assets — no CDN, no build step,
-no server — and both cover the same season, so it is worth saying which to reach
-for.
+どちらも外部アセットなしの1ファイルで完結し（CDNなし、ビルドなし、サーバーなし）、
+対象シーズンも同じなので、どちらを使うべきか書いておきます。
 
-**`report`** renders every chart as SVG in Python and ships **no JavaScript at
-all**. It is the one to use when the page has to survive being printed, opened
-with scripting off, or read by something that is not a browser.
+**`report`** はすべてのチャートをPython側でSVGとして描き、**JavaScriptを一切含みません。**
+印刷する、スクリプトを切って開く、ブラウザ以外のもので読む、といった場合はこちらです。
 
-**`dashboard`** builds its charts in the browser from a JSON payload, which is
-what buys the team selector and the per-player views. It needs JavaScript.
+**`dashboard`** はJSONペイロードからブラウザ側でチャートを組み立てます。チーム選択や
+選手単位のビューが使えるのはそのためで、JavaScriptが必要です。
 
-The rest of this section describes the dashboard, which is the larger of the two.
+以下はダッシュボード側の説明です。
 
-**League level**
+**リーグ全体**
 
-- **Position × shot volume × goals.** Rank on the x axis, shots per game on the
-  y, total goals as circle area. A side that shoots a lot without scoring
-  separates visibly from one that converts a handful of chances.
-- **Six-axis team fingerprints** — shot volume, finishing, defence, rotation,
-  youth and late push, each scaled within the series. Twelve small radars side by
-  side make a settled veteran side and a young rotating one different *shapes*,
-  not different numbers.
-- **Points accumulated by matchday**, all teams at once, the selected one
-  highlighted.
-- **Goals split by the opponent's half of the table** — feasting on the bottom
-  and going quiet against the top looks identical in a goals column.
+- **順位 × シュート数 × 得点。** x軸に順位、y軸に1試合あたりシュート数、円の面積が総得点。
+  撃つが入らないチームと、少ない機会を決めるチームが目で分かれます。
+- **6軸のチーム指紋** — シュート数・決定率・守備・ローテーション・下級生比率・終盤の伸び。
+  各指標はシリーズ内で正規化します。12個の小さなレーダーを並べると、成熟した固定メンバーの
+  チームと、若くて回すチームが違う*形*になります。数字の違いではなく形の違いとして出ます。
+- **節ごとの累積勝点。** 全チームを重ね、選択したチームだけ強調します。
+- **相手の順位帯で分けた得点。** 下位から荒稼ぎして上位に沈黙するチームと、そうでないチームは、
+  得点数の列では区別がつきません。
 
-**Team level**, behind a selector button
+**チーム単位**（選択ボタンの向こう側）
 
-- **A matchday × player minutes grid.** The single most useful view for a
-  squad: who actually plays, who rotates, who disappears after a certain week. A
-  settled side is a solid block; a rotated one is mottled.
-- **Minutes and goals by academic year**, plus mean year weighted by minutes.
-- **The club's history across divisions**, followed by its federation-wide id, so
-  relegation and promotion appear as a change of division on consecutive rows.
-- The full squad table with per-90 rates.
+- **節 × 選手の出場時間グリッド。** チームを見るうえで最も有用なビューです。誰が実際に出て、
+  誰が回され、誰がある週から消えるか。固定メンバーのチームは塊になり、回すチームはまだらになります。
+- **学年別の出場時間と得点**、および出場時間で重みづけした平均学年。
+- **クラブの所属部の履歴。** 連盟のクラブIDで追うので、昇降格が連続する行の部の変化として現れます。
+- 90分あたりの各指標を含む名簿表。
 
-**Across seasons** (`togakuren trends`)
+**シーズン横断**（`togakuren trends`）
 
-One season answers who is good now; several answer the questions that made the
-backfill worth doing. Aggregates throughout, so this page is publishable as it
-stands.
+1シーズンは「いま誰が強いか」に答えます。全期間の取得に手を出す価値があったのは、
+その先の問いのほうです。このページは全体が集計値なので、そのまま公開できます。
 
-- **League level over time** — goals, shots and conversion per division, with
-  seasons still in progress drawn faintly so they are not mistaken for finished
-  ones.
-- **Academic year over time**, per division: minutes share as stacked columns
-  and scoring rate as a line. Enough seasons to tell a real pattern from one
-  cohort being strong.
-- **Club trajectories** — tier on an inverted axis, so promotion reads as the
-  line going up, sized by points per game.
-- **Promotion and relegation as a natural experiment** — the same squad, a year
-  later, against different opposition.
+- **リーグ水準の推移** — 部ごとの得点・シュート・決定率。消化途中のシーズンは薄く描き、
+  終了済みと取り違えられないようにしています。
+- **学年の推移**（部ごと） — 出場時間の割合を積み上げ棒、得点率を折れ線で。1つの世代が
+  強いだけなのか本当の傾向なのかを判別できるだけのシーズン数があります。
+- **クラブの推移** — 階層を反転軸に取るので、昇格が線の上昇として読めます。太さは1試合あたり勝点。
+- **昇降格を自然実験として** — 同じチームが1年後に、相手だけを変えて戦う。
 
-The database and the response cache go to a per-user data directory
-(`~/Library/Application Support/togakuren-analytics` on macOS,
-`$XDG_DATA_HOME` elsewhere), not the working directory. Override with
-`$TOGAKUREN_HOME`, `--db` or `--cache`.
+データベースとレスポンスキャッシュは作業ディレクトリではなく、OS標準のユーザーデータ
+ディレクトリに置きます（macOSなら `~/Library/Application Support/togakuren-analytics`、
+それ以外は `$XDG_DATA_HOME`）。`$TOGAKUREN_HOME`・`--db`・`--cache` で上書きできます。
 
-## What gets collected
+## 何を取得しているか
 
-| Table | Contents |
+| テーブル | 内容 |
 |---|---|
-| `series` | one row per competition-season |
-| `games` | fixtures: section, kickoff, venue, regulation length |
-| `game_teams` | one row per team per fixture: score, points, fair-play points |
-| `appearances` | who played, in which role, and **for how many minutes** |
-| `squad_members` | academic year, shirt number, position — the year group data |
-| `shots` | per player per match, split into halves and extra time |
-| `events` | goals and cards with the minute and the offence code |
-| `substitutions` | who came off, who came on, when |
-| `standings` | the league table the federation computes |
-| `players` | names — the only free-text personal data, and droppable |
+| `series` | 大会×シーズンにつき1行 |
+| `games` | 試合：節、キックオフ、会場、規定時間 |
+| `game_teams` | 試合×チームにつき1行：スコア、勝点、フェアプレーポイント |
+| `appearances` | 誰がどの役割で出て、**何分出たか** |
+| `squad_members` | 学年、背番号、ポジション — 学年分析の元データ |
+| `shots` | 選手×試合、前後半と延長に分割 |
+| `events` | 得点とカード、時刻と反則コードつき |
+| `substitutions` | 誰が下がり、誰が入り、いつか |
+| `standings` | 連盟が計算した順位表 |
+| `players` | 氏名 — 唯一の自由記述の個人データで、削除可能 |
 
-A full backfill as of August 2026:
+2026年8月時点の全期間バックフィル：
 
-| Season | Series | Fixtures | Appearances | Shot rows | Substitutions |
+| 年度 | シリーズ | 試合 | 出場記録 | シュート記録 | 交代 |
 |---|---|---|---|---|---|
 | 2026 | 4 | 350 | 6,633 | 8,564 | 1,720 |
 | 2025 | 6 | 370 | 10,979 | 14,062 | 2,892 |
@@ -201,93 +191,80 @@ A full backfill as of August 2026:
 | 2022 | 5 | 410 | 11,396 | 13,611 | 2,915 |
 | 2021 | 8 | 347 | 31 | 36 | 9 |
 
-2,312 fixtures, 53,093 appearances, 3.56 million player-minutes, 7,748 goals,
-6,499 players across 53 clubs. Player-level recording begins in 2022; 2021
-predates the schema change and has results only.
+2,312試合、53,093件の出場記録、延べ356万分、7,748得点、53クラブ6,499選手。
+選手単位の記録は2022年から。2021年はスキーマ変更前で結果のみです。
 
-## How it works
+## どう動いているか
 
-**The source is an API, not HTML.** The federation's site is a Vue single-page
-application rendered from a Cockpit CMS instance, so there is no page scraping —
-the data arrives as JSON. The read token is one the site ships to every browser;
-this client reads it out of the site's own `common.js` at runtime rather than
-hardcoding it, so a rotated token is picked up automatically and no credential
-lives in this repository. Requests are throttled and every response is cached, so
-re-running costs nothing.
+**出典はHTMLではなくAPIです。** 連盟のサイトは Cockpit CMS から描画される Vue の
+シングルページアプリケーションなので、ページのスクレイピングは発生せず、データはJSONで
+届きます。読み取りトークンはサイトがすべてのブラウザに配っているもので、このクライアントは
+ハードコードせず**実行時にサイトの `common.js` から読み出します。** ローテーションに自動で
+追従し、リポジトリに資格情報が残りません。リクエストは絞ってあり、レスポンスはすべて
+キャッシュするので、再実行のコストはゼロです。
 
-**Minutes are reconstructed, not recorded.** The federation stores a starting
-eleven, a bench and timed substitutions, and never a minutes-played figure. The
-whole point of the exercise — any per-90 metric — depends on deriving it, and the
-edge cases are where the interesting bugs live:
+**出場時間は記録ではなく復元値です。** 連盟が保存しているのは先発11人・ベンチ・時刻つきの
+交代であって、出場時間そのものではありません。この取り組みの中心である90分あたりの指標は
+すべてその復元に乗っており、面白いバグは端の条件に住んでいます。
 
-- Substitution times are free text entered by match officials: a plain number, the
-  half-time marker `HT`, stoppage time as `90+2`, and at least once a superscript
-  `90⁺5`. All four appear in the real data and all four parse.
-- A player sent off leaves the pitch at the minute of the red card. The
-  substitution list does not record it, so without handling cards separately a
-  dismissed player is credited with the full match.
-- An unparseable time is skipped rather than guessed, and the affected player
-  keeps a defensible default instead of a fabricated one.
+- 交代時刻は審判が自由入力したテキストです。素の数値、ハーフタイムの `HT`、アディショナル
+  タイムの `90+2`、そして少なくとも1件は全角上付きの `90⁺5`。4種類とも実データに存在し、
+  4種類とも解釈できます。
+- 退場した選手はレッドカードの時刻でピッチを離れます。交代のリストには載らないので、
+  カードを別に処理しないと退場者にフル出場が付きます。
+- 解釈できない時刻は推測せずスキップし、その選手には捏造した値ではなく妥当な既定値を残します。
 
-**What the undocumented columns mean.** Shot counts are stored under four keys
-named `first` to `fourth`. Checking every season shows `third` is non-zero only in
-knockout ties that went to extra time and `fourth` is never used at all, so they
-are the two halves followed by the two extra-time halves. The schema names them
-that way.
+**ドキュメントのない列の意味。** シュート数は `first` から `fourth` の4つのキーに入って
+います。全シーズンを調べると `third` が非ゼロなのは延長に入ったノックアウト戦だけで、
+`fourth` は一度も使われていません。つまり前半・後半・延長前半・延長後半です。スキーマでは
+そう命名しています。
 
-## Privacy
+## 個人情報
 
-The squad lists carry names, kana, dates of birth, heights, weights and former
-schools of amateur students. The federation publishing them is not the same as a
-third party redistributing them, so the tool is built to make the safe thing the
-easy thing:
+名簿にはアマチュアの学生の氏名・かな・生年・身長・体重・出身校が入っています。連盟が
+公開していることと、第三者がそれを再配布することは別です。そのため、安全な側が楽な側に
+なるように作ってあります。
 
-- `--privacy aggregate` emits no per-player rows at all.
-- `--privacy pseudonym` uses salted, non-reversible labels and states the residual
-  risk on the report itself.
-- `--privacy initials` exists and is **refused** for anything marked `--public`.
-- `--public` refuses to write an unsafe file rather than warning about it.
-- `ingest --drop-personal-data` deletes every name and squad detail, keeping only
-  opaque ids. All the metrics still work; the tests assert it.
+- `--privacy aggregate` は選手単位の行を一切出しません。
+- `--privacy pseudonym` はソルト付きの非可逆ラベルを使い、残余リスクをレポート自身に明記します。
+- `--privacy initials` は存在しますが、`--public` を付けたものには**拒否されます。**
+- `--public` は安全でないファイルについて警告するのではなく、書き込みを拒否します。
+- `ingest --drop-personal-data` は氏名と名簿の詳細をすべて削除し、不透明なIDだけを残します。
+  それでも全指標が動くことをテストで担保しています。
 
-Initials are not anonymisation, and `privacy-check` measures rather than assumes
-it. On the 2026 first division, of 189 players above 270 minutes, **105 (56%) are
-unique on team, position and appearances alone** — three ordinary analytical
-columns, against squad lists the federation already publishes. Removing the name
-does not help. [docs/DATA_POLICY.md](docs/DATA_POLICY.md) has the full table and
-the reasoning.
+イニシャル化は匿名化ではありません。`privacy-check` はそれを仮定せず実測します。
+2026年1部で270分以上出場した189人のうち、**105人（56%）がチーム・ポジション・出場数だけで
+一意に定まります。** 分析に必要なだけの3列と、連盟自身が公開している名簿の突き合わせで、です。
+名前を消しても解決しません。表と根拠は [docs/DATA_POLICY.ja.md](docs/DATA_POLICY.ja.md) に
+あります。
 
-## Tests
+## テスト
 
 ```bash
 python3 -m unittest discover -s tests -t . -v
 ```
 
-215 tests, no network access, no fixtures taken from the federation — the test
-data is invented clubs and invented people. CI runs them on Linux, macOS and
-Windows against Python 3.9 and 3.13, and fails the build if any collected data is
-ever committed.
+239件。ネットワークアクセスなし、連盟から取得したフィクスチャも使っていません（テストデータは
+架空のクラブと架空の人物です）。CIは Linux・macOS・Windows × Python 3.9・3.13 で実行し、
+収集データがコミットされた場合はビルドを落とします。
 
-Every command runs end to end in the suite, and the API client is exercised
-against a stubbed transport, so the retry rule, the request throttle and the
-token discovery are checked rather than assumed. Coverage is measured with the
-standard library's `trace`; 5.7% of statements are unreached, most of them the
-Windows and Linux branches of `paths.py`, which only run on the other two CI
-platforms.
+全コマンドがスイートの中で端から端まで動きます。APIクライアントはスタブ化した通信層に対して
+実行するので、リトライ規則・リクエストの間引き・トークン発見が仮定ではなく検証されています。
+カバレッジは標準ライブラリの `trace` で測っており、未到達は5.7%、その大半は `paths.py` の
+Windows分岐とLinux分岐です（他の2つのCIプラットフォームでのみ通ります）。
 
-## Licence
+## ライセンス
 
-MIT — see [LICENSE](LICENSE). It covers this code. It says nothing about the
-federation's data, which the tool does not redistribute.
+MIT（[LICENSE](LICENSE)）。対象はこのコードです。連盟のデータについては何も述べておらず、
+このツールはそれを再配布しません。
 
-## Not affiliated
+## 非公式
 
-An independent hobby project, not endorsed by or connected to the Tokyo University
-Football Association. It reads only what their site already publishes.
+個人の趣味プロジェクトであり、東京都大学サッカー連盟と関係はなく、承認も受けていません。
+サイトがすでに公開しているものだけを読んでいます。
 
-Every figure is computed from the federation's public records. Nothing
-unpublished is used, every club goes through the same code, and no club is
-favoured or singled out.
+数値はすべて連盟の公開記録から計算しています。非公開の資料は一切使っておらず、どのクラブも
+同じコードを通しており、特定のクラブを有利にも不利にも扱っていません。
 
-If the federation, or any club whose results appear here, would prefer this not to
-exist, open an issue and it comes down.
+連盟、または結果が掲載されているクラブが、これを公開してほしくないとお考えの場合は、
+issueを立てていただければ取り下げます。

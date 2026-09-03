@@ -177,6 +177,82 @@ class Seasons(Base):
         self.assertEqual(analysis.grade_trend(self.conn), [])
 
 
+class SeasonLadder(unittest.TestCase):
+    """The Challenge League's level depends on which divisions ran that year."""
+
+    def setUp(self):
+        self.conn = db.connect(":memory:")
+        self.addCleanup(self.conn.close)
+
+    def _season(self, year, divisions, club_in=None, points=10):
+        """A season of empty divisions, optionally with one club standing in one."""
+        for index, division in enumerate(divisions):
+            sid = f"{year}-{index}"
+            self.conn.executescript(
+                f"""
+                INSERT INTO series (id, year, name, short_name, type)
+                  VALUES ('{sid}', '{year}', 'League {year} {division}',
+                          '{division}', 'league');
+                INSERT INTO games (id, series_id, section, kickoff, game_over, length)
+                  VALUES ('{sid}-g', '{sid}', '1', '{year}-04-01', 1, 90);
+                """
+            )
+            if division == club_in:
+                self.conn.executescript(
+                    f"""
+                    INSERT INTO teams (id, series_id, team_id, name, short_name)
+                      VALUES ('{sid}-t', '{sid}', '100', 'Alpha University FC', 'Alpha');
+                    INSERT INTO standings (team_pk, series_id, played, win, draw, lose,
+                                           points, goals_for, goal_difference, fairplay_points)
+                      VALUES ('{sid}-t', '{sid}', 10, 3, 1, 6, {points}, 9, -5, 0);
+                    """
+                )
+        self.conn.commit()
+
+    def test_challenge_sits_below_the_deepest_numbered_division(self):
+        # 2022-2024: first, second, Challenge. Challenge is the third level.
+        self._season("2022", ["1部リーグ", "2部リーグ", "チャレンジリーグ"])
+        # 2025: a third division was inserted above it, so it becomes the fourth.
+        self._season("2025", ["1部リーグ", "2部リーグ", "3部リーグ", "チャレンジリーグ"])
+        ladder = analysis.season_ladder(self.conn)
+        self.assertEqual(ladder["2022"]["チャレンジリーグ"], 3)
+        self.assertEqual(ladder["2025"]["チャレンジリーグ"], 4)
+
+    def test_numbered_divisions_keep_their_number(self):
+        self._season("2021", ["1部リーグ", "2部リーグ", "3部リーグ", "4部リーグ"])
+        self._season("2026", ["1部リーグ", "2部リーグ", "3部リーグ"])
+        ladder = analysis.season_ladder(self.conn)
+        self.assertEqual(ladder["2021"], {"1部リーグ": 1, "2部リーグ": 2, "3部リーグ": 3, "4部リーグ": 4})
+        self.assertEqual(ladder["2026"], {"1部リーグ": 1, "2部リーグ": 2, "3部リーグ": 3})
+
+    def test_a_club_the_ladder_moved_under_is_flagged(self):
+        # The 2025 reorganisation pushed the Challenge League a level down. Its
+        # clubs lost a level without changing division or playing a match, and
+        # the headline promotion and relegation averages leave them out.
+        self._season("2024", ["1部リーグ", "2部リーグ", "チャレンジリーグ"],
+                     club_in="チャレンジリーグ", points=10)
+        self._season("2025", ["1部リーグ", "2部リーグ", "3部リーグ", "チャレンジリーグ"],
+                     club_in="チャレンジリーグ", points=20)
+        moves = analysis.division_moves(self.conn)
+        self.assertEqual(len(moves), 1)
+        self.assertEqual(moves[0]["direction"], "relegated")
+        self.assertFalse(moves[0]["moved"])
+
+    def test_a_club_that_changes_division_is_flagged_as_moved(self):
+        self._season("2024", ["1部リーグ", "2部リーグ", "チャレンジリーグ"],
+                     club_in="2部リーグ", points=20)
+        self._season("2025", ["1部リーグ", "2部リーグ", "3部リーグ", "チャレンジリーグ"],
+                     club_in="1部リーグ", points=10)
+        moves = analysis.division_moves(self.conn)
+        self.assertEqual(len(moves), 1)
+        self.assertEqual(moves[0]["direction"], "promoted")
+        self.assertTrue(moves[0]["moved"])
+
+    def test_a_division_outside_the_ladder_has_no_level(self):
+        self._season("2022", ["1部リーグ", "特別リーグ"])
+        self.assertNotIn("特別リーグ", analysis.season_ladder(self.conn)["2022"])
+
+
 class Trajectories(Base):
     def _add_second_season(self, division, points, played=10):
         """A follow-up season for Alpha, one tier up."""
