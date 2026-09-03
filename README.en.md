@@ -1,6 +1,6 @@
 # togakuren-analytics
 
-*[日本語版が本編です / the Japanese README is the primary one](README.md)*
+*[日本語](README.ja.md)*
 
 [![tests](https://github.com/sean-from-japan/togakuren-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/sean-from-japan/togakuren-analytics/actions/workflows/ci.yml)
 ![python](https://img.shields.io/badge/python-3.9%20%E2%80%93%203.13-blue)
@@ -15,7 +15,7 @@ repository.**
 
 Those six seasons are not six seasons of one competition. The league merged with
 Kanagawa's in 2023 and was rebuilt three times, which is documented in
-[docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md) because getting it wrong
+[docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md) because getting it wrong
 retracted one of the findings below.
 
 The federation's site shows fixtures, a table and a top-scorers list. The records
@@ -26,12 +26,12 @@ cards, and none of it is aggregated anywhere.
 
 | | result | where |
 |---|---|---|
-| **Forecasting** | Settings frozen on 2022–24; on 2025–26 (n=525) log loss goes **1.0200 → 0.8192**, past Elo at 0.8753. Accuracy 44.6% → 65.7%. The time decay is the whole story — removing it costs 0.095 nats, more than the model's entire margin over Elo. | [PREDICTION.md](docs/PREDICTION.md) · [ja](docs/PREDICTION.ja.md) |
-| **Player ratings** | Adjusted plus-minus over 8,087 lineup segments. Knowing the players beats knowing only the clubs by **+3.73%** (cross-validated) and **+4.06%** (forward split), with the ridge penalties chosen *inside* each training fold. | [RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) |
-| **What the data cannot do** | Goal records carry a scorer and a minute and nothing else, so **penalties cannot be separated from open play** — no non-penalty rate is possible from this source. Goal events reconcile with the recorded score in **79%** of fixtures. | [FINDINGS.md](FINDINGS.md) |
-| **Comparing leagues** | Predictability is mostly a function of how far apart the clubs are: `gain = −0.092 + 1.257 × spread`, R² = **0.735** over 22 professional divisions. Noll-Scully, the standard balance measure, misreads a short season and says this league is ordinary when it is not. | [LEAGUE_COMPARISON.md](docs/LEAGUE_COMPARISON.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) |
-| **What the league did to the numbers** | The competition was rebuilt three times in six seasons, and one division's level is not in its name. Reading it off a fixed map got **21% of division changes pointing the wrong way** and manufactured an asymmetry between promotion and relegation that does not exist. | [LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md) · [ja](docs/LEAGUE_STRUCTURE.ja.md) |
-| **What may be published** | Names removed is not anonymous: club, position and appearances alone identify **56%** of a division uniquely, and 77% once goals are added. Measured, not assumed — `privacy-check` reproduces it. | [DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) |
+| **Forecasting** | Settings frozen on 2022–24; on 2025–26 (n=525) log loss goes **1.0200 → 0.8192**, past Elo at 0.8753. Accuracy 44.6% → 65.7%. The time decay is the whole story — removing it costs 0.095 nats, more than the model's entire margin over Elo. | [PREDICTION.en.md](docs/PREDICTION.en.md) · [ja](docs/PREDICTION.ja.md) |
+| **Player ratings** | Adjusted plus-minus over 8,087 lineup segments. Knowing the players beats knowing only the clubs by **+3.73%** (cross-validated) and **+4.06%** (forward split), with the ridge penalties chosen *inside* each training fold. | [RATINGS.en.md](docs/RATINGS.en.md) · [ja](docs/RATINGS.ja.md) |
+| **What the data cannot do** | Goal records carry a scorer and a minute and nothing else, so **penalties cannot be separated from open play** — no non-penalty rate is possible from this source. Goal events reconcile with the recorded score in **79%** of fixtures. | [FINDINGS.en.md](FINDINGS.en.md) |
+| **Comparing leagues** | Predictability is mostly a function of how far apart the clubs are: `gain = −0.092 + 1.257 × spread`, R² = **0.735** over 22 professional divisions. Noll-Scully, the standard balance measure, misreads a short season and says this league is ordinary when it is not. | [LEAGUE_COMPARISON.en.md](docs/LEAGUE_COMPARISON.en.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) |
+| **What the league did to the numbers** | The competition was rebuilt three times in six seasons, and one division's level is not in its name. Reading it off a fixed map got **21% of division changes pointing the wrong way** and manufactured an asymmetry between promotion and relegation that does not exist. | [LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md) · [ja](docs/LEAGUE_STRUCTURE.ja.md) |
+| **What may be published** | Names removed is not anonymous: club, position and appearances alone identify **56%** of a division uniquely, and 77% once goals are added. Measured, not assumed — `privacy-check` reproduces it. | [DATA_POLICY.en.md](docs/DATA_POLICY.en.md) · [ja](docs/DATA_POLICY.ja.md) |
 
 Two things were worked out here that the source documents nowhere: the four shot
 columns are halves and extra time rather than quarters (the fourth is never used
@@ -41,10 +41,10 @@ from the eleven, the bench and free-text substitution times, which include `HT`,
 
 **No collected data is committed here.** The repository is code, and the people
 in this dataset are amateur students — see
-[docs/DATA_POLICY.md](docs/DATA_POLICY.md). CI fails if collected data appears in
+[docs/DATA_POLICY.en.md](docs/DATA_POLICY.en.md). CI fails if collected data appears in
 a commit.
 
-📊 **[Findings](FINDINGS.md)** ([日本語](FINDINGS.ja.md)) — five results with the
+📊 **[Findings](FINDINGS.en.md)** ([日本語](FINDINGS.ja.md)) — five results with the
 charts, including two that came out against expectation and one that was
 withdrawn.
 
@@ -57,27 +57,30 @@ local version adds the squad table and a matchday-by-player minutes grid.*
 
 | | |
 |---|---|
-| [FINDINGS.md](FINDINGS.md) · [ja](FINDINGS.ja.md) | Five results with the charts. Start here. |
-| [docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md) · [ja](docs/LEAGUE_STRUCTURE.ja.md) | The three reorganisations inside this dataset, what each did to the club pool, and the result they retracted. |
-| [docs/SEASON_TRENDS.md](docs/SEASON_TRENDS.md) · [ja](docs/SEASON_TRENDS.ja.md) | Every season in one place: league level, year groups, every division change, every club's path. Generated. |
+| [FINDINGS.en.md](FINDINGS.en.md) · [ja](FINDINGS.ja.md) | Five results with the charts. Start here. |
+| [docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md) · [ja](docs/LEAGUE_STRUCTURE.ja.md) | The three reorganisations inside this dataset, what each did to the club pool, and the result they retracted. |
+| [docs/SEASON_TRENDS.en.md](docs/SEASON_TRENDS.en.md) · [ja](docs/SEASON_TRENDS.ja.md) | Every season in one place: league level, year groups, every division change, every club's path. Generated. |
 | [docs/seasons/](docs/seasons/) | One document per league season and division, 2021–2026: table, indices, year groups, history. 40 documents, generated. |
-| [docs/PLAYER_ANALYSIS_SAMPLE.md](docs/PLAYER_ANALYSIS_SAMPLE.md) · [ja](docs/PLAYER_ANALYSIS_SAMPLE.ja.md) | What the player-level output looks like, over an **invented** season. Generated. |
-| [docs/PREDICTION.md](docs/PREDICTION.md) · [ja](docs/PREDICTION.ja.md) | Forecasting the fixtures still to play, scored against the class prior on seasons the settings were not chosen on. |
-| [docs/RATINGS.md](docs/RATINGS.md) · [ja](docs/RATINGS.ja.md) | Adjusted plus-minus: what knowing the players adds over knowing the clubs, and the two mistakes that reverse the answer. |
-| [docs/SOURCE_SELECTION.md](docs/SOURCE_SELECTION.md) · [ja](docs/SOURCE_SELECTION.ja.md) | Why this league and not the tier above: what each federation publishes, and what its site says about being read by a program. |
-| [docs/DATA_POLICY.md](docs/DATA_POLICY.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
-| [docs/LEAGUE_COMPARISON.md](docs/LEAGUE_COMPARISON.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) | This federation's divisions measured against 22 professional leagues, and the two headline results that widening the sample destroyed. |
-| [docs/FIGURES.md](docs/FIGURES.md) · [ja](docs/FIGURES.ja.md) | Which chart each committed PNG is a picture of, and how to remake one. |
+| [docs/PLAYER_ANALYSIS_SAMPLE.en.md](docs/PLAYER_ANALYSIS_SAMPLE.en.md) · [ja](docs/PLAYER_ANALYSIS_SAMPLE.ja.md) | What the player-level output looks like, over an **invented** season. Generated. |
+| [docs/PREDICTION.en.md](docs/PREDICTION.en.md) · [ja](docs/PREDICTION.ja.md) | Forecasting the fixtures still to play, scored against the class prior on seasons the settings were not chosen on. |
+| [docs/RATINGS.en.md](docs/RATINGS.en.md) · [ja](docs/RATINGS.ja.md) | Adjusted plus-minus: what knowing the players adds over knowing the clubs, and the two mistakes that reverse the answer. |
+| [docs/SOURCE_SELECTION.en.md](docs/SOURCE_SELECTION.en.md) · [ja](docs/SOURCE_SELECTION.ja.md) | Why this league and not the tier above: what each federation publishes, and what its site says about being read by a program. |
+| [docs/DATA_POLICY.en.md](docs/DATA_POLICY.en.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
+| [docs/LEAGUE_COMPARISON.en.md](docs/LEAGUE_COMPARISON.en.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) | This federation's divisions measured against 22 professional leagues, and the two headline results that widening the sample destroyed. |
+| [docs/FIGURES.en.md](docs/FIGURES.en.md) · [ja](docs/FIGURES.ja.md) | Which chart each committed PNG is a picture of, and how to remake one. |
 | [CHANGELOG.md](CHANGELOG.md) | What changed and, where a published figure moved, why it moved. |
 
-The two generated documents come out of the tool in both languages
-(`--lang en|ja`), so only prose is ever translated by hand and the numbers
-cannot drift between versions. Regenerate them with:
+The generated documents come out of the tool in both languages
+(`--lang en|ja`). English and Japanese copy are maintained independently while
+the data and table structure share one generator, so the numbers cannot drift
+between versions. Regenerate them with:
 
 ```bash
-togakuren trends --format md             # docs/SEASON_TRENDS.md; --lang ja for the other
+togakuren trends --format md --lang en   # docs/SEASON_TRENDS.en.md
+togakuren trends --format md --lang ja   # docs/SEASON_TRENDS.ja.md
 togakuren profiles --all                 # docs/seasons/, both languages
-togakuren sample --out docs/PLAYER_ANALYSIS_SAMPLE.md
+togakuren sample --lang en               # docs/PLAYER_ANALYSIS_SAMPLE.en.md
+togakuren sample --lang ja               # docs/PLAYER_ANALYSIS_SAMPLE.ja.md
 ```
 
 Seasons before 2026 are over, so their documents never change: the same code
@@ -264,7 +267,7 @@ Initials are not anonymisation, and `privacy-check` measures rather than assumes
 it. On the 2026 first division, of 189 players above 270 minutes, **105 (56%) are
 unique on team, position and appearances alone** — three ordinary analytical
 columns, against squad lists the federation already publishes. Removing the name
-does not help. [docs/DATA_POLICY.md](docs/DATA_POLICY.md) has the full table and
+does not help. [docs/DATA_POLICY.en.md](docs/DATA_POLICY.en.md) has the full table and
 the reasoning.
 
 ## Tests

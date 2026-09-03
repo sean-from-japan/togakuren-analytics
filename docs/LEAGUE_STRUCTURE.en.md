@@ -1,5 +1,7 @@
 # The competition changed three times inside this dataset
 
+*[日本語](LEAGUE_STRUCTURE.ja.md)*
+
 Everything else here compares seasons with each other. That only means something
 if the seasons are seasons of the same competition, and between 2021 and 2026
 they are not. The league was rebuilt three times, and once it stopped being the
@@ -122,14 +124,14 @@ same applies to any level-wide average read across that boundary.
 
 ## Where this still needs work
 
-- `docs/SEASON_TRENDS.md`, `docs/PREDICTION.md` and `docs/LEAGUE_COMPARISON.md`
+- `docs/SEASON_TRENDS.en.md`, `docs/PREDICTION.en.md` and `docs/LEAGUE_COMPARISON.en.md`
   all pool seasons. The forecasting model's 180-day half-life discounts the
   2022 season heavily by the time it is predicting 2023 onwards, which limits
   the damage but does not measure it; nobody has checked what the merge does to
   the backtest.
 - The 2024 second division of nineteen clubs is now explained — it was the
   staging year before the third division was created — but the conversion-rate
-  anomaly in the second division from 2025 onwards, noted in `FINDINGS.md`, is
+  anomaly in the second division from 2025 onwards, noted in `FINDINGS.en.md`, is
   still unexplained.
 - The 2021 third and fourth divisions are incomplete in the source: 44 fixtures
   for ten clubs and 23 for eight, and the fourth division records no draws at

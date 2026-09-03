@@ -104,7 +104,7 @@ function divisionLines(host, key, title, digits) {
 function gradeChart(host, tier) {
   const rows = DATA.grades[tier] || [];
   const W = 560, H = 280, L = 40, R = 40, T = 28, B = 42;
-  const node = svg(W, H, "学年別の出場時間シェアと得点率");
+  const node = svg(W, H, "学年別の出場時間割合と得点率");
   if (!rows.length) { host.replaceChildren(node); return; }
   const years = [...new Set(rows.map(r => r.year))].sort();
   const slot = (W - L - R) / years.length;
@@ -148,7 +148,7 @@ function gradeChart(host, tier) {
 /* Tier on an inverted axis so promotion reads as the line going up. */
 function trajectory(host, club) {
   const W = 560, H = 210, L = 62, R = 30, T = 26, B = 34;
-  const node = svg(W, H, `${club.name} のシーズン推移`);
+  const node = svg(W, H, `${club.name}の所属部推移`);
   const years = DATA.years;
   const maxTier = 5;
   const x = year => L + (W - L - R) * years.indexOf(year) / Math.max(1, years.length - 1);
@@ -184,7 +184,7 @@ function trajectory(host, club) {
    what the division change cost or gave. */
 function moves(host) {
   const W = 500, H = 330, P = 44;
-  const node = svg(W, H, "部の移動前後の1試合平均勝点");
+  const node = svg(W, H, "昇降格前後の1試合平均勝点");
   const span = W - P * 2;
   const x = v => P + span * v / 3;
   const y = v => H - P - (H - P * 2) * v / 3;
@@ -211,7 +211,7 @@ function moves(host) {
   node.appendChild(el("text", { x: W / 2, y: H - 6, "font-size": 11, "text-anchor": "middle",
     fill: "currentColor", "fill-opacity": .6 }, "昇降格前シーズンの1試合平均勝点 →"));
   node.appendChild(el("text", { x: 0, y: 12, "font-size": 11, fill: "currentColor",
-    "fill-opacity": .6 }, "昇降格後 ↑   橙=昇格 / 青=降格"));
+    "fill-opacity": .6 }, "縦軸: 昇降格後   橙=昇格 / 青=降格"));
   host.replaceChildren(node);
 }
 
@@ -336,7 +336,7 @@ def build(conn, focus_team_id=None):
 <title>シーズン横断 — togakuren-analytics</title>
 <style>{CSS}</style>
 </head><body><main>
-<h1>シーズン横断ビュー</h1>
+<h1>シーズン横断分析</h1>
 <p class="sub">{_e(years[0])}–{_e(years[-1])} · {len(seasons)}シーズン · {len(clubs)}クラブ ·
 生成 {_e(generated)} · togakuren-analytics</p>
 <div class="banner">このページは集計値のみで構成されており、選手個人の行を一切含まない。</div>
@@ -344,7 +344,7 @@ def build(conn, focus_team_id=None):
 <h2>シーズン一覧</h2>
 <div class="scroll"><table>
 <thead><tr><th class="l">年度</th><th class="l">部</th><th>チーム</th><th>試合</th><th>消化</th>
-<th>得点/試合</th><th>S/試合</th><th>決定率</th><th>警告/試合</th><th>退場</th></tr></thead>
+<th>得点/試合</th><th>シュート/試合</th><th>決定率</th><th>警告/試合</th><th>退場</th></tr></thead>
 <tbody>{season_rows}</tbody></table></div>
 <p class="note">選手単位の記録は2022年から。2021年は結果のみのため、シュート数と決定率は算出していない。</p>
 
@@ -362,7 +362,7 @@ def build(conn, focus_team_id=None):
 <p class="note">棒が出場時間の割合（積み上げで100%）、点線が90分あたり得点。
 学年構成は毎年入れ替わるため、1シーズンだけの上下は世代差であって傾向ではない。</p>
 
-<h2>クラブの軌跡</h2>
+<h2>クラブの所属部推移</h2>
 <p class="sub"><select id="club">{options}</select></p>
 <div id="trajectory"></div>
 <div class="scroll"><table>

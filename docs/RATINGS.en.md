@@ -1,5 +1,7 @@
 # Adjusted plus-minus ratings
 
+*[日本語](RATINGS.ja.md)*
+
 How much does knowing *who* is on the pitch tell you, beyond knowing which two
 clubs are playing? For this league the answer is: a little, and it is measurable.
 
@@ -105,7 +107,7 @@ evidence.
 
 Home advantage falls out of the same fit at **+0.26 goals per 90**. It is
 estimated from the venue, since the API records a venue and never a host — see
-[PREDICTION.md](PREDICTION.md) for how that inference works and how often it
+[PREDICTION.en.md](PREDICTION.en.md) for how that inference works and how often it
 succeeds.
 
 ## Two things that will reverse the result if you get them wrong
@@ -130,7 +132,7 @@ The ratings themselves. They are per player, and the people in this dataset are
 amateur students, so `ratings` prints them and never writes them to a file, the
 same rule every other player-level output follows. The validation tables above are
 aggregates and carry no individual, which is why they are the part that is
-published. See [DATA_POLICY.md](DATA_POLICY.md).
+published. See [DATA_POLICY.en.md](DATA_POLICY.en.md).
 
 Two limits are worth repeating from the README. Penalties cannot be separated
 from open play in this source, so a designated taker's goals sit in these numbers

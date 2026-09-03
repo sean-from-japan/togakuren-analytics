@@ -1,4 +1,4 @@
-# Collected data never enters the repository. See docs/DATA_POLICY.md.
+# Collected data never enters the repository. See docs/DATA_POLICY.en.md.
 data/
 reports/
 *.sqlite3

@@ -2,6 +2,20 @@
 
 Dates are the day the work landed on `main`.
 
+## Unreleased
+
+### Changed
+
+- Every bilingual Markdown document now names its language explicitly with
+  `.en.md` or `.ja.md`. The root `README.md` is a short language-neutral index
+  linking to `README.en.md` and `README.ja.md`.
+- Generated Markdown uses one central filename function, so English and
+  Japanese defaults cannot overwrite each other or leave one language
+  unlabeled. The regression tests enforce the pairing rule.
+- The Japanese documentation and dashboard copy were edited as Japanese prose,
+  including football terminology and mixed-language UI labels. A small
+  regression check blocks the literal translations corrected in this pass.
+
 ## 0.3.0 — 2026-09-02
 
 ### Fixed
@@ -14,7 +28,7 @@ Dates are the day the work landed on `main`.
   which reversed the direction of **15 of 72 division changes (21%)** — seven
   promotions filed as relegations, six lateral moves filed as relegations, and
   two lateral moves filed as promotions. `analysis.season_ladder` replaces
-  `analysis.TIERS`. See [docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md).
+  `analysis.TIERS`. See [docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md).
 - `division_moves` now carries `moved`, false for the five Challenge League
   clubs that lost a level in the 2025 reorganisation without changing division
   or playing a match. A reorganisation is not a relegation, and `trends` and
@@ -23,8 +37,8 @@ Dates are the day the work landed on `main`.
   what its callers were labelling their tables with all along. Filtering on a
   level put the 2022–24 Challenge League and the 2025–26 third division into one
   table and dropped the Challenge League heading entirely.
-- `trends --format md --lang ja` wrote to `docs/SEASON_TRENDS.md`, silently
-  overwriting the English document. It now appends the language suffix, as
+- `trends --format md --lang ja` silently overwrote the English document.
+  It now appends the Japanese language suffix, as
   `profiles` already did.
 
 ### Changed
@@ -38,9 +52,9 @@ Dates are the day the work landed on `main`.
 - `docs/figures/fig-promotion.png` re-shot: the correction recolours fifteen
   points and removes five, so the old picture contradicted the corrected text.
   915 × 640, replacing 992 × 539.
-- **The README is now Japanese**, with the English text moved to
-  `README.en.md`. Nearly all of this league's readers read Japanese, and every
-  other document in the repository already shipped in both languages.
+- **The README became Japanese-first**, with the English text moved to
+  `README.en.md`. This was later replaced by the language-neutral index noted
+  under Unreleased, while the full Japanese and English documents remain.
 - FINDINGS drops the section on one club crossing three tiers in five years.
   The rise is a recruitment decision by the club, not something measured here,
   so it does not belong among the results.
@@ -57,7 +71,7 @@ Dates are the day the work landed on `main`.
 
 ### Added
 
-- `docs/LEAGUE_STRUCTURE.md` and `.ja.md`: what ran in each season, what each
+- `docs/LEAGUE_STRUCTURE.en.md` and `.ja.md`: what ran in each season, what each
   reorganisation did to the club pool, how large the 2023 discontinuity is
   (a first-division club that stood still gained 0.83 points a game across it,
   five times the movement at any other boundary), and what the correction did
@@ -71,10 +85,10 @@ Dates are the day the work landed on `main`.
   correction, fitted by closed-form coordinate ascent. Settings were fixed on
   2022–2024 and not touched again; on 2025–2026 league fixtures (n = 525) the
   log loss runs 1.0200 (class prior) → 0.8753 (Elo) → 0.8192, and accuracy 44.6%
-  → 65.7%. See [docs/PREDICTION.md](docs/PREDICTION.md).
+  → 65.7%. See [docs/PREDICTION.en.md](docs/PREDICTION.en.md).
 - `ratings`: adjusted plus-minus over segments cut at kick-off, every
   substitution and every dismissal, solved by conjugate gradient. See
-  [docs/RATINGS.md](docs/RATINGS.md).
+  [docs/RATINGS.en.md](docs/RATINGS.en.md).
 - `ratings --tune`: chooses the two ridge penalties by cross-validation *inside*
   each training fold.
 - `ratings --forward`: the forward split — fit the first 60% of each season,
@@ -85,9 +99,9 @@ Dates are the day the work landed on `main`.
   gets wrong for a short season, match shape, and predictability against a
   reference set. `docs/reference-leagues.json` ships 22 European professional
   divisions as derived statistics so `--reference` works out of the box. See
-  [docs/LEAGUE_COMPARISON.md](docs/LEAGUE_COMPARISON.md), which also records the
+  [docs/LEAGUE_COMPARISON.en.md](docs/LEAGUE_COMPARISON.en.md), which also records the
   two headline results that widening the sample destroyed.
-- `docs/SOURCE_SELECTION.md`: why this league and not the tier above, in terms
+- `docs/SOURCE_SELECTION.en.md`: why this league and not the tier above, in terms
   of what each federation publishes and what its site says about being read by a
   program.
 - Document link checking in the test suite: anchors, relative links, and that
@@ -99,7 +113,7 @@ Dates are the day the work landed on `main`.
   command now runs end to end through `main`.
 - A fixture for a season with a match still to play, so `forecast` is covered by
   something other than its refusal to run.
-- `docs/FIGURES.md`: which chart each committed PNG is a picture of, how to remake
+- `docs/FIGURES.en.md`: which chart each committed PNG is a picture of, how to remake
   one, and why the step is not automated. The six figures were the only thing
   here that no command could reproduce and nothing said where they came from.
 
@@ -132,7 +146,7 @@ Dates are the day the work landed on `main`.
   were module constants chosen by cross-validation over every fixture the
   reported score was then computed on. Chosen inside each fold instead, the gain
   from knowing the players is **+3.73%** rather than +4.07%.
-- **The forward-split figure was replaced, not reconciled.** RATINGS.md quoted
+- **The forward-split figure was replaced, not reconciled.** RATINGS.en.md quoted
   +5.44% from a prototype that predates the package. It does not reproduce — the
   split divides 741/494 rather than 735/500 and the errors do not come back — so
   it now reports what the shipped code prints, +4.06%.

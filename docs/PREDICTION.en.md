@@ -1,5 +1,7 @@
 # Forecasting
 
+*[日本語](PREDICTION.ja.md)*
+
 Every other document here describes what happened. This one makes claims about
 what has not happened yet, so it is written to be checked rather than believed:
 each model is scored against the class prior, on fixtures it has not seen, and
@@ -14,7 +16,7 @@ togakuren forecast --series "2026 1部"          # the fixtures still to play
 
 One thing is not accounted for below. The league merged with Kanagawa's in 2023
 and the club pool changed with it, so the tuning window straddles a change of
-competition ([LEAGUE_STRUCTURE.md](LEAGUE_STRUCTURE.md)). The 180-day half-life
+competition ([LEAGUE_STRUCTURE.en.md](LEAGUE_STRUCTURE.en.md)). The 180-day half-life
 happens to discount 2022 heavily by the time the model is predicting 2023
 onwards, which limits the damage — but that is a coincidence of the setting, not
 a correction, and nobody has measured what the merger does to these numbers.
@@ -145,7 +147,7 @@ Held-out 2025–2026, against the prior for the same fixtures.
 The second division is the hardest division to forecast in the league, and by
 some distance — the model recovers less than half as much over the prior there as
 it does in the third. That is consistent with the conversion-rate anomaly in
-[FINDINGS.md](../FINDINGS.md), which is also a second-division story and also
+[FINDINGS.en.md](../FINDINGS.en.md), which is also a second-division story and also
 unexplained.
 
 ## A forecast on the record
@@ -189,7 +191,7 @@ Good enough to rank a table; not good enough to quote a goal difference from.
 - **No squad information.** Injuries, suspensions and selection are not in the
   model, though the data holds enough to try.
 - **No player-level forecast, and there will not be one.** Predicting individual
-  amateur students is profiling; [DATA_POLICY.md](DATA_POLICY.md) applies here as
+  amateur students is profiling; [DATA_POLICY.en.md](DATA_POLICY.en.md) applies here as
   it does everywhere else in this repository. Every number above is a team-level
   aggregate.
 - **Fixtures that are not scheduled yet** keep the season's provisional date until

@@ -1,6 +1,6 @@
 # Comparing leagues
 
-*[日本語版](LEAGUE_COMPARISON.ja.md)*
+*[日本語](LEAGUE_COMPARISON.ja.md)*
 
 Everything else here measures one federation. This measures it against others,
 because a number from a single league says nothing until something else has been
@@ -16,7 +16,7 @@ rebuilt three times between 2021 and 2026, and the clubs in "2部" in 2022 are
 not the population that name refers to in 2026. Every figure below is measured
 within one season of one division, which is the right unit; anything read as a
 trend down a column is reading across reorganisations.
-[LEAGUE_STRUCTURE.md](LEAGUE_STRUCTURE.md) has the accounting.
+[LEAGUE_STRUCTURE.en.md](LEAGUE_STRUCTURE.en.md) has the accounting.
 
 ## The two quantities
 
@@ -40,7 +40,7 @@ Grayson and Martin Eastwood have both applied it to the Premier League. Nothing
 in `compare.py` is a novel method. What is done here is applying it, and the
 measure below, to leagues that the published comparisons leave out.
 
-**Predictability.** How far the [forecasting model](PREDICTION.md) gets below the
+**Predictability.** How far the [forecasting model](PREDICTION.en.md) gets below the
 class prior, in nats, on the two seasons its half-life was *not* chosen on. Same
 estimator for every league, imported rather than re-implemented.
 
@@ -65,13 +65,13 @@ being measured badly.
 `docs/reference-leagues.json` holds 22 European professional divisions
 (2021/22–2025/26) as eight numbers each. **It is a set of derived statistics
 about leagues, not a copy of anybody's fixtures** — the same distinction
-[DATA_POLICY.md](DATA_POLICY.md) draws for players.
+[DATA_POLICY.en.md](DATA_POLICY.en.md) draws for players.
 
 It was built from [football-data.co.uk](https://www.football-data.co.uk/), whose
 `robots.txt` is `Disallow:` with an empty value, by running exactly the
 `compare.measure` in this package over each division. The fetching code is not
 in this repository: a second set of third-party scrapers does not belong in a
-project whose [source selection](SOURCE_SELECTION.md) is an argument about being
+project whose [source selection](SOURCE_SELECTION.en.md) is an argument about being
 careful with one. Any reference set of `{talent_spread, gain}` rows works with
 `--reference`.
 
@@ -118,7 +118,7 @@ standard rises — 関東 1部 at 21.0% and 3.03 goals is nearly professional in
 of football rather than of the players being students.
 
 **A negative result: league memory is not shorter for students.** The half-life
-justified in [PREDICTION.md](PREDICTION.md) by squads turning over every year is
+justified in [PREDICTION.en.md](PREDICTION.en.md) by squads turning over every year is
 250 days for the Tokyo divisions and 250 for the professional leagues, and across
 23 leagues the chosen half-life ranges 120–4000 days with no relation to talent
 spread (r = −0.208 on the log). Decay helps everywhere; there is no evidence it

@@ -1,8 +1,10 @@
 # Team profiles — 2022年度 第55回 東京都大学サッカーリーグ戦 チャレンジリーグ
 
-Every club in the division, from the federation's published match records. Aggregates only — no individual appears in this document; see [../DATA_POLICY.md](../DATA_POLICY.md).
+*[日本語](2022-challenge.ja.md)*
 
-2022 チャレンジリーグ. The season is over, so this document is final: the same code over the same records reproduces it exactly. Regenerate with `togakuren profiles --series "2022 チャレンジリーグ"`.
+Every club in the division, from the federation's published match records. Aggregates only — no individual appears in this document; see [../DATA_POLICY.en.md](../DATA_POLICY.en.md).
+
+2022 チャレンジリーグ. The season is over, so this document is final: the same code over the same records reproduces it exactly. Regenerate with `togakuren profiles --series "2022 チャレンジリーグ" --lang en`.
 
 1 of the 120 scheduled fixtures were never played and are not counted anywhere above.
 

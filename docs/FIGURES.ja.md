@@ -1,6 +1,6 @@
 # 図はどこから来たか
 
-*[English](FIGURES.md)*
+*[English](FIGURES.en.md)*
 
 `docs/figures/` の6枚のPNGは、このリポジトリで唯一「コマンド1本で再生成できないもの」です。どうやって作ったかは [FINDINGS.ja.md](../FINDINGS.ja.md) に1行で書いてありますが、ここでは**どの図がどのチャートなのか**を明記します。1枚だけ差し替えるときに迷わないためです。
 
@@ -12,9 +12,9 @@
 |---|---|---|---|
 | `fig-conversion.png` | `trends` | `#conv-line` | 部ごとの決定率のシーズン推移 |
 | `fig-grades.png` | `trends` | `#grades` | 学年別の出場時間シェアと得点率 |
-| `fig-promotion.png` | `trends` | `#moves` | 部の移動前後の1試合平均勝点 |
+| `fig-promotion.png` | `trends` | `#moves` | 昇降格前後の1試合平均勝点 |
 | `fig-trajectory.png` | `trends` | `#trajectory` | あるクラブのシーズン推移 |
-| `fig-bubbles.png` | `dashboard` | `#bubbles` | 順位とシュート量 |
+| `fig-bubbles.png` | `dashboard` | `#bubbles` | 順位とシュート数 |
 | `fig-fingerprints.png` | `dashboard` | `#radars` | 全クラブの6指標を横並びにしたもの |
 
 ## 作り直す手順

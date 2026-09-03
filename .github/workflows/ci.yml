@@ -37,7 +37,7 @@ jobs:
           set -euo pipefail
           offenders=$(git ls-files -- '*.sqlite3' '*.db' '*.csv' 'data/**' 'reports/**' || true)
           if [ -n "$offenders" ]; then
-            echo "collected data must not be committed; see docs/DATA_POLICY.md"
+            echo "collected data must not be committed; see docs/DATA_POLICY.en.md"
             echo "$offenders"
             exit 1
           fi

@@ -22,7 +22,7 @@ keeps this module on the standard library and takes a few seconds over five
 seasons. Forming the matrix itself would be thousands of columns squared.
 
 Ratings are per player. They stay on the machine that produced them, like every
-other player-level output here — see ``docs/DATA_POLICY.md``.
+other player-level output here — see ``docs/DATA_POLICY.en.md``.
 """
 import collections
 import random

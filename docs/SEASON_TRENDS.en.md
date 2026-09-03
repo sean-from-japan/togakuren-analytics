@@ -1,8 +1,10 @@
 # Across seasons — 2021–2026
 
+*[日本語](SEASON_TRENDS.ja.md)*
+
 Every completed season in one place. Seasons before 2026 are finished, so these tables are fixed: the same code over the same records reproduces them exactly. Aggregates only — no individual appears here.
 
-Snapshot of 2021–2026, generated 2026-09-02. Regenerate with `togakuren trends --format md`.
+Snapshot of 2021–2026, generated 2026-09-03. Regenerate with `togakuren trends --format md --lang en`.
 
 ## Seasons
 

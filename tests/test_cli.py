@@ -11,6 +11,7 @@ No network: ``_client`` is replaced with the fixture client.
 import contextlib
 import io
 import logging
+import os
 import pathlib
 import re
 import tempfile
@@ -78,6 +79,14 @@ class Listing(Command):
 
 
 class Analysis(Command):
+    def in_working_directory(self, *argv):
+        previous = os.getcwd()
+        os.chdir(self.root)
+        try:
+            return self.run_cli(*argv)
+        finally:
+            os.chdir(previous)
+
     def test_profiles_writes_a_markdown_document(self):
         target = self.root / "season.md"
         self.run_cli("profiles", "--series", "latest", "--out", str(target))
@@ -108,6 +117,15 @@ class Analysis(Command):
         target = self.root / "sample.md"
         self.run_cli("sample", "--out", str(target))
         self.assertTrue(target.read_text(encoding="utf-8").strip())
+
+    def test_default_markdown_names_always_include_the_language(self):
+        self.in_working_directory("trends", "--format", "md", "--lang", "ja")
+        self.assertTrue((self.root / "docs" / "SEASON_TRENDS.ja.md").exists())
+        self.assertFalse((self.root / "docs" / "SEASON_TRENDS.md").exists())
+
+        self.in_working_directory("sample", "--lang", "en", "--top", "1")
+        self.assertTrue((self.root / "docs" / "PLAYER_ANALYSIS_SAMPLE.en.md").exists())
+        self.assertFalse((self.root / "docs" / "PLAYER_ANALYSIS_SAMPLE.md").exists())
 
 
 class Views(Command):
