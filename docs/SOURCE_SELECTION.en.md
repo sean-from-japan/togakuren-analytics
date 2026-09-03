@@ -1,5 +1,7 @@
 # Why this league
 
+*[日本語](SOURCE_SELECTION.ja.md)*
+
 University football in Japan is organised in a pyramid: prefectural leagues at the
 bottom, regional leagues above them, and a national championship at the top. This
 project reads one rung of it — the Tokyo University Football Association, which
@@ -19,7 +21,7 @@ Checked 2026-09-01.
 | `robots.txt` | Disallows `/wp-admin/` only. |
 
 The depth is what makes the analysis possible. Every result in
-[FINDINGS.md](../FINDINGS.md) — the cost of promotion, the year-group study, the
+[FINDINGS.en.md](../FINDINGS.en.md) — the cost of promotion, the year-group study, the
 gap between league position and shot volume — needs match-level records for
 several seasons. Results tables alone would not produce any of them.
 

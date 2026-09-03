@@ -1,6 +1,6 @@
 # Data policy
 
-*[日本語版](DATA_POLICY.ja.md)*
+*[日本語](DATA_POLICY.ja.md)*
 
 The people in this dataset are amateur student athletes. This document records
 what the tool collects, what it will not let you publish, and why the defaults
@@ -108,7 +108,7 @@ python3 -m togakuren privacy-check --series "1部"
   and manager names after loading, keeping only opaque player ids. Every metric
   in this tool still works afterwards; the tests assert it.
 
-[PLAYER_ANALYSIS_SAMPLE.md](PLAYER_ANALYSIS_SAMPLE.md) shows what the player-level
+[PLAYER_ANALYSIS_SAMPLE.en.md](PLAYER_ANALYSIS_SAMPLE.en.md) shows what the player-level
 output actually looks like, over an invented season with no real person in it.
 
 ## Rate limiting and takedown

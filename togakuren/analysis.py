@@ -25,7 +25,7 @@ FINGERPRINT_AXES_JA = {
     "volume": ("シュート数", "1試合あたりのシュート数"),
     "finishing": ("決定率", "シュート1本あたりの得点"),
     "defence": ("守備", "1試合あたりの失点の少なさ"),
-    "rotation": ("ターンオーバー", "固定の11人から外へ広がった出場時間"),
+    "rotation": ("ターンオーバー", "主力11人以外が占める出場時間の割合"),
     "youth": ("下級生比率", "1・2年が占める出場時間の割合"),
     "late": ("後半の比重", "後半に打ったシュートの割合"),
 }
@@ -430,7 +430,7 @@ def season_ladder(conn):
     the alphabet. Reading that off a fixed map gets 15 of 72 division changes
     pointing the wrong way: seven promotions filed as relegations, six lateral
     moves filed as relegations, and two lateral moves filed as promotions. What
-    that did to the published figures is in docs/LEAGUE_STRUCTURE.md.
+    that did to the published figures is in docs/LEAGUE_STRUCTURE.en.md.
     """
     running = defaultdict(set)
     for series in league_series(conn):

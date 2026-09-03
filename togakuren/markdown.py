@@ -4,8 +4,9 @@ These are generated, not written. A season moves every week, so a hand-written
 team report is wrong within a matchday; regenerating is one command, and the
 numbers in the repository can always be traced to a run of this code.
 
-Both documents come in English and Japanese from the same data, which is the
-cheap half of bilingual docs: only prose has to be translated by hand.
+Both documents come in English and Japanese from the same data. Every bilingual
+document names its language explicitly (``*.en.md`` or ``*.ja.md``); an
+unsuffixed filename is reserved for a language-neutral index.
 """
 
 from datetime import datetime, timezone
@@ -63,7 +64,7 @@ LABELS = {
             "The real equivalent is not published, and that is deliberate rather than a "
             "limitation of the tool: the people in the federation's records are amateur "
             "students, and per-player rows are personal data. "
-            "[DATA_POLICY.md](DATA_POLICY.md) has the reasoning and the measurements."
+            "[DATA_POLICY.en.md](DATA_POLICY.en.md) has the reasoning and the measurements."
         ),
         "players_source": ("Source series: *{series}* — {clubs} clubs, "
                            "{players} players above {minutes} minutes."),
@@ -119,8 +120,8 @@ LABELS = {
     "ja": {
         "teams_title": "チーム分析",
         "teams_intro": (
-            "連盟が公開している試合記録をもとにした、その部の全チーム。集計値のみで、"
-            "個人は一切登場しない（[{policy}]({policy})）。"
+            "連盟が公開している試合記録をもとに、その部の全チームを集計した文書。"
+            "選手個人の情報は掲載していない（[{policy}]({policy})）。"
         ),
         "snapshot": "{series} 時点の集計。生成日 {when}。再生成は `{command}`。",
         "final": ("{series}。シーズンは終了しているため、この文書は確定である。"
@@ -128,11 +129,11 @@ LABELS = {
         "unplayed": "予定されていた全{total}試合のうち{n}試合は不成立で、上の集計には含まれていない。",
         "in_progress": "**シーズン進行中: 全{total}試合中{done}試合を消化。**",
         "table": "順位表",
-        "fingerprints": "チームの個性",
+        "fingerprints": "チームの特徴",
         "fingerprint_note": (
             "6指標をこの部の中で相対化した値。頂点の番号1〜6は上から時計回りで、"
-            "各クラブの節に並ぶ指標の順序と同じ。点線はこの部の平均。"
-            "図はダッシュボードと同じもので、各クラブの節に同じ数値を文字でも載せている。"
+            "各クラブの項目に並ぶ指標と同じ順序。点線はこの部の平均。"
+            "図はダッシュボードと共通で、各クラブの項目にも同じ数値を記載している。"
         ),
         "axes": "指標",
         "grades": "学年別",
@@ -145,7 +146,7 @@ LABELS = {
         "cols_table_thin": ["順位", "チーム", "試合", "勝点", "勝-分-敗", "得点", "失点", "得失点"],
         "results_only": (
             "**結果のみのシーズン。** この年、連盟は出場メンバーを記録していない。"
-            "そのため出場時間・シュート数と、そこから導かれる指標はいずれも存在しない。"
+            "そのため出場時間・シュート数と、そこから導かれる指標は算出できない。"
             "以下の順位表がこのシーズンに残っている情報のすべてである。"
         ),
         "cols_grade": ["学年", "人数", "出場時間(分)", "得点"],
@@ -153,9 +154,9 @@ LABELS = {
         "cols_player": ["選手", "チーム", "学年", "ポジション", "出場", "先発", "出場時間",
                         "シュート", "得点", "90分あたりシュート", "決定率"],
         "summary": ("{played}試合 / 勝点{points} / {gf}得点{ga}失点 / "
-                    "1試合平均{spg}本のシュートを決定率{conv}で決める / "
+                    "シュートは1試合平均{spg}本、決定率{conv} / "
                     "{used}人を起用し、主力11人が出場時間の{core}を占める / 平均学年{grade}"),
-        "opp_line": "上位陣から{top}点、下位陣から{bottom}点（下位陣からが{share}）。",
+        "opp_line": "上位陣から{top}点、下位陣から{bottom}点（下位陣からの得点が{share}）。",
         "players_title": "選手単位の出力 — サンプル",
         "players_intro": (
             "選手単位の出力がどういうものかを示すサンプル。"
@@ -170,12 +171,12 @@ LABELS = {
         "players_heading": "シーズン通算と各種指標",
         "players_note": (
             "出場時間{minutes}分以上。出場時間は先発・交代・退場から復元した値で、"
-            "連盟はいずれも記録していない。"
+            "連盟は出場時間そのものを記録していない。"
         ),
         "minutes_heading": "節ごとの出場時間",
         "minutes_note": (
-            "1行が選手、1列が節。固定メンバーで戦うチームは値が揃い、"
-            "ターンオーバーの多いチームはまばらになる。"
+            "1行が選手、1列が節。固定メンバーで戦うチームは同じ選手の行に値が並び、"
+            "ターンオーバーの多いチームは多くの行に値が分散する。"
             "ダッシュボードではこれをヒートマップで描いている。"
         ),
         "cols_matrix": ["選手", "学年", "ポジション"],
@@ -190,12 +191,12 @@ LABELS = {
         "seasons": "シーズン一覧",
         "seasons_note": (
             "選手単位の記録は2022年から。2021年は結果のみのため、シュート数と決定率は"
-            "丸め誤差から算出せず、空欄にしている。"
+            "少数の不完全な記録から推定せず、空欄にしている。"
         ),
         "grades_section": "学年別の推移",
         "grades_note": (
             "1つの部の中での、出場時間の割合と90分あたり得点。"
-            "低く見える学年は毎年入れ替わり、これは世代差であって構造ではない。"
+            "数値が低い学年は年によって異なるため、継続的な学年差ではなく世代差とみなせる。"
         ),
         "moves_section": "昇降格",
         "moves_note": (
@@ -216,6 +217,20 @@ LABELS = {
         "promoted": "昇格", "relegated": "降格", "in_progress_mark": "消化途中",
     },
 }
+
+
+def localized_filename(stem, lang):
+    """Return the explicit filename for one language of a Markdown document."""
+    if lang not in LABELS:
+        raise ValueError(f"unsupported language: {lang}")
+    return f"{stem}.{lang}.md"
+
+
+def language_switch(stem, lang):
+    """Link to the other language using the same explicit naming convention."""
+    other = "ja" if lang == "en" else "en"
+    label = "日本語" if other == "ja" else "English"
+    return f"*[{label}]({localized_filename(stem, other)})*"
 
 
 def _table(headers, rows, left=1):
@@ -276,7 +291,7 @@ def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.p
     finished = bool(last) and last < datetime.now().strftime("%Y-%m-%d")
     unplayed = (fixtures[0] or 0) - (fixtures[1] or 0)
     label = f"{series['year']} {series['short_name']}"
-    command = f'togakuren profiles --series "{label}"'
+    command = f'togakuren profiles --series "{label}" --lang {lang}'
     header = (
         text["final"].format(series=label, command=command)
         if finished
@@ -288,9 +303,9 @@ def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.p
     )
     parts = [
         f"# {text['teams_title']} — {series['name'].strip()}",
-        "",
+        "", language_switch(season_slug(series["year"], series["short_name"]), lang), "",
         text["teams_intro"].format(
-            policy=policy or ("DATA_POLICY.md" if lang == "en" else "DATA_POLICY.ja.md")
+            policy=policy or localized_filename("DATA_POLICY", lang)
         ),
         "", header,
     ]
@@ -384,7 +399,8 @@ def player_document(conn, series_id, lang="en", min_minutes=270, top=25, matrix_
     profile = analysis.team_profile(conn, series_id)
 
     parts = [
-        f"# {text['players_title']}", "", text["players_intro"], "",
+        f"# {text['players_title']}", "", language_switch("PLAYER_ANALYSIS_SAMPLE", lang),
+        "", text["players_intro"], "",
         text["players_source"].format(
             series=series["name"].strip(), clubs=len(profile), players=len(rows),
             minutes=min_minutes,
@@ -420,8 +436,9 @@ def player_document(conn, series_id, lang="en", min_minutes=270, top=25, matrix_
         parts += ["", f"## {text['minutes_heading']} — {team_name}", "",
                   _table(headers, body, left=3), "", text["minutes_note"]]
 
+    output = localized_filename("PLAYER_ANALYSIS_SAMPLE", lang)
     parts += ["", f"## {text['reproduce']}", "", "```bash",
-              "togakuren sample --out docs/PLAYER_ANALYSIS_SAMPLE.md", "```", ""]
+              f"togakuren sample --lang {lang} --out docs/{output}", "```", ""]
     return "\n".join(parts)
 
 
@@ -453,9 +470,10 @@ def season_trends(conn, lang="en", figures=("figures/fig-conversion.png",
     when = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d")
 
     parts = [
-        f"# {text['trends_title']} — {years[0]}–{years[-1]}", "", text["trends_intro"], "",
+        f"# {text['trends_title']} — {years[0]}–{years[-1]}", "",
+        language_switch("SEASON_TRENDS", lang), "", text["trends_intro"], "",
         text["snapshot"].format(series=f"{years[0]}–{years[-1]}", when=when,
-                                command="togakuren trends --format md"),
+                                command=f"togakuren trends --format md --lang {lang}"),
         "", f"## {text['seasons']}", "",
         _table(
             text["cols_seasons"],

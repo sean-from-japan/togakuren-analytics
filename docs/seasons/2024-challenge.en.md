@@ -1,8 +1,10 @@
 # Team profiles — 2024 年度 第 2 回 関東大学サッカーリーグ戦 東京・神奈川　チャレンジ
 
-Every club in the division, from the federation's published match records. Aggregates only — no individual appears in this document; see [../DATA_POLICY.md](../DATA_POLICY.md).
+*[日本語](2024-challenge.ja.md)*
 
-2024 チャレンジリーグ. The season is over, so this document is final: the same code over the same records reproduces it exactly. Regenerate with `togakuren profiles --series "2024 チャレンジリーグ"`.
+Every club in the division, from the federation's published match records. Aggregates only — no individual appears in this document; see [../DATA_POLICY.en.md](../DATA_POLICY.en.md).
+
+2024 チャレンジリーグ. The season is over, so this document is final: the same code over the same records reproduces it exactly. Regenerate with `togakuren profiles --series "2024 チャレンジリーグ" --lang en`.
 
 ## League table
 

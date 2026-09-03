@@ -288,7 +288,7 @@ class Poisson:
     """
 
     #: Defaults chosen on 2022-2024 alone and then left alone, so the numbers
-    #: reported for 2025-2026 in docs/PREDICTION.md are out of sample.
+    #: reported for 2025-2026 in docs/PREDICTION.en.md are out of sample.
     def __init__(self, half_life=180.0, home=True, rho=0.2, goal_cap=15,
                  iterations=40, warm_iterations=20, name=None):
         self.half_life, self.use_home, self.rho = half_life, home, rho

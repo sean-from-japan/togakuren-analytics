@@ -64,11 +64,43 @@ class Links(unittest.TestCase):
     def test_the_english_and_japanese_pairs_both_exist(self):
         for path in documents():
             if path.name.endswith(".ja.md"):
-                counterpart = path.with_name(path.name[:-len(".ja.md")] + ".md")
+                counterpart = path.with_name(path.name[:-len(".ja.md")] + ".en.md")
+            elif path.name.endswith(".en.md"):
+                counterpart = path.with_name(path.name[:-len(".en.md")] + ".ja.md")
             else:
                 continue
             with self.subTest(document=path.name):
                 self.assertTrue(counterpart.exists())
+
+    def test_unsuffixed_markdown_is_not_one_side_of_a_language_pair(self):
+        for path in documents():
+            if path.name.endswith((".en.md", ".ja.md")):
+                continue
+            if path == ROOT / "README.md":
+                text = path.read_text(encoding="utf-8")
+                self.assertIn("README.en.md", text)
+                self.assertIn("README.ja.md", text)
+                continue
+            stem = path.with_suffix("")
+            with self.subTest(document=path.name):
+                self.assertFalse(stem.with_name(stem.name + ".en.md").exists())
+                self.assertFalse(stem.with_name(stem.name + ".ja.md").exists())
+
+
+class JapaneseCopy(unittest.TestCase):
+    """Keep previously corrected literal translations out of public output."""
+
+    def test_known_translationese_does_not_return(self):
+        banned = ("線を引く", "シュート量", "撃つが", "per試合", "部の移動")
+        paths = [ROOT / "README.ja.md", ROOT / "FINDINGS.ja.md"]
+        paths += list((ROOT / "docs").glob("*.ja.md"))
+        paths += [ROOT / "togakuren" / name
+                  for name in ("dashboard.py", "markdown.py", "report.py", "trends.py")]
+        for path in paths:
+            text = path.read_text(encoding="utf-8")
+            for phrase in banned:
+                with self.subTest(document=path.name, phrase=phrase):
+                    self.assertNotIn(phrase, text)
 
 
 if __name__ == "__main__":

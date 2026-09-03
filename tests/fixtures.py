@@ -1,7 +1,7 @@
 """Synthetic payloads shaped like the federation API.
 
 Invented clubs and invented people. No data collected from the federation is
-committed to this repository; see docs/DATA_POLICY.md.
+committed to this repository; see docs/DATA_POLICY.en.md.
 """
 
 SERIES = {

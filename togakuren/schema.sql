@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS standings (
     fairplay_points   INTEGER
 );
 
--- Personal data. Not exported, not committed. See docs/DATA_POLICY.md.
+-- Personal data. Not exported, not committed. See docs/DATA_POLICY.en.md.
 CREATE TABLE IF NOT EXISTS players (
     player_id    TEXT PRIMARY KEY,
     name         TEXT,

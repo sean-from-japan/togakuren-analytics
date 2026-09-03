@@ -1,6 +1,6 @@
 # Findings
 
-*[日本語版](FINDINGS.ja.md)*
+*[日本語](FINDINGS.ja.md)*
 
 Five things the Tokyo University Football Association's own pages do not show,
 taken from its published match records: results from 2021 and player-level
@@ -72,7 +72,7 @@ process; a third division was inserted in 2025 and the Challenge League abolishe
 in 2026. A first-division club that did nothing at all gained 0.83 points a game
 across the 2023 boundary — five times the movement at any other. Anything below
 that pools seasons is pooling different competitions, and
-[docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md) is the accounting.
+[docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md) is the accounting.
 
 ## 1. Promotion costs a point a game
 
@@ -82,7 +82,7 @@ Promotion and relegation are the one natural experiment this dataset offers: the
 same squad, one season later, against different opposition. Forty-nine completed
 cases across five seasons — once the ladder is read correctly, which turned out
 to be the whole difficulty. See
-[docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md).
+[docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md).
 
 | | Cases | Change in points per game | Got worse |
 |---|---|---|---|
@@ -212,7 +212,7 @@ and then crossed under it in 2025 and stayed there. The reorganisation that runs
 through the middle of this table is now documented — the 2024 second division of
 nineteen clubs was the staging year before a third division was created, and the
 Challenge League it is being compared against changed level in 2025 and stopped
-existing in 2026 ([docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md)). Knowing
+existing in 2026 ([docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md)). Knowing
 that does not explain the crossing: the 2025 second division was ten clubs, the
 same size it had been in most seasons. The claim is still open.
 
@@ -234,17 +234,17 @@ squad lists the federation already publishes.
 
 So this document contains group statistics only, which is a different legal
 object entirely. Everything player-level runs locally, on a database this
-repository does not ship. [docs/DATA_POLICY.md](docs/DATA_POLICY.md) has the full
+repository does not ship. [docs/DATA_POLICY.en.md](docs/DATA_POLICY.en.md) has the full
 reasoning and the measurements.
 
 ## Related documents
 
-- [docs/LEAGUE_STRUCTURE.md](docs/LEAGUE_STRUCTURE.md) — the three reorganisations inside
+- [docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md) — the three reorganisations inside
   this dataset, what they did to section 1, and the one claim they retracted.
-- [docs/SEASON_TRENDS.md](docs/SEASON_TRENDS.md) — every table behind sections 1, 2 and 5,
+- [docs/SEASON_TRENDS.en.md](docs/SEASON_TRENDS.en.md) — every table behind sections 1, 2 and 5,
   including every division change and every club's path through the tiers.
 - [docs/seasons/](docs/seasons/) — one document per season and division, 2021–2026.
-- [docs/PLAYER_ANALYSIS_SAMPLE.md](docs/PLAYER_ANALYSIS_SAMPLE.md) — what the player-level
+- [docs/PLAYER_ANALYSIS_SAMPLE.en.md](docs/PLAYER_ANALYSIS_SAMPLE.en.md) — what the player-level
   output looks like, over an invented season.
 
 ## Reproducing
@@ -255,7 +255,7 @@ togakuren ingest                                 # about 40 seconds
 togakuren trends                                 # sections 1, 2 and 5
 togakuren dashboard --series "2026 1部"          # sections 3, 4
 togakuren privacy-check --series "2026 1部"      # the last section
-togakuren trends --format md                     # docs/SEASON_TRENDS.md
+togakuren trends --format md                     # docs/SEASON_TRENDS.en.md
 togakuren profiles --all                         # docs/seasons/
 ```
 
@@ -263,4 +263,4 @@ The figures here are the charts from those two pages, `trends` and `dashboard
 --privacy aggregate`, isolated with CSS, screenshotted headless, auto-cropped and
 quantised to 256 colours. No number in this document was typed in by hand.
 
-See [docs/FIGURES.md](docs/FIGURES.md) for which chart each file is.
+See [docs/FIGURES.en.md](docs/FIGURES.en.md) for which chart each file is.

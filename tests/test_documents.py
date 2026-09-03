@@ -173,6 +173,14 @@ class Slugs(unittest.TestCase):
         self.assertEqual(slug, "2030-other")
         self.assertTrue(slug.isascii())
 
+    def test_bilingual_filenames_always_name_the_language(self):
+        self.assertEqual(markdown.localized_filename("REPORT", "en"), "REPORT.en.md")
+        self.assertEqual(markdown.localized_filename("REPORT", "ja"), "REPORT.ja.md")
+
+    def test_an_unknown_language_is_refused(self):
+        with self.assertRaises(ValueError):
+            markdown.localized_filename("REPORT", "fr")
+
 
 class DocumentStability(unittest.TestCase):
     """A committed document for a finished season must not churn."""

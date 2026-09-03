@@ -94,7 +94,7 @@ function svg(width, height, label) {
    that shoots a lot without scoring separates from one that does not shoot. */
 function bubbles(host, teams, selected) {
   const W = 620, H = 330, L = 72, R = 18, T = 26, B = 42;
-  const node = svg(W, H, "順位とシュート量");
+  const node = svg(W, H, "順位とシュート数");
   const maxRank = teams.length;
   const maxY = Math.max(...teams.map(t => t.shots_per_game)) * 1.12 || 1;
   const maxGoals = Math.max(...teams.map(t => t.goals_for)) || 1;
@@ -116,7 +116,7 @@ function bubbles(host, teams, selected) {
     const circle = el("circle", { cx: x(team.rank), cy: y(team.shots_per_game), r: radius,
       fill: on ? "var(--warm)" : "var(--accent)", "fill-opacity": on ? .55 : .3,
       stroke: on ? "var(--warm)" : "var(--accent)", "stroke-width": on ? 2 : 1, cursor: "pointer" });
-    circle.appendChild(el("title", {}, `${team.team} — ${team.rank}位 / シュート${fmt(team.shots_per_game)}本per試合 / ${team.goals_for}得点`));
+    circle.appendChild(el("title", {}, `${team.team} — ${team.rank}位 / 1試合平均シュート${fmt(team.shots_per_game)}本 / ${team.goals_for}得点`));
     circle.addEventListener("click", () => select(team.team_pk));
     node.appendChild(circle);
     node.appendChild(el("text", { x: x(team.rank), y: y(team.shots_per_game) + 3.5,
@@ -140,7 +140,7 @@ function radar(team, size, selected) {
   const big = size > 200;
   const W = big ? Math.round(size * 1.45) : size;
   const c = W / 2, cy = size / 2, radius = size * 0.34;
-  const node = svg(W, size, `${team.team} の個性`);
+  const node = svg(W, size, `${team.team}の特徴`);
   const angleOf = i => -Math.PI / 2 + i * 2 * Math.PI / AXES.length;
   const ringPoints = ring => AXES.map((_, i) => {
     const angle = angleOf(i);
@@ -201,7 +201,7 @@ function radarGrid(host, teams, selected) {
 
 function curve(host, selected) {
   const W = 620, H = 300, L = 34, R = 96, T = 20, B = 32;
-  const node = svg(W, H, "節ごとの勝点の積み上がり");
+  const node = svg(W, H, "節ごとの累積勝点");
   const maxSection = Math.max(...DATA.curve.flatMap(t => t.points.map(p => p[0])));
   const maxPoints = Math.max(...DATA.curve.flatMap(t => t.points.map(p => p[1]))) || 1;
   const x = s => L + (W - L - R) * (s - 1) / Math.max(1, maxSection - 1);
@@ -236,7 +236,7 @@ function curve(host, selected) {
 
 function stacked(host, rows, selected) {
   const rowH = 21, L = 118, W = 560, T = 8;
-  const node = svg(W, T + rows.length * rowH + 6, "上位陣・下位陣から奪った得点");
+  const node = svg(W, T + rows.length * rowH + 6, "対戦相手の順位帯別得点");
   const peak = Math.max(...rows.map(r => r.vs_top + r.vs_bottom)) || 1;
   const span = W - L - 96;
   rows.forEach((row, i) => {
@@ -310,7 +310,7 @@ function grades(host, team) {
       height: Math.max(barH, 1), rx: 2, fill: "var(--plum)", "fill-opacity": .75 }));
     node.appendChild(el("text", { x: x + slot / 2, y: T + plot - barH - 4, "font-size": 9.5,
       "text-anchor": "middle", fill: "currentColor", "fill-opacity": .65 },
-      `${value.minutes}分 / ${value.goals}G`));
+      `${value.minutes}分 / ${value.goals}得点`));
     node.appendChild(el("text", { x: x + slot / 2, y: T + plot + 14, "font-size": 10.5,
       "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 },
       `${grade}年 (${value.players})`));
@@ -384,14 +384,14 @@ function select(teamPk) {
   heat(document.getElementById("heat"), team);
 
   table(document.getElementById("history"),
-    ["年度", "ディビジョン", "試合", "勝-分-敗", "勝点", "1試合平均"],
+    ["年度", "部", "試合", "勝-分-敗", "勝点", "1試合平均"],
     (DATA.history[team.team_id] || []).map(h =>
       [h.year, h.division, h.played, `${h.win}-${h.draw}-${h.lose}`, h.points, fmt(h.points_per_game, 2)]),
     2);
 
   const squad = DATA.squads[teamPk] || [];
   table(document.getElementById("squad"),
-    ["選手", "学年", "Pos", "出場", "先発", "分", "S", "G", "S/90", "決定率"],
+    ["選手", "学年", "ポジション", "出場", "先発", "出場時間", "シュート", "得点", "90分あたりシュート", "決定率"],
     squad.map(p => [p.label, p.grade ? p.grade + "年" : "-", p.position || "-",
       p.apps, p.starts, p.minutes, p.shots, p.goals, fmt(p.shots_per_90, 2), fmt(p.conversion, 3)]), 3);
 }
@@ -540,7 +540,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
     )
     player_sections = (
         """
-<h3>出場時間マトリクス（節 × 選手）</h3>
+<h3>節ごとの出場時間（節 × 選手）</h3>
 <div class="scroll" id="heat"></div>
 <div class="legend"><span>出場時間</span><i style="background:var(--panel)"></i>0分
   <i style="background:color-mix(in srgb, var(--accent) 54%, transparent)"></i>45分
@@ -580,7 +580,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
   <p class="note">青が上位陣から、橙が下位陣から奪った得点。</p></div>
 </div>
 
-<h3>チームの個性（6指標）</h3>
+<h3>チームの特徴（6指標）</h3>
 <div class="radars" id="radars"></div>
 <p class="note">各指標はこのリーグ内での相対値（0〜100）。頂点の番号は下のリストの番号に対応する。
 点線はリーグ平均で、平均が50から離れている指標は、上位に偏っているか下位に長い尾を引いている。
