@@ -167,8 +167,13 @@ the top half and finish at 0.204.
 Six indices per team, each scaled within the season: shot volume, finishing,
 defence, rotation (minutes spread beyond a settled eleven), youth (share of
 minutes played by first and second years) and late push (share of shots in the
-second half). Twelve small radars make squad character something you recognise by
-outline rather than read off a table.
+second half). The vertices are numbered in that order, clockwise from the top.
+Twelve small radars make squad character something you recognise by outline
+rather than read off a table.
+
+The dashed outline on each radar is the league mean. Because every axis is
+scaled inside the season, that mean is not 50: it sits high on an axis where the
+field is bunched near the top and low where one club is dragging a long tail.
 
 The extremes of each axis in 2026 belong to six different clubs:
 

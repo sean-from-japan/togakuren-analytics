@@ -19,7 +19,7 @@ Every club in the division, from the federation's published match records. Aggre
 
 ![Fingerprints](../figures/fig-fingerprints.png)
 
-Six indices, each scaled within this division. The chart is the same one the dashboard draws; the numbers under each club repeat it in text.
+Six indices, each scaled within this division. The vertices are numbered 1-6 clockwise from the top, in the order the indices are listed under each club below, and the dashed outline is the division mean. The chart is the same one the dashboard draws; the numbers under each club repeat it in text.
 
 ### 1. 東京都市大学
 
