@@ -2,7 +2,7 @@
 
 *[English](FIGURES.en.md)*
 
-`docs/figures/` の6枚のPNGは、このリポジトリで唯一「コマンド1本で再生成できないもの」です。どうやって作ったかは [FINDINGS.ja.md](../FINDINGS.ja.md) に1行で書いてありますが、ここでは**どの図がどのチャートなのか**を明記します。1枚だけ差し替えるときに迷わないためです。
+`docs/figures/` の6枚のPNGと、READMEに貼っている `docs/example-dashboard.png` は、このリポジトリで唯一「コマンド1本で再生成できないもの」です。どうやって作ったかは [FINDINGS.ja.md](../FINDINGS.ja.md) に1行で書いてありますが、ここでは**どの図がどのチャートなのか**を明記します。1枚だけ差し替えるときに迷わないためです。
 
 **どれもプロット用ライブラリでは描いていません。** このプロジェクトのグラフはすべて、ページ自身のJSONペイロードからブラウザ上でSVGとして組み立てています（`togakuren/trends.py` と `togakuren/dashboard.py` の `svg()` ヘルパー）。依存パッケージがゼロなのはこのためです。PNGはその要素のスクリーンショットです。
 
@@ -16,6 +16,7 @@
 | `fig-trajectory.png` | `trends` | `#trajectory` | あるクラブのシーズン推移 |
 | `fig-bubbles.png` | `dashboard` | `#bubbles` | 順位とシュート数 |
 | `fig-fingerprints.png` | `dashboard` | `#radars` | 全クラブの6指標を横並びにしたもの |
+| `example-dashboard.png` | `dashboard` | ページ全体 | READMEのスクリーンショット。ページ冒頭からレーダーの1行目までを、1160 × 1290 のビューポートで撮ったもの |
 
 ## 作り直す手順
 

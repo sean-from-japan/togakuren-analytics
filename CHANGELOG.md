@@ -68,6 +68,10 @@ Dates are the day the work landed on `main`.
 - `docs/figures/fig-fingerprints.png` re-shot for the numbered vertices and the
   mean outline, 2026 1部リーグ as before. 1104 × 397, replacing 1104 × 386. The
   season documents and FINDINGS say what the numbers and the dashed outline are.
+- `docs/example-dashboard.png` re-shot for the same reason: the README's
+  screenshot still showed unnumbered radars. 1160 × 1290, unchanged. It is a
+  screenshot that no command regenerates, and it was missed because FIGURES
+  covered only `docs/figures/`; it is now in that table.
 
 ### Added
 
