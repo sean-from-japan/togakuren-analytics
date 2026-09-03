@@ -7,8 +7,9 @@ import logging
 import sys
 from pathlib import Path
 
-from . import (__version__, analysis, compare, dashboard, db, ingest, markdown,
-               metrics, paths, predict, privacy, rapm, report, sample, trends)
+from . import (__version__, analysis, compare, dashboard, db, ingest, intake,
+               markdown, metrics, origins, paths, predict, privacy, rapm, report,
+               sample, trends)
 from .client import ApiError, Client
 
 
@@ -130,11 +131,11 @@ def cmd_dashboard(args):
     if args.public:
         rows = metrics.player_season(conn, series_id, min_minutes=0)
         privacy.check_public_safe(args.privacy, rows)
-    html = dashboard.build(conn, series_id, mode=args.privacy, salt=salt)
+    html = dashboard.build(conn, series_id, mode=args.privacy, salt=salt, lang=args.lang)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
-    print(f"wrote {out} ({len(html):,} bytes, privacy={args.privacy})")
+    print(f"wrote {out} ({len(html):,} bytes, privacy={args.privacy}, lang={args.lang})")
 
 
 def cmd_trends(args):
@@ -143,7 +144,7 @@ def cmd_trends(args):
     if args.format == "md":
         body = markdown.season_trends(conn, lang=args.lang)
     else:
-        body = trends.build(conn, focus_team_id=args.club)
+        body = trends.build(conn, focus_team_id=args.club, lang=args.lang)
     # Every language gets an explicit suffix. This prevents one language from
     # looking like the default and keeps a second language from overwriting it.
     out = Path(args.out or (f"docs/{markdown.localized_filename('SEASON_TRENDS', args.lang)}"
@@ -170,7 +171,9 @@ def cmd_profiles(args):
     conn = _database(args)
     if not args.all:
         series_id = _resolve_series(conn, args.series)
-        text = markdown.team_profiles(conn, series_id, lang=args.lang, figure=args.figure)
+        text = markdown.team_profiles(
+            conn, series_id, lang=args.lang,
+            figure=args.figure or f"figures/{args.lang}/fig-fingerprints.png")
         out = Path(args.out or f"docs/{markdown.localized_filename('TEAM_PROFILES', args.lang)}")
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(text, encoding="utf-8")
@@ -187,7 +190,8 @@ def cmd_profiles(args):
             continue
         for lang in args.lang_all:
             written.append(
-                _write_profile(conn, series, out_dir, lang, "../figures/fig-fingerprints.png")
+                _write_profile(conn, series, out_dir, lang,
+                               f"../figures/{lang}/fig-fingerprints.png")
             )
     index = out_dir / "README.md"
     index.write_text(_seasons_index(conn, args.lang_all), encoding="utf-8")
@@ -425,6 +429,55 @@ def cmd_compare(args):
               f"{'yes' if placed['inside_reference_spread'] else 'NO':>9}")
 
 
+def cmd_intake(args):
+    """What the squad list says before the season starts."""
+    conn = _database(args)
+    rows = intake.squad_rows(conn)
+    if not rows:
+        raise SystemExit("no season has both a squad list and a table; run `ingest` first")
+    if args.completed_only:
+        latest = max(row["year"] for row in rows)
+        rows = [row for row in rows if row["year"] != latest]
+
+    if args.validate:
+        scored = intake.evaluate(rows)
+        print(f"Leave-one-season-out, predictions pooled. Baseline is the division average.\n")
+        for title, key, n in (
+            ("clubs with a previous season", "with_previous", scored["n_with_previous"]),
+            ("every club, previous season or not", "every_club", scored["n_all"]),
+        ):
+            print(f"{title} (n={n})")
+            for model in scored[key]:
+                print(f"  {model['label']:<42} RMSE {model['rmse']:.4f}  "
+                      f"{model['gain']:+6.1%}  r={model['r']:+.3f}")
+            print()
+        print("Correlation with the season's result, split by what the club just did")
+        print(f"  {'':<12}{'clubs':>7}{'last table':>13}{'squad list':>13}")
+        for row in intake.by_move(rows):
+            print(f"  {row['move']:<12}{row['n']:>7}{row['last_table']:>+13.3f}"
+                  f"{row['squad_list']:>+13.3f}")
+        print()
+        print("Championship and academy share by division, which the measure was never told")
+        for row in intake.division_pedigree(rows):
+            print(f"  {row['year']} level {row['level']}  {row['clubs']:>2} clubs  "
+                  f"championship {row['champions']:6.1%}  academy {row['youth']:5.1%}")
+        return
+
+    year = args.year or max(row["year"] for row in rows)
+    table = intake.preseason_table(rows, year, level=args.level)
+    if not table:
+        raise SystemExit(f"nothing to rank for {year} at level {args.level}")
+    print(f"{year}, level {args.level}: ranked as the squad lists had it before kick-off")
+    print(f"  {'club':<22}{'predicted':>10}{'actual':>9}{'champion school':>17}{'academy':>9}")
+    for row in table:
+        print(f"  {row['name'][:20]:<22}{row['predicted']:+10.2f}{row['result']:+9.2f}"
+              f"{row['champions']:16.0%}{row['youth']:9.0%}")
+    print(f"\n  correlation over the {len(table)} clubs: "
+          f"{intake.correlation([r['predicted'] for r in table], [r['result'] for r in table]):+.3f}")
+    print("  Both columns are standardised inside the division, so 0 is average and the\n"
+          "  units are its own standard deviations.")
+
+
 def cmd_sample(args):
     """Player-level output over a synthetic season, safe to publish."""
     conn = _database(args, ":memory:")
@@ -474,10 +527,23 @@ def cmd_privacy_check(args):
     conn = _database(args)
     series_id = _resolve_series(conn, args.series)
     rows = metrics.player_season(conn, series_id, min_minutes=args.min_minutes)
+    # The squad list carries one more ordinary-looking analytical column, and
+    # what it does to the table below is the reason no per-player output here
+    # ever includes it. See docs/DATA_POLICY.en.md.
+    schools = {
+        row[0]: origins.split_origin(row[1])[1] or "-"
+        for row in conn.execute(
+            "SELECT player_id, former_team FROM squad_members WHERE series_id = ?",
+            (series_id,),
+        )
+    }
+    for row in rows:
+        row["school"] = schools.get(row["player_id"], "-")
     print(f"{len(rows)} players above {args.min_minutes} minutes\n")
     for identifiers in (
         ["team"], ["team", "position"], ["team", "position", "apps"],
         ["team", "position", "apps", "goals"],
+        ["school"], ["team", "school"], ["team", "position", "apps", "school"],
     ):
         result = privacy.k_anonymity(rows, identifiers)
         share = 100 * result["unique"] / result["total"] if result["total"] else 0
@@ -540,7 +606,8 @@ def build_parser():
         "--lang-all", nargs="+", choices=sorted(markdown.LABELS), default=["en", "ja"],
         help="languages to emit with --all",
     )
-    profiles.add_argument("--figure", default="figures/fig-fingerprints.png")
+    profiles.add_argument("--figure", help="path to the fingerprint figure, "
+                          "relative to the document (default: the one for --lang)")
     profiles.add_argument("--out")
     profiles.set_defaults(func=cmd_profiles)
 
@@ -576,6 +643,18 @@ def build_parser():
     across.add_argument("--lang", choices=sorted(markdown.LABELS), default="en")
     across.add_argument("--out")
     across.set_defaults(func=cmd_trends)
+
+    preseason = subparsers.add_parser(
+        "intake", help="what the squad list predicts before a ball is kicked"
+    )
+    preseason.add_argument("--year", help="season to rank (default: the most recent)")
+    preseason.add_argument("--level", type=int, default=1,
+                           help="league level, 1 being the top division")
+    preseason.add_argument("--validate", action="store_true",
+                           help="score every model out of sample instead of ranking a division")
+    preseason.add_argument("--completed-only", action="store_true",
+                           help="drop the most recent season, which is still being played")
+    preseason.set_defaults(func=cmd_intake)
 
     forecast = subparsers.add_parser(
         "forecast", help="win/draw/loss probabilities for the fixtures still to play"
@@ -632,6 +711,8 @@ def build_parser():
         )
         sub.add_argument("--series", default="latest", help="series id, a search term, or 'latest'")
         sub.add_argument("--min-minutes", type=int, default=270)
+        if name == "dashboard":
+            sub.add_argument("--lang", choices=sorted(dashboard.TEXT), default="en")
         if extra is not None:
             sub.add_argument(
                 "--privacy", choices=privacy.MODES,

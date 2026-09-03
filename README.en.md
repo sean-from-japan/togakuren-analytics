@@ -26,6 +26,7 @@ cards, and none of it is aggregated anywhere.
 
 | | result | where |
 |---|---|---|
+| **Preseason forecasting** | The squad list, published before a ball is kicked, predicts the season **better than last year's final table does**: +12.8% against the division average over 191 club-seasons, where the table alone scores **−0.2%**. Two well-motivated attempts to improve it both failed, and both are written up. | [FINDINGS.en.md](FINDINGS.en.md) |
 | **Forecasting** | Settings frozen on 2022–24; on 2025–26 (n=525) log loss goes **1.0200 → 0.8192**, past Elo at 0.8753. Accuracy 44.6% → 65.7%. The time decay is the whole story — removing it costs 0.095 nats, more than the model's entire margin over Elo. | [PREDICTION.en.md](docs/PREDICTION.en.md) · [ja](docs/PREDICTION.ja.md) |
 | **Player ratings** | Adjusted plus-minus over 8,087 lineup segments. Knowing the players beats knowing only the clubs by **+3.73%** (cross-validated) and **+4.06%** (forward split), with the ridge penalties chosen *inside* each training fold. | [RATINGS.en.md](docs/RATINGS.en.md) · [ja](docs/RATINGS.ja.md) |
 | **What the data cannot do** | Goal records carry a scorer and a minute and nothing else, so **penalties cannot be separated from open play** — no non-penalty rate is possible from this source. Goal events reconcile with the recorded score in **79%** of fixtures. | [FINDINGS.en.md](FINDINGS.en.md) |
@@ -44,11 +45,10 @@ in this dataset are amateur students — see
 [docs/DATA_POLICY.en.md](docs/DATA_POLICY.en.md). CI fails if collected data appears in
 a commit.
 
-📊 **[Findings](FINDINGS.en.md)** ([日本語](FINDINGS.ja.md)) — five results with the
-charts, including two that came out against expectation and one that was
-withdrawn.
+📊 **[Findings](FINDINGS.en.md)** ([日本語](FINDINGS.ja.md)) — six results with the
+charts, including three negative results and one claim that was withdrawn.
 
-![Example dashboard](docs/example-dashboard.png)
+![Example dashboard](docs/example-dashboard.en.png)
 
 *Above: the dashboard in aggregate mode, which omits every per-player view. The
 local version adds the squad table and a matchday-by-player minutes grid.*
@@ -57,7 +57,7 @@ local version adds the squad table and a matchday-by-player minutes grid.*
 
 | | |
 |---|---|
-| [FINDINGS.en.md](FINDINGS.en.md) · [ja](FINDINGS.ja.md) | Five results with the charts. Start here. |
+| [FINDINGS.en.md](FINDINGS.en.md) · [ja](FINDINGS.ja.md) | Six results with the charts. Start here. |
 | [docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md) · [ja](docs/LEAGUE_STRUCTURE.ja.md) | The three reorganisations inside this dataset, what each did to the club pool, and the result they retracted. |
 | [docs/SEASON_TRENDS.en.md](docs/SEASON_TRENDS.en.md) · [ja](docs/SEASON_TRENDS.ja.md) | Every season in one place: league level, year groups, every division change, every club's path. Generated. |
 | [docs/seasons/](docs/seasons/) | One document per league season and division, 2021–2026: table, indices, year groups, history. 40 documents, generated. |
@@ -82,6 +82,11 @@ togakuren profiles --all                 # docs/seasons/, both languages
 togakuren sample --lang en               # docs/PLAYER_ANALYSIS_SAMPLE.en.md
 togakuren sample --lang ja               # docs/PLAYER_ANALYSIS_SAMPLE.ja.md
 ```
+
+`--lang` covers the HTML pages too, charts included — `trends --lang ja` and
+`dashboard --lang ja` label their axes and legends in Japanese. Every string a
+chart draws comes from the page payload rather than the drawing code, so the
+committed figures exist in both languages and are shot from the same command.
 
 Seasons before 2026 are over, so their documents never change: the same code
 over the same records reproduces them byte for byte. That is why they are
@@ -112,6 +117,8 @@ togakuren dashboard --series "2026 1部"              # interactive, team select
 togakuren report --series "2026 1部"                 # flat standalone HTML
 togakuren export --series "2026 1部" --out d1.csv    # per-player season rows
 togakuren trends                                     # every season at once
+togakuren intake --validate                          # what the squad list is worth before kick-off
+togakuren intake --year 2026                         # one division ranked from its squad lists
 togakuren profiles --series "2026 1部"               # one division as Markdown
 togakuren profiles --all                             # every completed season
 togakuren sample                                     # player-level output, invented data
@@ -196,7 +203,7 @@ The database and the response cache go to a per-user data directory
 | `games` | fixtures: section, kickoff, venue, regulation length |
 | `game_teams` | one row per team per fixture: score, points, fair-play points |
 | `appearances` | who played, in which role, and **for how many minutes** |
-| `squad_members` | academic year, shirt number, position — the year group data |
+| `squad_members` | academic year, shirt number, position, and the school or club youth side each player arrived from |
 | `shots` | per player per match, split into halves and extra time |
 | `events` | goals and cards with the minute and the offence code |
 | `substitutions` | who came off, who came on, when |
@@ -267,8 +274,12 @@ Initials are not anonymisation, and `privacy-check` measures rather than assumes
 it. On the 2026 first division, of 189 players above 270 minutes, **105 (56%) are
 unique on team, position and appearances alone** — three ordinary analytical
 columns, against squad lists the federation already publishes. Removing the name
-does not help. [docs/DATA_POLICY.en.md](docs/DATA_POLICY.en.md) has the full table and
-the reasoning.
+does not help.
+
+Adding the school makes it total: **184 of 189 (97%)**. That is the column the
+preseason model in the findings is built on, which is why it appears there only
+as a club-level average and never on a per-player row, in any privacy mode.
+[docs/DATA_POLICY.en.md](docs/DATA_POLICY.en.md) has the full table and the reasoning.
 
 ## Tests
 
@@ -276,7 +287,7 @@ the reasoning.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-239 tests, no network access, no fixtures taken from the federation — the test
+285 tests, no network access, no fixtures taken from the federation — the test
 data is invented clubs and invented people. CI runs them on Linux, macOS and
 Windows against Python 3.9 and 3.13, and fails the build if any collected data is
 ever committed.
@@ -284,9 +295,9 @@ ever committed.
 Every command runs end to end in the suite, and the API client is exercised
 against a stubbed transport, so the retry rule, the request throttle and the
 token discovery are checked rather than assumed. Coverage is measured with the
-standard library's `trace`; 5.7% of statements are unreached, most of them the
-Windows and Linux branches of `paths.py`, which only run on the other two CI
-platforms.
+standard library's `trace`; 6.7% of statements are unreached, most of them error
+branches in `cli.py` and the Windows and Linux branches of `paths.py`, which
+only run on the other two CI platforms.
 
 ## Licence
 

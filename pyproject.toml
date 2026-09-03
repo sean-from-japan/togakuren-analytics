@@ -25,4 +25,4 @@ togakuren = "togakuren.cli:main"
 packages = ["togakuren"]
 
 [tool.setuptools.package-data]
-togakuren = ["schema.sql"]
+togakuren = ["schema.sql", "reference-schools.json"]

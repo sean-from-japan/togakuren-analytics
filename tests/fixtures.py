@@ -217,3 +217,70 @@ class UnfinishedSeasonClient(FakeClient):
 
     def games(self, series_id):
         return [GAME, GAME2, GAME3]
+
+
+def seed_seasons(conn):
+    """Fill ``conn`` with three seasons of two invented divisions.
+
+    The preseason model needs several seasons, a division wide enough to have a
+    spread, standings, and a ``former_team`` on every squad row, so the
+    single-season fixture above cannot exercise it. Half of each club's players
+    come from a school that really does appear in the championship reference, so
+    the pedigree column has something to find; nobody here is a real person.
+    """
+    for year in ("2001", "2002", "2003"):
+        for tier, division in ((1, "1部リーグ"), (2, "2部リーグ")):
+            series_id = f"s{year}-{tier}"
+            conn.execute(
+                "INSERT INTO series (id, year, name, short_name, type, division) "
+                "VALUES (?, ?, ?, ?, 'league', ?)",
+                (series_id, year, f"Example {year} {division}", division, division),
+            )
+            for index in range(6):
+                team_pk = f"{series_id}-t{index}"
+                club = f"club-{tier}{index}"
+                conn.execute(
+                    "INSERT INTO teams (id, series_id, team_id, name, short_name) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (team_pk, series_id, club, f"Club {club}", f"Club {club}"),
+                )
+                conn.execute(
+                    "INSERT INTO standings (team_pk, series_id, played, win, draw, lose, "
+                    "points, goals_for, goal_difference, fairplay_points) "
+                    "VALUES (?, ?, 10, ?, 0, ?, ?, 10, 0, 0)",
+                    (team_pk, series_id, index, 10 - index, index * 3),
+                )
+                # A fixture makes the season count as "player data recorded".
+                game_id = f"{team_pk}-g"
+                conn.execute(
+                    "INSERT INTO games (id, series_id, section, name, kickoff, venue, "
+                    "game_over, length) VALUES (?, ?, '1', 'g', '', '', 1, 90)",
+                    (game_id, series_id),
+                )
+                conn.execute(
+                    "INSERT INTO game_teams (id, game_id, series_id, team_pk, score, "
+                    "points, goal_difference, fairplay_points) "
+                    "VALUES (?, ?, ?, ?, 1, 3, 0, 0)",
+                    (f"{team_pk}-gt", game_id, series_id, team_pk),
+                )
+                for player in range(12):
+                    player_id = f"{team_pk}-p{player}"
+                    conn.execute(
+                        "INSERT INTO players (player_id, name, kana) VALUES (?, ?, '')",
+                        (player_id, f"Player {player}"),
+                    )
+                    strong = player < index * 2
+                    conn.execute(
+                        "INSERT INTO squad_members (series_id, team_pk, player_id, number, "
+                        "position, grade, former_team) VALUES (?, ?, ?, ?, 'MF', ?, ?)",
+                        (series_id, team_pk, player_id, str(player + 1),
+                         str(player % 4 + 1),
+                         "青森山田高校" if strong else "架空第一高校"),
+                    )
+                    conn.execute(
+                        "INSERT INTO appearances (game_team_id, player_id, role, position, "
+                        "number, minutes) VALUES (?, ?, 'start', 'MF', ?, 90)",
+                        (f"{team_pk}-gt", player_id, str(player + 1)),
+                    )
+    conn.commit()
+    return conn

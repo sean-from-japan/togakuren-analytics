@@ -4,7 +4,70 @@ Dates are the day the work landed on `main`.
 
 ## Unreleased
 
+### Added
+
+- **`togakuren intake` — what the squad list is worth before a ball is kicked.**
+  The registration list names every player, their academic year, and the high
+  school or club youth side they came from, and it is public before the season
+  starts. Scored leave-one-season-out against the only baseline that matters,
+  last season's final table: the squad list is worth **+12.8%** against the
+  division average over 191 club-seasons, where the table alone scores
+  **−0.2%**. New modules `togakuren/origins.py` (parsing the free-text origin
+  column) and `togakuren/intake.py` (features and scoring), plus
+  `togakuren/reference-schools.json` — the schools that reached editions 97–104
+  of the All-Japan High School Championship, from Japanese Wikipedia under
+  CC BY-SA 4.0.
+- `intake --validate` also splits the correlation by what the club had just
+  done, which is where the second result came from: after **relegation**, a
+  club's own last table predicts the coming season at r = +0.017, and its squad
+  list at +0.568.
+- `privacy-check` now measures the school column too, because the model above is
+  built on it. It takes the 2026 first division from 105 unique rows of 189 to
+  **184**, which is why no per-player output carries it in any privacy mode.
+  [docs/DATA_POLICY.en.md](docs/DATA_POLICY.en.md) has the table.
+- `--lang en|ja` on the two HTML pages, `trends` and `dashboard`. Every string
+  the charts draw now arrives in the page payload rather than being written into
+  the drawing code, so the axes, legends, tooltips and captions follow the
+  language.
+
+### Fixed
+
+- **`docs/figures/fig-promotion.png` was unreadable.** It had been shot on a
+  light background while the page's colours were the dark ones, so both axis
+  captions were pale grey on white. Re-shot on the dark palette like the other
+  five, and the two captions are drawn at full contrast rather than at the tick
+  labels' opacity. [docs/FIGURES.en.md](docs/FIGURES.en.md) now says how to
+  shoot a figure without repeating this.
+- **The club history table was blank on every aggregate dashboard**, including
+  the screenshot in the README. Aggregate mode omits the minutes grid and the
+  squad table, so two of `select()`'s draw calls had no element to write into;
+  the first threw, and every later call in the same function never ran. Both
+  draw functions now tolerate a missing host.
+- The conversion chart drew the third division and the Challenge League as the
+  same colour. Lines are coloured by division rather than by the level the
+  division started on, and those two both began at level three.
+- The club trajectory chart labelled its y axis with division names while
+  positioning points by level, so the 2022 Challenge League appeared on the
+  "3部" row. The axis is labelled by level, with the mismatch explained under
+  the chart.
+
 ### Changed
+
+- **FINDINGS is reordered and largely rewritten.** The promotion section led on
+  a result nobody needed telling — a promoted club takes fewer points — so it
+  now opens with what the move does to predictability instead, and the size of
+  the drop is kept as context. The preseason model is the new first section, and
+  a third section records the two things that were tried to improve it and did
+  not: a second pedigree source that turned out to measure the same thing
+  (r = 0.866, +0.2 points), and an endogenous school rating that made the model
+  worse.
+- **The committed figures are now two sets, `docs/figures/en/` and
+  `docs/figures/ja/`.** The English documents had been illustrated with
+  Japanese-labelled charts. Club names stay as the federation writes them in
+  both sets. `docs/example-dashboard.png` becomes
+  `docs/example-dashboard.en.png` and `.ja.png`.
+- `fig-trajectory.png` now opens on a club that actually moves between levels,
+  which is what the chart is for.
 
 - Every bilingual Markdown document now names its language explicitly with
   `.en.md` or `.ja.md`. The root `README.md` is a short language-neutral index

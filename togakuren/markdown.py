@@ -247,7 +247,7 @@ def _pct(value):
     return f"{value * 100:.0f}%"
 
 
-def team_profiles(conn, series_id, lang="en", figure="figures/fig-fingerprints.png",
+def team_profiles(conn, series_id, lang="en", figure="figures/en/fig-fingerprints.png",
                   policy=None):
     """The whole division: table, fingerprints and one section per club."""
     text = LABELS[lang]
@@ -453,11 +453,14 @@ def season_slug(year, division):
     return f"{year}-{DIVISION_SLUGS.get(division, 'other')}"
 
 
-def season_trends(conn, lang="en", figures=("figures/fig-conversion.png",
-                                            "figures/fig-grades.png",
-                                            "figures/fig-promotion.png")):
+def season_trends(conn, lang="en", figures=None):
     """Everything that only becomes visible across seasons, as one document."""
     text = LABELS[lang]
+    # The figures are shot per language; a document points at its own set.
+    figures = figures or tuple(
+        f"figures/{lang}/{name}"
+        for name in ("fig-conversion.png", "fig-grades.png", "fig-promotion.png")
+    )
     seasons = analysis.season_summary(conn)
     if not seasons:
         raise ValueError("no league seasons in this database")

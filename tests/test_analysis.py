@@ -134,6 +134,23 @@ class Dashboard(Base):
         self.assertNotIn("出場時間マトリクス", html)
         self.assertIn("Alpha", html)
 
+    def test_aggregate_mode_still_draws_what_it_keeps(self):
+        """Regression: the club history table was blank on every aggregate page.
+
+        Aggregate mode omits the minutes grid and the squad table, so two of
+        ``select()``'s draw calls had no element to write into. The first threw,
+        and every later call in the same function — the club history among them
+        — never ran. The page still has to declare what it keeps, and the
+        drawing code has to tolerate the hosts it does not.
+        """
+        html = dashboard.build(self.conn, "series-1", mode="aggregate")
+        self.assertIn('id="history"', html)
+        self.assertNotIn('id="heat"', html)
+        self.assertNotIn('id="squad"', html)
+        script = dashboard.SCRIPT
+        self.assertIn("if (!host) return;", script)
+        self.assertEqual(script.count("if (!host) return;"), 2)
+
     def test_payload_cannot_close_the_script_element(self):
         html = dashboard.build(self.conn, "series-1", mode="full")
         payload = html.split('id="payload"', 1)[1].split("</script>", 1)[0]
@@ -142,6 +159,22 @@ class Dashboard(Base):
     def test_unknown_series(self):
         with self.assertRaises(ValueError):
             dashboard.build(self.conn, "nope")
+
+    def test_each_language_labels_its_own_charts(self):
+        """The charts read their strings from the payload, not from the code."""
+        english = dashboard.build(self.conn, "series-1", mode="aggregate", lang="en")
+        japanese = dashboard.build(self.conn, "series-1", mode="aggregate", lang="ja")
+        self.assertIn('<html lang="en">', english)
+        self.assertIn("Shots/game", english)
+        self.assertIn("circle area = goals scored", english)
+        self.assertNotIn("シュート/試合", english)
+        self.assertIn('<html lang="ja">', japanese)
+        self.assertIn("シュート/試合", japanese)
+        self.assertNotIn("circle area", japanese)
+
+    def test_an_unknown_language_is_refused_rather_than_defaulted(self):
+        with self.assertRaises(ValueError):
+            dashboard.build(self.conn, "series-1", lang="fr")
 
 
 class Seasons(Base):
@@ -309,6 +342,26 @@ class Trends(Base):
     def test_the_focus_club_is_preselected(self):
         html = trends.build(self.conn, focus_team_id="200")
         self.assertIn('value="200" selected', html)
+
+    def test_each_language_labels_its_own_charts(self):
+        english = trends.build(self.conn, lang="en")
+        japanese = trends.build(self.conn, lang="ja")
+        self.assertIn('<html lang="en">', english)
+        self.assertIn("Conversion", english)
+        self.assertIn("orange = promoted", english)
+        self.assertNotIn("昇降格", english)
+        self.assertIn('<html lang="ja">', japanese)
+        self.assertIn("決定率", japanese)
+        self.assertNotIn("orange = promoted", japanese)
+
+    def test_division_names_are_localised_on_the_english_page(self):
+        english = trends.build(self.conn, lang="en")
+        self.assertIn("Div 1", english)
+        self.assertIn("1部リーグ", trends.build(self.conn, lang="ja"))
+
+    def test_an_unknown_language_is_refused_rather_than_defaulted(self):
+        with self.assertRaises(ValueError):
+            trends.build(self.conn, lang="fr")
 
     def test_empty_database(self):
         empty = db.connect(":memory:")

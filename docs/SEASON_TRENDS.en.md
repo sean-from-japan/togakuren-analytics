@@ -33,11 +33,11 @@ Snapshot of 2021–2026, generated 2026-09-03. Regenerate with `togakuren trends
 
 Player-level recording begins in 2022. 2021 has results only, so shots and conversion are not computed for it rather than derived from a rounding error.
 
-![Seasons](figures/fig-conversion.png)
+![Seasons](figures/en/fig-conversion.png)
 
 ## Academic year, season by season
 
-![Academic year, season by season](figures/fig-grades.png)
+![Academic year, season by season](figures/en/fig-grades.png)
 
 ### 1部リーグ
 
@@ -127,7 +127,7 @@ Share of minutes and goals per 90 minutes, within one division. Which year group
 
 ## Promotion and relegation
 
-![Promotion and relegation](figures/fig-promotion.png)
+![Promotion and relegation](figures/en/fig-promotion.png)
 
 - Promoted: 32 cases, -0.97 points per game on average.
 - Relegated: 17 cases, +1.24 points per game on average.
