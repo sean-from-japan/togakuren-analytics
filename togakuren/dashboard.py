@@ -49,7 +49,7 @@ svg { display:block; max-width:100%; height:auto; }
 #bubbles svg, #curve svg, #opponents svg, #grades svg,
 #goals-line svg, #shots-line svg, #conv-line svg, #trajectory svg, #moves svg
   { width:100%; max-width:640px; }
-#radar-big svg { width:100%; max-width:320px; }
+#radar-big svg { width:100%; max-width:440px; }
 .grid { display:grid; gap:1.4rem; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); }
 .cards { display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); margin:.8rem 0; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:.6rem .7rem; }
@@ -59,6 +59,8 @@ svg { display:block; max-width:100%; height:auto; }
 .radars figure { margin:0; text-align:center; }
 .radars figcaption { font-size:.73rem; color:var(--muted); margin-top:-.3rem; }
 .radars figure.on { outline:2px solid var(--accent); outline-offset:3px; border-radius:6px; }
+.axis-key { columns:2; column-gap:1.6rem; padding-left:1.4rem; margin:.5rem 0 0; }
+.axis-key li { margin:.1rem 0; break-inside:avoid; }
 .heat td { padding:0; border:none; }
 .heat .cell { width:19px; height:17px; border-radius:2px; }
 .heat th { font-size:.68rem; padding:.2rem .25rem; }
@@ -133,39 +135,52 @@ function bubbles(host, teams, selected) {
 }
 
 function radar(team, size, selected) {
-  const c = size / 2, radius = size * 0.34;
-  const node = svg(size, size, `${team.team} の個性`);
-  const points = AXES.map((axis, i) => {
-    const angle = -Math.PI / 2 + i * 2 * Math.PI / AXES.length;
-    const value = team.axes[axis.key] / 100;
-    return [c + radius * value * Math.cos(angle), c + radius * value * Math.sin(angle),
-            c + radius * Math.cos(angle), c + radius * Math.sin(angle), axis];
-  });
+  /* The labelled version needs room outside the circle for six Japanese
+     names, so it gets a wider box with the circle still centred in it. */
+  const big = size > 200;
+  const W = big ? Math.round(size * 1.45) : size;
+  const c = W / 2, cy = size / 2, radius = size * 0.34;
+  const node = svg(W, size, `${team.team} の個性`);
+  const angleOf = i => -Math.PI / 2 + i * 2 * Math.PI / AXES.length;
+  const ringPoints = ring => AXES.map((_, i) => {
+    const angle = angleOf(i);
+    return `${c + radius * ring * Math.cos(angle)},${cy + radius * ring * Math.sin(angle)}`;
+  }).join(" ");
+  const shape = values => AXES.map((axis, i) => {
+    const angle = angleOf(i), value = (values[axis.key] || 0) / 100;
+    return `${c + radius * value * Math.cos(angle)},${cy + radius * value * Math.sin(angle)}`;
+  }).join(" ");
   for (const ring of [.34, .67, 1]) {
-    node.appendChild(el("polygon", {
-      points: AXES.map((_, i) => {
-        const angle = -Math.PI / 2 + i * 2 * Math.PI / AXES.length;
-        return `${c + radius * ring * Math.cos(angle)},${c + radius * ring * Math.sin(angle)}`;
-      }).join(" "),
+    node.appendChild(el("polygon", { points: ringPoints(ring),
       fill: "none", stroke: "currentColor", "stroke-opacity": .13 }));
   }
-  for (const p of points) {
-    node.appendChild(el("line", { x1: c, y1: c, x2: p[2], y2: p[3],
+  AXES.forEach((_, i) => {
+    const angle = angleOf(i);
+    node.appendChild(el("line", { x1: c, y1: cy,
+      x2: c + radius * Math.cos(angle), y2: cy + radius * Math.sin(angle),
       stroke: "currentColor", "stroke-opacity": .1 }));
-  }
+  });
+  /* The league mean sits under every club, so a shape reads as a deviation
+     from the field rather than as an absolute score. */
+  node.appendChild(el("polygon", { points: shape(DATA.axis_means),
+    fill: "none", stroke: "currentColor", "stroke-opacity": .45,
+    "stroke-width": 1, "stroke-dasharray": "3 2" }));
   const on = team.team_pk === selected;
-  node.appendChild(el("polygon", { points: points.map(p => `${p[0]},${p[1]}`).join(" "),
+  node.appendChild(el("polygon", { points: shape(team.axes),
     fill: on ? "var(--warm)" : "var(--accent)", "fill-opacity": .28,
     stroke: on ? "var(--warm)" : "var(--accent)", "stroke-width": 1.6 }));
-  if (size > 200) {
-    points.forEach((p, i) => {
-      const angle = -Math.PI / 2 + i * 2 * Math.PI / AXES.length;
-      node.appendChild(el("text", {
-        x: c + (radius + 16) * Math.cos(angle), y: c + (radius + 16) * Math.sin(angle) + 4,
-        "font-size": 10.5, "text-anchor": "middle", fill: "currentColor", "fill-opacity": .7,
-      }, `${AXES[i].label} ${Math.round(team.axes[AXES[i].key])}`));
-    });
-  }
+  /* Numbers, not names: the small charts have no room for six Japanese
+     labels, and the number keys back to the list under the grid. */
+  AXES.forEach((axis, i) => {
+    const angle = angleOf(i), gap = big ? 10 : 9;
+    const dx = Math.cos(angle), anchor = big && Math.abs(dx) > .3
+      ? (dx > 0 ? "start" : "end") : "middle";
+    node.appendChild(el("text", {
+      x: c + (radius + gap) * dx, y: cy + (radius + gap) * Math.sin(angle) + 4,
+      "font-size": big ? 10.5 : 8.5, "text-anchor": anchor,
+      fill: "currentColor", "fill-opacity": big ? .7 : .55,
+    }, big ? `${i + 1}. ${axis.label} ${Math.round(team.axes[axis.key])}` : `${i + 1}`));
+  });
   return node;
 }
 
@@ -402,6 +417,12 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
     if not profile:
         raise ValueError(f"series {series_id!r} has no completed fixtures")
     prints = {row["team_pk"]: row["axes"] for row in analysis.fingerprints(conn, series_id, profile)}
+    # Each axis is min-max scaled within the series, so the mean is not 50: it
+    # says whether the field is bunched near the top or dragged down by a tail.
+    axis_means = {
+        key: round(sum(axes.get(key, 0.0) for axes in prints.values()) / len(prints), 1)
+        for key, _, _ in analysis.FINGERPRINT_AXES
+    } if prints else {key: 0.0 for key, _, _ in analysis.FINGERPRINT_AXES}
     names = dict(conn.execute("SELECT player_id, name FROM players"))
     per_player = metrics.player_season(conn, series_id, min_minutes=min_minutes, order_by="minutes")
     grades = {
@@ -480,6 +501,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
              "hint": analysis.FINGERPRINT_AXES_JA[key][1]}
             for key, _, _ in analysis.FINGERPRINT_AXES
         ],
+        "axis_means": axis_means,
         "teams": teams,
         "curve": analysis.points_curve(conn, series_id),
         "opponents": analysis.goals_by_opponent(conn, series_id, profile),
@@ -512,7 +534,8 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
     )
     axis_list = "".join(
         f"<li><b>{_e(analysis.FINGERPRINT_AXES_JA[key][0])}</b> — "
-        f"{_e(analysis.FINGERPRINT_AXES_JA[key][1])}</li>"
+        f"{_e(analysis.FINGERPRINT_AXES_JA[key][1])}"
+        f"（リーグ平均 {axis_means[key]:.0f}）</li>"
         for key, _, _ in analysis.FINGERPRINT_AXES
     )
     player_sections = (
@@ -559,8 +582,10 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0):
 
 <h3>チームの個性（6指標）</h3>
 <div class="radars" id="radars"></div>
-<p class="note">各指標はこのリーグ内での相対値（0〜100）。クリックでそのチームに切り替わる。</p>
-<ul class="note">{axis_list}</ul>
+<p class="note">各指標はこのリーグ内での相対値（0〜100）。頂点の番号は下のリストの番号に対応する。
+点線はリーグ平均で、平均が50から離れている指標は、上位に偏っているか下位に長い尾を引いている。
+クリックでそのチームに切り替わる。</p>
+<ol class="note axis-key">{axis_list}</ol>
 
 <h2 id="team-name"></h2>
 <div class="grid">

@@ -29,8 +29,10 @@ LABELS = {
         "table": "League table",
         "fingerprints": "Fingerprints",
         "fingerprint_note": (
-            "Six indices, each scaled within this division. The chart is the same one the "
-            "dashboard draws; the numbers under each club repeat it in text."
+            "Six indices, each scaled within this division. The vertices are numbered 1-6 "
+            "clockwise from the top, in the order the indices are listed under each club "
+            "below, and the dashed outline is the division mean. The chart is the same one "
+            "the dashboard draws; the numbers under each club repeat it in text."
         ),
         "axes": "Indices",
         "grades": "By academic year",
@@ -128,8 +130,9 @@ LABELS = {
         "table": "順位表",
         "fingerprints": "チームの個性",
         "fingerprint_note": (
-            "6指標をこの部の中で相対化した値。図はダッシュボードと同じもので、"
-            "各クラブの節に同じ数値を文字でも載せている。"
+            "6指標をこの部の中で相対化した値。頂点の番号1〜6は上から時計回りで、"
+            "各クラブの節に並ぶ指標の順序と同じ。点線はこの部の平均。"
+            "図はダッシュボードと同じもので、各クラブの節に同じ数値を文字でも載せている。"
         ),
         "axes": "指標",
         "grades": "学年別",

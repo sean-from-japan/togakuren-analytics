@@ -44,6 +44,16 @@ Dates are the day the work landed on `main`.
 - FINDINGS drops the section on one club crossing three tiers in five years.
   The rise is a recruitment decision by the club, not something measured here,
   so it does not belong among the results.
+- **The dashboard's fingerprint radars are readable on their own.** The small
+  charts carried no axis labels at all, so a shape could not be read without
+  guessing which vertex was which; each vertex now shows the index number, and
+  the list under the grid is numbered to match. Every radar also draws the
+  league mean as a dashed outline, so a club reads as a deviation from the
+  field. Because each axis is min-max scaled inside the series, that mean is
+  not 50, and the list prints it per index.
+- `docs/figures/fig-fingerprints.png` re-shot for the numbered vertices and the
+  mean outline, 2026 1部リーグ as before. 1104 × 397, replacing 1104 × 386. The
+  season documents and FINDINGS say what the numbers and the dashed outline are.
 
 ### Added
 
