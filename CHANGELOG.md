@@ -32,6 +32,14 @@ Dates are the day the work landed on `main`.
 
 ### Fixed
 
+- **The documents used statistical notation without ever defining it.** `r`,
+  `RMSE`, `n`, `R²`, `se`, `t`, `MSE`, Brier and "vs the division average" all
+  carried headline claims while being introduced nowhere, so a reader outside
+  the field could not tell whether +0.017 was small or large. FINDINGS now has a
+  `Notation` section before the first result, the section 2 correlation columns
+  say they are `r`, and LEAGUE_COMPARISON, PREDICTION, RATINGS and
+  LEAGUE_STRUCTURE gloss their own metrics at first use. No number changed.
+
 - **The Japanese documents mixed sentence registers.** Nine files carried 126
   sentences that dropped out of です・ます into plain だ・である mid-document,
   almost all of them either the closing sentence of a section or a bold
