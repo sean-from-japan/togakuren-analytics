@@ -78,6 +78,32 @@ across the 2023 boundary — five times the movement at any other. Anything belo
 that pools seasons is pooling different competitions, and
 [docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md) is the accounting.
 
+## Notation
+
+What the symbols in the tables mean. None of it assumes a statistics background.
+
+**n** — the number of cases. In sections 1 and 2 a case is one club in one
+season, so n = 141 means 141 club-and-season combinations.
+
+**Standardised within a division** — rescaled so that each division in each
+season has a mean of 0 and a standard deviation of 1, which is what makes clubs
+in different divisions comparable. 0 is that division's average and +1 is one
+standard deviation above it.
+
+**RMSE** — root mean squared error: the typical distance between a prediction
+and what happened. Lower is better. These figures are on the standardised scale,
+so 1.00 means missing by a full standard deviation on average.
+
+**vs the division average** — how much lower the RMSE is than the RMSE of
+predicting that every club finishes exactly at its division's average. +15.7% is
+15.7% more accurate than that; −0.2% is 0.2% less accurate.
+
+**r** — the Pearson correlation between prediction and outcome, from −1 to +1.
++1 is a perfect ordering, 0 is no relationship, negative is the wrong way round.
+Around +0.5 means the broad ordering is right while individual clubs are not.
+
+**Conversion** — goals per shot. 0.167 is one goal every six shots.
+
 ## 1. A squad list beats a league table
 
 Everything else in this project measures a season that is already under way. This
@@ -192,11 +218,14 @@ What is not obvious is what the move does to *predictability*. Split every
 club-season by what the club had just done, and ask how well each signal
 forecasts the season about to start:
 
-| | Clubs | Last season's table | The squad list |
+| | Clubs | Last season's table (r) | The squad list (r) |
 |---|---|---|---|
 | Promoted | 29 | +0.664 | +0.545 |
 | **Relegated** | 24 | **+0.017** | **+0.568** |
 | Stayed put | 88 | +0.494 | +0.325 |
+
+*Each cell is the correlation between what that signal predicted and how the
+season went. Closer to 1 is better; 0 is no information at all.*
 
 **For a relegated club, its own last table carries no information at all.** Not
 weak information — none, r = +0.017. The same clubs' squad lists predict them at

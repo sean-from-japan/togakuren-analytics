@@ -110,7 +110,8 @@ in both years. Mean points per game of the clubs that stayed put:
 | 1部 | +0.09 (n=9) | **+0.83 (n=6)** | −0.22 (n=9) | +0.00 (n=9) | −0.23 (n=9) |
 | 2部 | +0.23 (n=6) | **+0.59 (n=6)** | +0.11 (n=9) | −0.31 (n=8) | −0.57 (n=5) |
 
-\* 2026 is about 60% played.
+\* 2026 is about 60% played. n is the number of clubs that were in that division
+in both seasons.
 
 A first-division club that did nothing at all gained **0.83 points a game** in
 2023 — five to six times the movement at any other boundary. Six of the twelve

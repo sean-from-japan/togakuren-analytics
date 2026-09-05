@@ -45,6 +45,15 @@ the number to beat. Accuracy is reported because it is legible, not because it i
 informative: a model can gain accuracy by rounding every close fixture towards
 the favourite while getting worse at everything that matters.
 
+What those names mean. **Log loss** scores how much probability a model put on
+the result that actually happened, and grows the more confidently it is wrong, so
+lower is better. **Nats** is its unit when natural logs are used: losing 0.095
+nats is putting about 9% less probability on what happened. **Brier** scores the
+same forecasts as a squared error, runs from 0 to 2, and is also better lower.
+**Prior** is the model that predicts the running frequency of home win, draw and
+away win and nothing else — failing to beat it means the fitting bought nothing.
+**n** in the tables is a number of fixtures.
+
 ## Results
 
 League fixtures only. Settings were chosen on the first block and not revisited.

@@ -62,6 +62,10 @@ Grouped five-fold cross-validation — whole fixtures are held out, so no segmen
 of a test match is ever in training. The error is on the goal difference of the
 whole match, formed by summing the model's segment predictions.
 
+MSE is the mean squared error between the predicted and the actual goal
+difference; lower is better. "vs zero" is how much lower that is than the `zero`
+row, the model that predicts every club and every player to be average.
+
 | model | MSE | vs zero |
 |---|---|---|
 | zero | 6.7676 | — |

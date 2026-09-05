@@ -78,7 +78,9 @@ careful with one. Any reference set of `{talent_spread, gain}` rows works with
 Top flights and lower tiers give slopes 1.013 (se 0.505) and 0.438 (se 0.283) —
 a difference of t = 0.99, so one line fits both and they are used as a single
 band. With n = 11 each that is low power: *cannot be distinguished*, not
-*identical*.
+*identical*. (`se` is the standard error of the slope — how much the estimate
+itself wobbles; `t` is the gap between the two slopes measured in those wobbles,
+and below about 2 it is not a difference.)
 
 ## What came out of it
 
@@ -87,6 +89,12 @@ Fitted on the 22 reference leagues alone:
 ```
 gain = −0.0924 + 1.257 × spread     r = +0.857, R² = 0.735, residual sd 0.0223
 ```
+
+r is the correlation between spread and predictability (−1 to +1, +1 being a
+perfect line); R² is the share of the variation between leagues that the line
+accounts for, so 0.735 is 73.5%; residual sd is the standard deviation of how
+far leagues sit from the line — the unit the residuals below are quoted in, so
+2.54 sd is that many widths away from it.
 
 **Predictability is mostly a function of how far apart the clubs are.** Three
 quarters of the variance across professional divisions, with no reference to
@@ -121,7 +129,8 @@ of football rather than of the players being students.
 justified in [PREDICTION.en.md](PREDICTION.en.md) by squads turning over every year is
 250 days for the Tokyo divisions and 250 for the professional leagues, and across
 23 leagues the chosen half-life ranges 120–4000 days with no relation to talent
-spread (r = −0.208 on the log). Decay helps everywhere; there is no evidence it
+spread (r = −0.208 on the log: a correlation near zero, and pointing the
+opposite way from the hypothesis). Decay helps everywhere; there is no evidence it
 needs to be shorter here.
 
 ## What may be claimed
