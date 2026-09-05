@@ -287,7 +287,7 @@ as a club-level average and never on a per-player row, in any privacy mode.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-285 tests, no network access, no fixtures taken from the federation — the test
+287 tests, no network access, no fixtures taken from the federation — the test
 data is invented clubs and invented people. CI runs them on Linux, macOS and
 Windows against Python 3.9 and 3.13, and fails the build if any collected data is
 ever committed.

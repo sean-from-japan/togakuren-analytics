@@ -32,6 +32,21 @@ Dates are the day the work landed on `main`.
 
 ### Fixed
 
+- **The Japanese documents mixed sentence registers.** Nine files carried 126
+  sentences that dropped out of です・ます into plain だ・である mid-document,
+  almost all of them either the closing sentence of a section or a bold
+  run-in — the places where plain form sounds more decisive. Mixed registers
+  read as content-farm Japanese, which is the wrong impression for a document
+  whose subject is measurement. Every `*.ja.md` is now です・ます throughout,
+  and so are the Japanese label dictionaries the generated documents and the
+  HTML pages are built from. 体言止め is untouched: used consistently for
+  captions and labels it is correct, and only plain verbs and adjectives were
+  changed.
+- `tests/test_docs.py::JapaneseRegister` enforces it, over both the documents
+  and the label dictionaries in `markdown.py`, `trends.py` and `dashboard.py`.
+  Fixing a generated document by hand would otherwise be undone by the next
+  regeneration.
+
 - **`docs/figures/fig-promotion.png` was unreadable.** It had been shot on a
   light background while the page's colours were the dark ones, so both axis
   captions were pale grey on white. Re-shot on the dark palette like the other

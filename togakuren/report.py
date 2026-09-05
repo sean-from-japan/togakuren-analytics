@@ -140,8 +140,8 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
     banner = ""
     if mode == "aggregate":
         banner = (
-            '<div class="banner"><strong>集計モード。</strong> 選手単位の行は出力していない。'
-            "残っているのは集団についての統計情報であり、個人情報保護法の適用範囲外にあたる。</div>"
+            '<div class="banner"><strong>集計モード。</strong> 選手単位の行は出力していません。'
+            "残っているのは集団についての統計情報であり、個人情報保護法の適用範囲外にあたります。</div>"
         )
         player_section = ""
     else:
@@ -150,8 +150,8 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
             banner = (
                 f'<div class="banner"><strong>プライバシーモード: {_e(mode)}。</strong> '
                 f"名前は置き換えてあるが、{anonymity['total']}行のうち{anonymity['unique']}行は"
-                "チームとポジションだけで一意のままであり、どちらも連盟が公開している。"
-                "匿名ではなく仮名化として扱うこと。</div>"
+                "チームとポジションだけで一意のままであり、どちらも連盟が公開しています。"
+                "匿名ではなく仮名化として扱ってください。</div>"
             )
         rows = []
         for player in players[:top]:
@@ -173,7 +173,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
         player_section = (
             f"<h2>90分あたりのシュート数 &mdash; 上位{min(top, len(players))}人</h2>"
             f'<p class="sub">出場時間{min_minutes}分以上。出場時間は先発11人・時刻つきの交代・退場から'
-            "復元した値で、連盟はいずれも直接記録していない。</p>"
+            "復元した値で、連盟はいずれも直接記録していません。</p>"
             + _table(
                 ["選手", "チーム", "学年", "ポジション", "出場", "先発", "出場時間", "シュート", "得点", "90分あたり", "決定率"],
                 rows,
@@ -211,8 +211,8 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
 
 <h2>順位表とシュート</h2>
 {_table(["チーム", "試合", "勝点", "勝-分-敗", "得点", "得失点", "シュート", "1試合平均", "決定率"], table_rows)}
-<p class="note">決定率は得点をシュート数で割った値。順位表と得点ランキングは連盟が公開しているが、
-シュート関連の列はここで算出したもの。</p>
+<p class="note">決定率は得点をシュート数で割った値です。順位表と得点ランキングは連盟が公開していますが、
+シュート関連の列はここで算出したものです。</p>
 
 <div class="grid">
   <div>{_bar_chart(by_volume, 'shots_per_game', 'team', '1試合あたりのシュート数', colour=PALETTE[0])}</div>
@@ -222,7 +222,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
 <h2>時間帯</h2>
 <div class="grid">
   <div>{_column_chart(timeline, '15分ごとの得点', colour=PALETTE[1])}
-    <p class="note">最後の区分にはアディショナルタイムが含まれる。</p></div>
+    <p class="note">最後の区分にはアディショナルタイムが含まれます。</p></div>
   <div>{_column_chart(half_pairs, '時間帯別のシュート', colour=PALETTE[3])}</div>
 </div>
 
@@ -234,7 +234,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=270, top=20):
 
 <footer>
 出典: 東京都大学サッカー連盟 公開コンテンツAPI。
-このレポートはローカルで生成されたもので、同サイトが公開している以上の情報は含まない。
+このレポートはローカルで生成したもので、同サイトが公開している以上の情報は含みません。
 </footer>
 </main></body></html>
 """
