@@ -118,7 +118,8 @@ class JapaneseCopy(unittest.TestCase):
     """Keep previously corrected literal translations out of public output."""
 
     def test_known_translationese_does_not_return(self):
-        banned = ("線を引く", "シュート量", "撃つが", "per試合", "部の移動")
+        banned = ("線を引く", "シュート量", "撃つが", "per試合", "部の移動",
+                  "効く", "効き", "効か", "効い")
         paths = [ROOT / "README.ja.md", ROOT / "FINDINGS.ja.md"]
         paths += list((ROOT / "docs").glob("*.ja.md"))
         paths += [ROOT / "togakuren" / name
