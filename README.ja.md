@@ -79,7 +79,7 @@ togakuren sample --lang en               # docs/PLAYER_ANALYSIS_SAMPLE.en.md
 togakuren sample --lang ja               # docs/PLAYER_ANALYSIS_SAMPLE.ja.md
 ```
 
-`--lang` はHTMLのページにも効きます。グラフも含めてで、`trends --lang en` と
+`--lang` はHTMLのページにも適用されます。グラフも含めてで、`trends --lang en` と
 `dashboard --lang en` は軸ラベルも凡例も英語になります。グラフが描く文字列は描画コード
 ではなくページのペイロードから来るので、コミット済みの図も同じコマンドから両言語ぶん
 撮れます。
