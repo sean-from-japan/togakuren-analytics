@@ -11,13 +11,15 @@ JSON from a server is an ordinary web architecture. Anything needed to render a
 public page, including a token embedded in public JavaScript, is observable by
 the visitor.
 
-The implementation does, however, have concrete issues separate from the choice
-to use an API:
+The implementation does, however, have observations to verify and hardening
+opportunities separate from the choice to use an API:
 
 1. An unfiltered `series` request made with the token shipped in public
    JavaScript returned one `published:false` record. Its ID and content were not
-   inspected or stored. The public token's permissions or server-side publication
-   boundary are too broad.
+   inspected or stored. That fact alone cannot distinguish an empty test record,
+   a duplicate of already-public information, or a real draft, so it does not
+   establish a vulnerability with material impact. It is an observation whose
+   publication intent should be confirmed with the operator.
 2. On the match page, `seriesTeams` returns whole member objects, including
    `birthday`, `height`, `weight`, `formerTeam`, `nationality`, and `note`, even
    though that view does not need them. However, the official team pages
@@ -33,9 +35,9 @@ to use an API:
    end-of-life and all three dependencies need a current dependency review.
 
 The short assessment is therefore: **the API architecture is normal and most
-roster attributes are already intentionally published, while the publication
-boundary still has a defect indicator: exposure of one unpublished record is
-confirmed.**
+roster attributes are already intentionally published. One `published:false`
+record is returned, but without its contents or the operator's intended API
+contract this is an observation to verify, not a confirmed vulnerability.**
 
 ## Architecture
 
@@ -152,7 +154,7 @@ role for public API access.
 | Priority | Observation | Assessment | Why |
 |---|---|---|---|
 | High | API banner says `PHP/7.4.2` | Verify and update | PHP 7.4 reached upstream EOL on 28 November 2022. A banner cannot show whether Debian security fixes were backported. |
-| Medium | Public token returned one unpublished series | Confirmed publication-boundary failure | The UI's `published:true` filter is not a server-enforced policy. |
+| Informational/Low | Public token returned one `published:false` series | Needs confirmation | The UI condition is not server-enforced, but confidentiality impact cannot be determined without the contents and the operator's intended API contract. |
 | Low | Match-page `seriesTeams` returns personal attributes unused by that view | Response minimisation gap | Most are already public on official team pages, so no new confidential-data exposure is confirmed. It still lowers the cost of bulk collection. |
 | Medium | Vue 2.7.10 and old Axios/Lodash | Maintenance and supply-chain risk | Vue 2 is EOL. The observed code alone is not enough to claim immediate exploitability. |
 | Low | CORS `*` and all main HTTP methods advertised | Configuration should be narrowed | CORS is not authorisation, and advertising `DELETE` does not prove the token can delete. |
@@ -188,8 +190,9 @@ Recommended order:
 3. Define fixed public response schemas: retain the detailed roster for the
    official team page while returning only name, number, position, and other
    required fields to the match page.
-4. Remove the unpublished record from public access, then rotate the public
-   token.
+4. Confirm whether returning `published:false` records is intentional. If not,
+   remove them from public API access and rotate the token only if its role was
+   broader than intended.
 5. Upgrade PHP, Cockpit, Vue, Axios, and Lodash to supported versions.
 6. Restrict the browser origin and methods to those actually required, without
    treating CORS as authentication or authorisation.
@@ -205,8 +208,10 @@ always sends `published:true` and requests only the series fields needed by the
 analysis. Games already used `published:true`. Responses remain cached locally
 and requests retain the default 0.5-second spacing.
 
-This does not repair the official API. Another client holding the public token
-can still send an unfiltered query, so the root fix must be server-side.
+This change makes the repository honour its own policy of fetching published
+content only. The official API still accepts unfiltered queries, but whether
+that is a defect or intended behaviour cannot be determined without the record
+contents and the operator's publication policy.
 
 ## Method and limits
 
