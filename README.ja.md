@@ -62,6 +62,7 @@
 | [docs/PREDICTION.ja.md](docs/PREDICTION.ja.md) · [en](docs/PREDICTION.en.md) | 未消化試合の予測と、設定の選択に使っていないシーズンでのクラス事前分布に対する評価。 |
 | [docs/RATINGS.ja.md](docs/RATINGS.ja.md) · [en](docs/RATINGS.en.md) | 調整プラスマイナス。選手情報による予測改善と、結論を逆転させる2つの実装上の誤り。 |
 | [docs/SOURCE_SELECTION.ja.md](docs/SOURCE_SELECTION.ja.md) · [en](docs/SOURCE_SELECTION.en.md) | なぜこのリーグで、なぜ1つ上のリーグではないのか。各連盟が何を公開し、プログラムからの読み取りについて何と書いているか。 |
+| [docs/SITE_ARCHITECTURE.ja.md](docs/SITE_ARCHITECTURE.ja.md) · [en](docs/SITE_ARCHITECTURE.en.md) | 公式サイトのWordPress・Vue・Cockpit API構成、通信フロー、公開APIと脆弱性の境界。 |
 | [docs/DATA_POLICY.ja.md](docs/DATA_POLICY.ja.md) · [en](docs/DATA_POLICY.en.md) | 何を公開してよく、何がだめで、その判断の根拠になる実測値。 |
 | [docs/LEAGUE_COMPARISON.ja.md](docs/LEAGUE_COMPARISON.ja.md) · [en](docs/LEAGUE_COMPARISON.en.md) | この連盟の各部をプロ22リーグと並べたもの。標本を広げた結果、消えた2つの見出し。 |
 | [docs/FIGURES.ja.md](docs/FIGURES.ja.md) · [en](docs/FIGURES.en.md) | コミット済みの各PNGがどのチャートのスクリーンショットか、どう再作成するか。 |

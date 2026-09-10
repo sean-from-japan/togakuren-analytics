@@ -162,8 +162,20 @@ class Client:
     # -- convenience -------------------------------------------------------
 
     def series(self, year=None):
-        """All competition-seasons, newest first."""
-        query = {"filter": {}, "sort": {"year": -1}, "limit": 500}
+        """All published competition-seasons, newest first."""
+        query = {
+            "filter": {"published": True},
+            "fields": {
+                "_id": 1,
+                "year": 1,
+                "name": 1,
+                "shortName": 1,
+                "type": 1,
+                "requirements": 1,
+            },
+            "sort": {"year": -1},
+            "limit": 500,
+        }
         if year:
             query["filter"]["year"] = str(year)
         return self.get("series", query).get("entries", [])

@@ -6,6 +6,12 @@ Dates are the day the work landed on `main`.
 
 ### Added
 
+- `docs/SITE_ARCHITECTURE.{en,ja}.md` documents the official site's WordPress,
+  Vue and Cockpit split, every request made by the match page, the data crossing
+  that boundary, and a security assessment with architecture and sequence
+  diagrams. The review found that an unfiltered request made with the public
+  browser token returned one unpublished series; no identifier or content from
+  it is recorded.
 - **`togakuren intake` — what the squad list is worth before a ball is kicked.**
   The registration list names every player, their academic year, and the high
   school or club youth side they came from, and it is public before the season
@@ -32,6 +38,10 @@ Dates are the day the work landed on `main`.
 
 ### Fixed
 
+- `Client.series()` now always requests `published:true` and projects only the
+  six competition fields ingestion needs. The federation's visible page already
+  applies the publication filter, but this client did not, despite promising to
+  request only already-published content.
 - **The documents used statistical notation without ever defining it.** `r`,
   `RMSE`, `n`, `R²`, `se`, `t`, `MSE`, Brier and "vs the division average" all
   carried headline claims while being introduced nowhere, so a reader outside

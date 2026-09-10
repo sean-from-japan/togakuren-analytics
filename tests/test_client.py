@@ -242,12 +242,19 @@ class Convenience(unittest.TestCase):
             result = call()
         return captured, result
 
-    def test_series_filters_by_year_only_when_one_is_given(self):
+    def test_series_always_filters_to_published_records(self):
         captured, result = self.sent_query(lambda: self.client.series())
-        self.assertEqual(captured["query"]["filter"], {})
+        self.assertEqual(captured["query"]["filter"], {"published": True})
+        self.assertEqual(
+            set(captured["query"]["fields"]),
+            {"_id", "year", "name", "shortName", "type", "requirements"},
+        )
         self.assertEqual(result, [{"_id": "x"}])
         captured, _ = self.sent_query(lambda: self.client.series(2099))
-        self.assertEqual(captured["query"]["filter"], {"year": "2099"})
+        self.assertEqual(
+            captured["query"]["filter"],
+            {"published": True, "year": "2099"},
+        )
 
     def test_games_asks_only_for_published_fixtures_of_one_series(self):
         captured, _ = self.sent_query(lambda: self.client.games("s1"))

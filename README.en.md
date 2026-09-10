@@ -65,6 +65,7 @@ local version adds the squad table and a matchday-by-player minutes grid.*
 | [docs/PREDICTION.en.md](docs/PREDICTION.en.md) · [ja](docs/PREDICTION.ja.md) | Forecasting the fixtures still to play, scored against the class prior on seasons the settings were not chosen on. |
 | [docs/RATINGS.en.md](docs/RATINGS.en.md) · [ja](docs/RATINGS.ja.md) | Adjusted plus-minus: what knowing the players adds over knowing the clubs, and the two mistakes that reverse the answer. |
 | [docs/SOURCE_SELECTION.en.md](docs/SOURCE_SELECTION.en.md) · [ja](docs/SOURCE_SELECTION.ja.md) | Why this league and not the tier above: what each federation publishes, and what its site says about being read by a program. |
+| [docs/SITE_ARCHITECTURE.en.md](docs/SITE_ARCHITECTURE.en.md) · [ja](docs/SITE_ARCHITECTURE.ja.md) | The official site's WordPress, Vue and Cockpit API structure, traffic flow, and the boundary between a public API and a vulnerability. |
 | [docs/DATA_POLICY.en.md](docs/DATA_POLICY.en.md) · [ja](docs/DATA_POLICY.ja.md) | What may be published, what may not, and the measurements behind the answer. |
 | [docs/LEAGUE_COMPARISON.en.md](docs/LEAGUE_COMPARISON.en.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) | This federation's divisions measured against 22 professional leagues, and the two headline results that widening the sample destroyed. |
 | [docs/FIGURES.en.md](docs/FIGURES.en.md) · [ja](docs/FIGURES.ja.md) | Which chart each committed PNG is a picture of, and how to remake one. |
