@@ -18,9 +18,12 @@ to use an API:
    JavaScript returned one `published:false` record. Its ID and content were not
    inspected or stored. The public token's permissions or server-side publication
    boundary are too broad.
-2. `seriesTeams` returns whole member objects, including fields such as
-   `birthday`, `height`, `weight`, `formerTeam`, `nationality`, and `note` that
-   are not required by the visible page.
+2. On the match page, `seriesTeams` returns whole member objects, including
+   `birthday`, `height`, `weight`, `formerTeam`, `nationality`, and `note`, even
+   though that view does not need them. However, the official team pages
+   intentionally publish names, kana, class, birthday, height, weight, former
+   team, and notes in their roster tables. This is a response-minimisation and
+   bulk-collection issue, not a confirmed new disclosure of confidential data.
 3. The API permits any CORS origin and advertises `PUT` and `DELETE` as allowed
    methods. This does not prove that the public token may write, but it is broader
    than a public read client needs.
@@ -29,9 +32,10 @@ to use an API:
 5. The browser receives Vue 2.7.10, Axios 0.21.1, and Lodash 4.17.20. Vue 2 is
    end-of-life and all three dependencies need a current dependency review.
 
-The short assessment is therefore: **the API architecture is normal, while the
-publication boundary and response minimisation have defects or strong defect
-indicators; exposure of one unpublished record is confirmed.**
+The short assessment is therefore: **the API architecture is normal and most
+roster attributes are already intentionally published, while the publication
+boundary still has a defect indicator: exposure of one unpublished record is
+confirmed.**
 
 ## Architecture
 
@@ -115,14 +119,16 @@ page from the same site's WordPress REST API rather than Cockpit.
 |---|---|---|---|
 | `series` | year, `published:true` | name, short name, type, rules | creator/editor IDs, internal order, descriptive text |
 | `games` | `seriesId`, `published:true`, `populate:1` | date, venue, teams, scores, cards, lineups, substitutions, shots | officials, referees, internal metadata, lock state |
-| `seriesTeams` | `seriesId` | team, table, name, number, position | birthday, kana, class, height, weight, former team, nationality, notes |
+| `seriesTeams` | `seriesId` | on the match page: team, table, name, number, position | birthday, kana, class, height, weight, former team, nationality and notes; all but some fields such as nationality are displayed on official team pages |
 | `blocks` | series ID | tournament bracket | may include internal metadata |
 | WordPress REST | fixed page ID 496 | rendered past-results body | public WordPress page representation |
 
-The response is wider than the visible page. Once data reaches the network
-response it is public; hiding it in the browser is not an access-control measure.
-OWASP recommends returning only legitimate properties and never relying on
-client-side filtering of sensitive data.
+The response is wider than the match page that receives it. Names, kana, class,
+birthday, height, weight, former team, and notes are nevertheless intentionally
+displayed on the official team pages, so retrieving those fields through the API
+is not by itself a leak of unpublished information. Returning more fields than a
+particular view needs still makes bulk collection cheaper, and OWASP recommends
+response minimisation rather than client-side filtering.
 
 ## Security boundary
 
@@ -147,7 +153,7 @@ role for public API access.
 |---|---|---|---|
 | High | API banner says `PHP/7.4.2` | Verify and update | PHP 7.4 reached upstream EOL on 28 November 2022. A banner cannot show whether Debian security fixes were backported. |
 | Medium | Public token returned one unpublished series | Confirmed publication-boundary failure | The UI's `published:true` filter is not a server-enforced policy. |
-| Medium | `seriesTeams` returns unused personal attributes | Excessive data exposure | It lowers the cost of bulk collection and re-identification. |
+| Low | Match-page `seriesTeams` returns personal attributes unused by that view | Response minimisation gap | Most are already public on official team pages, so no new confidential-data exposure is confirmed. It still lowers the cost of bulk collection. |
 | Medium | Vue 2.7.10 and old Axios/Lodash | Maintenance and supply-chain risk | Vue 2 is EOL. The observed code alone is not enough to claim immediate exploitability. |
 | Low | CORS `*` and all main HTTP methods advertised | Configuration should be narrowed | CORS is not authorisation, and advertising `DELETE` does not prove the token can delete. |
 | Low | No CSP, HSTS, nosniff or anti-framing header observed | Missing defence in depth | These headers were absent from the `/match` response observed on 10 September 2026. |
@@ -179,8 +185,9 @@ Recommended order:
    `collections/get` routes and explicitly deny save, remove, administration,
    and asset-write routes.
 2. Enforce `published:true` on the server rather than trusting a client filter.
-3. Define fixed public response schemas. In particular, return only the member
-   fields required by each public view.
+3. Define fixed public response schemas: retain the detailed roster for the
+   official team page while returning only name, number, position, and other
+   required fields to the match page.
 4. Remove the unpublished record from public access, then rotate the public
    token.
 5. Upgrade PHP, Cockpit, Vue, Axios, and Lodash to supported versions.
@@ -206,7 +213,9 @@ can still send an unfiltered query, so the root fix must be server-side.
 The assessment read the `/match` HTML and headers, its `common.js`, `match.js`,
 five UI component scripts, `robots.txt`, API-root and CORS responses, one minimal
 unauthenticated request, the key names from one published series, and only the
-counts of `published` values in the unfiltered series response.
+counts of `published` values in the unfiltered series response. Official team
+pages were also checked to distinguish intentionally displayed roster fields
+from API-only fields.
 
 The token value, unpublished record ID and contents, and player values were not
 stored in this document or repository. No scanner, load test, write/delete
@@ -217,6 +226,7 @@ limited external observation, not a full audit of server configuration and logs.
 
 - [Tokyo University Football Association: fixtures and results](https://www.f-togakuren.com/match)
 - [Tokyo University Football Association: privacy policy](https://www.f-togakuren.com/privacy-policy)
+- [Tokyo University Football Association: example team page](https://www.f-togakuren.com/teams/427)
 - [Cockpit CMS: Authentication](https://getcockpit.com/documentation/core/api/authentication)
 - [Cockpit CMS: Configuration](https://getcockpit.com/documentation/core/quickstart/configuration)
 - [OWASP: API3:2019 Excessive Data Exposure](https://owasp.org/API-Security/editions/2019/en/0xa3-excessive-data-exposure/)
