@@ -11,6 +11,8 @@
 
 A standard-library-only Python toolkit that turns the Tokyo University Football Association's published match records into a database and a set of tested measurements: 2,312 fixtures, 53 clubs, 2021–2026, and no collected data in the repository.
 
+**公開ページ / Live pages: [sean-from-japan.github.io/togakuren-analytics](https://sean-from-japan.github.io/togakuren-analytics/)** — 2026年1〜3部のダッシュボード（勝率予測付き）とシーズン横断ページ / the 2026 dashboards with forecasts, and the cross-season page.
+
 ![The dashboard in aggregate mode](docs/example-dashboard.en.png)
 
 ## 主な結果
