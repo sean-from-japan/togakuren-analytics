@@ -6,6 +6,26 @@ Dates are the day the work landed on `main`.
 
 ### Added
 
+- **The dashboard now answers a club's own question: what is left, and what is
+  it worth.** Selecting a club shows every league fixture it has from its own
+  side — results with the score, then the fixtures left in date order, the
+  unscheduled ones marked TBC — and clicking an opponent switches to them.
+  `dashboard --forecast` adds, per fixture left, the chance of winning, drawing
+  and losing and the points the club can expect from it; a chart of points
+  taken, with the expected path and the 80% range through the rest of the
+  season; the chance of every finishing position; and a projected final table. The model, cut-off and
+  seed are the `forecast` command's, so the page and the command agree to the
+  digit. Every number is team-level, so `--privacy aggregate --public` allows it.
+- `predict.points_path` gives one club's points distribution after each of its
+  remaining fixtures exactly, by convolution, where the season simulation
+  samples. The chart's range comes from it.
+- **A second forecast on the record, and a score for the first.**
+  [docs/PREDICTION.en.md](docs/PREDICTION.en.md) keeps the 2026-09-01 table and
+  adds one made on 2026-09-28 from results up to 2026-09-27. Between the two, the
+  72 league fixtures played from 5 to 27 September are scored by the 2026-09-01
+  model as it stood: log loss 0.8436 against the prior's 0.9987, better in all
+  three divisions. The first division also gets each club's expected against
+  actual points over the four games it played in that time.
 - `docs/SITE_ARCHITECTURE.{en,ja}.md` documents the official site's WordPress,
   Vue and Cockpit split, every request made by the match page, the data crossing
   that boundary, and a security assessment with architecture and sequence
@@ -38,6 +58,21 @@ Dates are the day the work landed on `main`.
 
 ### Fixed
 
+- **`forecast` printed the wrong chance of finishing last.** The *last* column
+  took each club's own worst simulated finish instead of twelfth place, so a
+  club that never fell below fourth had its chance of fourth place printed as
+  its chance of finishing last, and the column summed to more than 100%. The simulation was right; only
+  the column was wrong. The 2026-09-01 table is corrected in place, with a note:
+  five clubs move to 0.0%, and the three that could finish last are unchanged.
+- **"Without time decay" in PREDICTION had been measured with a ten-year
+  half-life.** 0.9137 reproduces at 3,650 days; with no decay at all the same
+  fixtures give 0.9272. On the current data the row reads 0.9227, +0.102. The
+  conclusion — decay is worth more than everything else together — gets stronger.
+- **The Elo carry-over paragraph named the wrong setting.** On 2025–2026 the
+  better score was keeping all of last season's rating, not discarding it. Keep
+  all, the worst choice on 2022–24, was the best on 2025–26 (0.8606 against
+  0.8672 for half and 0.8709 for none), so the "no consistent answer" conclusion
+  stands, and more starkly.
 - `Client.series()` now always requests `published:true` and projects only the
   six competition fields ingestion needs. The federation's visible page already
   applies the publication filter, but this client did not, despite promising to
@@ -86,6 +121,16 @@ Dates are the day the work landed on `main`.
 
 ### Changed
 
+- **The 2026 season is loaded through 2026-09-27** — first division 102/132,
+  second 80/90, third 91/105 — and every number in PREDICTION is re-scored on it.
+  Held out, 2025–2026 goes from 525 to 597 fixtures: Poisson 0.8211 against Elo
+  0.8672 and the prior 1.0174. The tuning window's Elo moves from 0.8649 to
+  0.8650 without a 2022–24 result changing: September's fixtures took
+  武蔵野大学松芝園グラウンド past the three-fixture threshold, and home grounds
+  are inferred from every fixture loaded, earlier ones included.
+- The three 2026 season documents, `docs/seasons/README.md` and SEASON_TRENDS
+  are regenerated. The finished seasons' documents change only in the 2026 row
+  of each club's division history.
 - **FINDINGS is reordered and largely rewritten.** The promotion section led on
   a result nobody needed telling — a promoted club takes fewer points — so it
   now opens with what the move does to predictability instead, and the size of

@@ -27,7 +27,7 @@ cards, and none of it is aggregated anywhere.
 | | result | where |
 |---|---|---|
 | **Preseason forecasting** | The squad list, published before a ball is kicked, predicts the season **better than last year's final table does**: +12.8% against the division average over 191 club-seasons, where the table alone scores **−0.2%**. Two well-motivated attempts to improve it both failed, and both are written up. | [FINDINGS.en.md](FINDINGS.en.md) |
-| **Forecasting** | Settings frozen on 2022–24; on 525 held-out fixtures from 2025–26 log loss goes **1.0200 → 0.8192**, past Elo at 0.8753. Accuracy 44.6% → 65.7%. The time decay is the whole story — removing it costs 0.095 nats, more than the model's entire margin over Elo. | [PREDICTION.en.md](docs/PREDICTION.en.md) · [ja](docs/PREDICTION.ja.md) |
+| **Forecasting** | Settings frozen on 2022–24; on 597 held-out fixtures from 2025–26 (to 27 September 2026) log loss goes **1.0174 → 0.8211**, past Elo at 0.8672. Accuracy 44.9% → 65.7%. The time decay is the whole story — removing it costs 0.102 nats, more than the model's entire margin over Elo. | [PREDICTION.en.md](docs/PREDICTION.en.md) · [ja](docs/PREDICTION.ja.md) |
 | **Player ratings** | Adjusted plus-minus over 8,087 lineup segments. Knowing the players beats knowing only the clubs by **+3.73%** (cross-validated) and **+4.06%** (forward split), with the ridge penalties chosen *inside* each training fold. | [RATINGS.en.md](docs/RATINGS.en.md) · [ja](docs/RATINGS.ja.md) |
 | **What the data cannot do** | Goal records carry a scorer and a minute and nothing else, so **penalties cannot be separated from open play** — no non-penalty rate is possible from this source. Goal events reconcile with the recorded score in **79%** of fixtures. | [FINDINGS.en.md](FINDINGS.en.md) |
 | **Comparing leagues** | Predictability is mostly a function of how far apart the clubs are: `gain = −0.092 + 1.257 × spread`, R² = **0.735** over 22 professional divisions — 73.5% of the variation between them. Noll-Scully, the standard balance measure, misreads a short season and says this league is ordinary when it is not. | [LEAGUE_COMPARISON.en.md](docs/LEAGUE_COMPARISON.en.md) · [ja](docs/LEAGUE_COMPARISON.ja.md) |
@@ -115,6 +115,7 @@ togakuren ingest --year 2026
 
 togakuren list                                       # what is loaded
 togakuren dashboard --series "2026 1部"              # interactive, team selector
+togakuren dashboard --series "2026 1部" --forecast   # plus odds and projected points
 togakuren report --series "2026 1部"                 # flat standalone HTML
 togakuren export --series "2026 1部" --out d1.csv    # per-player season rows
 togakuren trends                                     # every season at once
@@ -166,6 +167,10 @@ The rest of this section describes the dashboard, which is the larger of the two
 
 **Team level**, behind a selector button
 
+- **Fixtures and results.** The club's league fixtures in one table: results as
+  W/D/L with the score, then the fixtures left in date order, with any the
+  federation has not scheduled yet marked TBC. Click an opponent to switch to
+  them.
 - **A matchday × player minutes grid.** The single most useful view for a
   squad: who actually plays, who rotates, who disappears after a certain week. A
   settled side is a solid block; a rotated one is mottled.
@@ -173,6 +178,22 @@ The rest of this section describes the dashboard, which is the larger of the two
 - **The club's history across divisions**, followed by its federation-wide id, so
   relegation and promotion appear as a change of division on consecutive rows.
 - The full squad table with per-90 rates.
+
+**With `--forecast`** (for a season with fixtures left)
+
+- **Odds for each fixture left** — the club's chance of winning, drawing and
+  losing, and the points it can expect from it: three times the chance of a win,
+  plus the chance of a draw.
+- **Points, taken and projected** — the points so far, then the expected path
+  through the rest of the season and the range the club finishes inside four
+  times in five.
+- **Where it finishes** — the chance of each final position.
+- **A projected final table**, in the league section: every club's projected
+  points and its chance of the title, the top three and last place.
+
+The numbers come from the same model, cut-off and seed as `togakuren forecast`,
+so the page and the command agree to the digit. All of it is team-level, so it is
+allowed under `--privacy aggregate --public`.
 
 **Across seasons** (`togakuren trends`)
 
@@ -288,7 +309,7 @@ as a club-level average and never on a per-player row, in any privacy mode.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-287 tests, no network access, no fixtures taken from the federation — the test
+296 tests, no network access, no fixtures taken from the federation — the test
 data is invented clubs and invented people. CI runs them on Linux, macOS and
 Windows against Python 3.9 and 3.13, and fails the build if any collected data is
 ever committed.

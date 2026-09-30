@@ -25,6 +25,6 @@ Aggregates only / 集計値のみ — [English data policy](../DATA_POLICY.en.md
 | 2025 | 2部リーグ | 90/90 | [en](2025-d2.en.md) · [ja](2025-d2.ja.md) |
 | 2025 | 3部リーグ | 72/72 | [en](2025-d3.en.md) · [ja](2025-d3.ja.md) |
 | 2025 | チャレンジリーグ | 30/30 | [en](2025-challenge.en.md) · [ja](2025-challenge.ja.md) |
-| 2026 | 1部リーグ *(in progress / 進行中)* | 78/132 | [en](2026-d1.en.md) · [ja](2026-d1.ja.md) |
-| 2026 | 2部リーグ *(in progress / 進行中)* | 60/90 | [en](2026-d2.en.md) · [ja](2026-d2.ja.md) |
-| 2026 | 3部リーグ *(in progress / 進行中)* | 63/105 | [en](2026-d3.en.md) · [ja](2026-d3.ja.md) |
+| 2026 | 1部リーグ *(in progress / 進行中)* | 102/132 | [en](2026-d1.en.md) · [ja](2026-d1.ja.md) |
+| 2026 | 2部リーグ *(in progress / 進行中)* | 80/90 | [en](2026-d2.en.md) · [ja](2026-d2.ja.md) |
+| 2026 | 3部リーグ *(in progress / 進行中)* | 91/105 | [en](2026-d3.en.md) · [ja](2026-d3.ja.md) |
