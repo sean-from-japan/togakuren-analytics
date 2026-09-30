@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>togakuren-analytics</title>
+<style>
+  :root { --bg: #14171c; --panel: #1b1f26; --line: #2b313b; --text: #e6e8eb; --muted: #9aa3ad; --accent: #6aaede; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 8px; }
+  p { color: var(--muted); margin: 0 0 12px; }
+  h2 { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 32px 0 12px; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  li { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .langs a { margin-left: 12px; }
+  footer { margin-top: 40px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>togakuren-analytics</h1>
+  <p>東京都大学サッカー連盟の公開記録から作った、チーム単位の集計ページです。選手個人の行は含みません。</p>
+  <p>Team-level pages built from the Tokyo University Football Association's published records. No per-player rows.</p>
+
+  <h2>2026 season · with forecast</h2>
+  <ul>
+    <li><span>1部 / First division</span><span class="langs"><a href="2026-d1.ja.html">日本語</a><a href="2026-d1.en.html">English</a></span></li>
+    <li><span>2部 / Second division</span><span class="langs"><a href="2026-d2.ja.html">日本語</a><a href="2026-d2.en.html">English</a></span></li>
+    <li><span>3部 / Third division</span><span class="langs"><a href="2026-d3.ja.html">日本語</a><a href="2026-d3.en.html">English</a></span></li>
+  </ul>
+
+  <h2>2021–2026 · across seasons</h2>
+  <ul>
+    <li><span>シーズン横断 / Trends</span><span class="langs"><a href="trends.ja.html">日本語</a><a href="trends.en.html">English</a></span></li>
+  </ul>
+
+  <footer>
+    <p>Source and method: <a href="https://github.com/sean-from-japan/togakuren-analytics">github.com/sean-from-japan/togakuren-analytics</a></p>
+    <p>東京都大学サッカー連盟とは無関係の個人プロジェクトです。 Not affiliated with the federation.</p>
+  </footer>
+</main>
+</body>
+</html>

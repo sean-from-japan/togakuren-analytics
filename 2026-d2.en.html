@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2部リーグ 2026 — dashboard</title>
+<style>
+:root { color-scheme: light dark;
+  --bg:#fff; --fg:#16191d; --muted:#5c6470; --line:#dfe3e8; --panel:#f7f8fa;
+  --accent:#2f6f9f; --warm:#c96a3f; --cool:#4c8b6b; --plum:#8a6bb0; }
+@media (prefers-color-scheme: dark) { :root {
+  --bg:#14171b; --fg:#e6e9ed; --muted:#9aa3af; --line:#2a2f36; --panel:#1b1f24;
+  --accent:#6aa8d8; --warm:#e08a5f; --cool:#6fb391; --plum:#a98cd0; } }
+* { box-sizing:border-box; }
+body { margin:0; padding:1.75rem 1.25rem 4rem; background:var(--bg); color:var(--fg);
+  font:15px/1.6 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif; }
+main { max-width:1100px; margin:0 auto; }
+h1 { font-size:1.55rem; margin:0 0 .2rem; letter-spacing:-.01em; }
+h2 { font-size:1.02rem; margin:2.4rem 0 .5rem; padding-bottom:.35rem; border-bottom:1px solid var(--line); }
+h3 { font-size:.85rem; margin:1.4rem 0 .4rem; color:var(--muted); font-weight:600;
+  text-transform:uppercase; letter-spacing:.05em; }
+.sub { color:var(--muted); font-size:.85rem; margin:0 0 1.2rem; }
+.note { color:var(--muted); font-size:.8rem; margin:.35rem 0 0; }
+.banner { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
+  padding:.7rem .95rem; border-radius:4px; font-size:.85rem; margin:1rem 0; }
+.tabs { display:flex; flex-wrap:wrap; gap:.4rem; margin:.9rem 0 1.2rem; }
+.tabs button { font:inherit; font-size:.82rem; padding:.35rem .75rem; cursor:pointer;
+  border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:999px; }
+.tabs button:hover { border-color:var(--accent); }
+.tabs button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:.83rem; }
+th,td { padding:.35rem .55rem; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap; }
+th:first-child,td:first-child,th.l,td.l { text-align:left; }
+th { color:var(--muted); font-weight:600; font-size:.74rem; text-transform:uppercase; letter-spacing:.04em; }
+tbody tr:hover { background:var(--panel); }
+svg { display:block; max-width:100%; height:auto; }
+#bubbles svg, #curve svg, #opponents svg, #grades svg,
+#goals-line svg, #shots-line svg, #conv-line svg, #trajectory svg, #moves svg,
+#projection svg, #places svg
+  { width:100%; max-width:640px; }
+.odds { display:flex; width:84px; height:9px; border-radius:2px; overflow:hidden; }
+.odds i { display:block; height:100%; }
+td.pick { cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px; }
+#radar-big svg { width:100%; max-width:440px; }
+.grid { display:grid; gap:1.4rem; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); }
+.cards { display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); margin:.8rem 0; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:.6rem .7rem; }
+.card b { display:block; font-size:1.28rem; font-weight:650; letter-spacing:-.02em; }
+.card span { color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; }
+.radars { display:grid; gap:.5rem; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); }
+.radars figure { margin:0; text-align:center; }
+.radars figcaption { font-size:.73rem; color:var(--muted); margin-top:-.3rem; }
+.radars figure.on { outline:2px solid var(--accent); outline-offset:3px; border-radius:6px; }
+.axis-key { columns:2; column-gap:1.6rem; padding-left:1.4rem; margin:.5rem 0 0; }
+.axis-key li { margin:.1rem 0; break-inside:avoid; }
+.heat td { padding:0; border:none; }
+.heat .cell { width:19px; height:17px; border-radius:2px; }
+.heat th { font-size:.68rem; padding:.2rem .25rem; }
+.heat td.l { padding:.1rem .5rem .1rem 0; font-size:.78rem; max-width:190px;
+  overflow:hidden; text-overflow:ellipsis; }
+.legend { display:flex; gap:.5rem; align-items:center; font-size:.75rem; color:var(--muted); margin-top:.5rem; }
+.legend i { width:15px; height:11px; border-radius:2px; display:inline-block; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+  color:var(--muted); font-size:.79rem; }
+</style>
+</head><body><main>
+<h1>2026年度 第４回 関東大学サッカーリーグ戦 東京・神奈川 2部</h1>
+<p class="sub">2026 · 10 clubs · generated 2026-09-30 16:13
+ · togakuren-analytics</p>
+<div class="banner"><strong>Aggregate mode.</strong> Squad and minutes views are omitted; what remains describes groups, not individuals.</div>
+
+<div class="tabs"><button type="button" data-team="699d4e0fd6d37f77dd6a8745" aria-pressed="false">1. 東京大学</button><button type="button" data-team="699d4e29b4bdc145815ea093" aria-pressed="false">2. 日本文化大學</button><button type="button" data-team="699d4e0c802136197678fce4" aria-pressed="false">3. 成蹊大学</button><button type="button" data-team="699d4e1844afb33c7e5892a3" aria-pressed="false">4. 成城大学</button><button type="button" data-team="699d4e12a3023b7abf540654" aria-pressed="false">5. 東京理科大学</button><button type="button" data-team="699d4e22c1efba0a054fe732" aria-pressed="false">6. 芝浦工業大学</button><button type="button" data-team="699d4e27e3b43170e647cb03" aria-pressed="false">7. 東京都立大学</button><button type="button" data-team="699d4e1bec4fe84b0d2faff3" aria-pressed="false">8. 創価大学</button><button type="button" data-team="699d4e2c7620b315cb046963" aria-pressed="false">9. 防衛大学校（神奈川県）</button><button type="button" data-team="699d4e15802136197678fce5" aria-pressed="false">10. 一橋大学</button></div>
+
+<h2>The division</h2>
+<h3>Position × shot volume × goals</h3>
+<div id="bubbles"></div>
+<p class="note">Final position on the x axis, shots per game on the y, total goals as circle area. A side that shoots a lot without scoring separates from one that converts a handful of chances.</p>
+
+<div class="grid">
+  <div><h3>Points by matchday</h3><div id="curve"></div></div>
+  <div><h3>Where the goals came from</h3><div id="opponents"></div>
+  <p class="note">Blue is goals against the top half, orange against the bottom half.</p></div>
+</div>
+
+
+<h3>Projected final table</h3>
+<div id="projected"></div>
+<p class="note">A Poisson model fitted on every result up to 2026-09-28, playing the fixtures left 10,000 times over. Only outcomes are drawn, so clubs level on points are split by the goal difference they have now. One model&#x27;s odds, not advice.</p>
+
+<h3>Squad character (six indices)</h3>
+<div class="radars" id="radars"></div>
+<p class="note">Each index is scaled inside this division (0–100). The numbers on the vertices key to the list below, and the dashed outline is the division mean — an index whose mean is far from 50 has the field bunched at one end. Click a club to select it.</p>
+<ol class="note axis-key"><li><b>Shot volume</b> — Shots per game (division mean 47)</li><li><b>Finishing</b> — Goals per shot (division mean 50)</li><li><b>Defence</b> — Fewer goals conceded per game (division mean 61)</li><li><b>Rotation</b> — Minutes spread beyond a settled eleven (division mean 50)</li><li><b>Underclassmen</b> — Share of minutes played by 1st and 2nd years (division mean 35)</li><li><b>Second-half weight</b> — Share of shots taken in the second half (division mean 48)</li></ol>
+
+<h2 id="team-name"></h2>
+<div class="grid">
+  <div id="radar-big"></div>
+  <div><div class="cards" id="team-cards"></div><div id="grades"></div></div>
+</div>
+
+<h3>Fixtures and results</h3>
+<div id="fixtures"></div>
+<p class="note">Every league fixture this club has: results first, then what is left in date order, with the unscheduled ones last. Click an opponent to switch to them.</p>
+
+<div class="cards" id="forecast-cards"></div>
+<div class="grid">
+  <div><h3>Points taken, and where they are heading</h3><div id="projection"></div></div>
+  <div><h3>Where it finishes</h3><div id="places"></div></div>
+</div>
+<p class="note">Solid is points taken; dashed is the expected path through the fixtures left, in the order they are scheduled; the band is where the club ends up four times in five. Grey lines are the rest of the division.</p>
+
+<h3>Earlier seasons, tracked across divisions</h3>
+<div id="history"></div>
+
+
+<footer>Source: the Tokyo University Football Association&#x27;s public content API. Generated locally, and it holds nothing the federation&#x27;s own site does not already publish.</footer>
+</main>
+<script id="payload" type="application/json">{"axes": [{"key": "volume", "label": "Shot volume", "hint": "Shots per game"}, {"key": "finishing", "label": "Finishing", "hint": "Goals per shot"}, {"key": "defence", "label": "Defence", "hint": "Fewer goals conceded per game"}, {"key": "rotation", "label": "Rotation", "hint": "Minutes spread beyond a settled eleven"}, {"key": "youth", "label": "Underclassmen", "hint": "Share of minutes played by 1st and 2nd years"}, {"key": "late", "label": "Second-half weight", "hint": "Share of shots taken in the second half"}], "t": {"html_lang": "en", "title": "{division} {year} — dashboard", "subtitle": "{year} · {teams} clubs · generated {when}", "h_league": "The division", "h_bubbles": "Position × shot volume × goals", "bubbles_title": "Position against shot volume", "bubbles_y": "Shots/game", "bubbles_x": "position →", "bubbles_key": "circle area = goals scored", "bubbles_tip": "{team} — {rank} / {shots} shots per game / {goals} goals", "bubbles_note": "Final position on the x axis, shots per game on the y, total goals as circle area. A side that shoots a lot without scoring separates from one that converts a handful of chances.", "h_curve": "Points by matchday", "curve_title": "Points accumulated by matchday", "curve_x": "matchday →", "h_opponents": "Where the goals came from", "opponents_title": "Goals split by the opponent's half of the table", "opponents_row": "{top}+{bottom}  {share} from below", "opponents_gap": 132, "opponents_note": "Blue is goals against the top half, orange against the bottom half.", "h_radars": "Squad character (six indices)", "radar_title": "{team}: six indices", "radars_note": "Each index is scaled inside this division (0–100). The numbers on the vertices key to the list below, and the dashed outline is the division mean — an index whose mean is far from 50 has the field bunched at one end. Click a club to select it.", "axis_mean": "division mean {mean:.0f}", "h_history": "Earlier seasons, tracked across divisions", "cols_history": ["Season", "Division", "P", "W-D-L", "Pts", "Pts/game"], "cols_squad": ["Player", "Yr", "Pos", "Apps", "Starts", "Min", "Shots", "Goals", "Shots/90", "Conv"], "card_points": "points", "card_scored": "scored", "card_conceded": "conceded", "card_shots": "shots/game", "card_conversion": "conversion", "card_used": "players used", "card_core": "minutes taken by the top eleven", "card_grade": "mean academic year", "grades_title": "Minutes by academic year", "grades_bar": "{minutes} min / {goals} goals", "grades_axis": "year {grade} ({players})", "h_heat": "Minutes by matchday (matchday × player)", "heat_total": "total", "heat_legend": "minutes", "heat_tip": "matchday {section}, {minutes} min", "heat_note": "Most-used players at the top. A settled side is a solid block; a rotated one is mottled.", "h_squad": "Squad", "year_suffix": "", "h_fixtures": "Fixtures and results", "cols_fixtures": ["MD", "Date", "Opponent", "Venue", "Result"], "cols_odds": ["", "Win", "Draw", "Loss", "Exp. pts"], "result_marks": ["W", "D", "L"], "tbc": "TBC", "fixtures_note": "Every league fixture this club has: results first, then what is left in date order, with the unscheduled ones last. Click an opponent to switch to them.", "h_projected": "Projected final table", "cols_projected": ["Club", "P", "Pts", "Proj.", "Title", "Top 3", "Last"], "projected_note": "A Poisson model fitted on every result up to {asof}, playing the fixtures left {runs} times over. Only outcomes are drawn, so clubs level on points are split by the goal difference they have now. One model's odds, not advice.", "h_projection": "Points taken, and where they are heading", "projection_title": "Points by games played, with the projection", "projection_x": "games played →", "projection_end": "{mean} ({low}–{high})", "projection_note": "Solid is points taken; dashed is the expected path through the fixtures left, in the order they are scheduled; the band is where the club ends up four times in five. Grey lines are the rest of the division.", "h_places": "Where it finishes", "places_title": "Chance of each finishing position", "places_tip": "position {place}: {share}", "card_expected": "projected points", "card_title": "title", "card_top3": "top 3", "card_last": "last", "footer": "Source: the Tokyo University Football Association's public content API. Generated locally, and it holds nothing the federation's own site does not already publish."}, "axis_means": {"volume": 47.3, "finishing": 49.9, "defence": 60.6, "rotation": 50.2, "youth": 35.4, "late": 48.0}, "teams": [{"team_pk": "699d4e0fd6d37f77dd6a8745", "team_id": "420", "team": "東京大学", "rank": 1, "points": 42, "played": 16, "goals_for": 30, "goals_against": 10, "shots": 155, "shots_per_game": 9.69, "conversion": 0.1935, "conceded_per_game": 0.62, "players_used": 26, "regulars": 10, "core_share": 0.8284, "youth_share": 0.2062, "mean_grade": 3.182, "second_half_share": 0.5355, "grades": {"1": {"players": 0, "minutes": 0, "goals": 0}, "2": {"players": 6, "minutes": 3267, "goals": 11}, "3": {"players": 9, "minutes": 6424, "goals": 3}, "4": {"players": 11, "minutes": 6149, "goals": 16}}, "axes": {"volume": 40.7, "finishing": 100.0, "defence": 100.0, "rotation": 4.1, "youth": 16.3, "late": 57.0}}, {"team_pk": "699d4e29b4bdc145815ea093", "team_id": "445", "team": "日本文化大學", "rank": 2, "points": 38, "played": 16, "goals_for": 36, "goals_against": 10, "shots": 228, "shots_per_game": 14.25, "conversion": 0.1579, "conceded_per_game": 0.62, "players_used": 30, "regulars": 11, "core_share": 0.8366, "youth_share": 0.8281, "mean_grade": 1.795, "second_half_share": 0.4825, "grades": {"1": {"players": 12, "minutes": 5974, "goals": 7}, "2": {"players": 15, "minutes": 7143, "goals": 17}, "3": {"players": 3, "minutes": 2723, "goals": 12}, "4": {"players": 0, "minutes": 0, "goals": 0}}, "axes": {"volume": 100.0, "finishing": 65.5, "defence": 100.0, "rotation": 0.0, "youth": 100.0, "late": 21.6}}, {"team_pk": "699d4e0c802136197678fce4", "team_id": "415", "team": "成蹊大学", "rank": 3, "points": 36, "played": 16, "goals_for": 30, "goals_against": 12, "shots": 225, "shots_per_game": 14.06, "conversion": 0.1333, "conceded_per_game": 0.75, "players_used": 35, "regulars": 8, "core_share": 0.6353, "youth_share": 0.1908, "mean_grade": 3.23, "second_half_share": 0.6, "grades": {"1": {"players": 3, "minutes": 421, "goals": 0}, "2": {"players": 10, "minutes": 2602, "goals": 7}, "3": {"players": 10, "minutes": 5737, "goals": 11}, "4": {"players": 12, "minutes": 7080, "goals": 10}}, "axes": {"volume": 97.6, "finishing": 41.7, "defence": 94.1, "rotation": 100.0, "youth": 14.2, "late": 100.0}}, {"team_pk": "699d4e1844afb33c7e5892a3", "team_id": "425", "team": "成城大学", "rank": 4, "points": 24, "played": 16, "goals_for": 30, "goals_against": 23, "shots": 166, "shots_per_game": 10.38, "conversion": 0.1807, "conceded_per_game": 1.44, "players_used": 33, "regulars": 8, "core_share": 0.6813, "youth_share": 0.3076, "mean_grade": 2.78, "second_half_share": 0.5723, "grades": {"1": {"players": 10, "minutes": 3104, "goals": 3}, "2": {"players": 4, "minutes": 1769, "goals": 2}, "3": {"players": 10, "minutes": 6467, "goals": 13}, "4": {"players": 9, "minutes": 4500, "goals": 10}}, "axes": {"volume": 49.6, "finishing": 87.6, "defence": 61.8, "rotation": 77.2, "youth": 29.9, "late": 81.5}}, {"team_pk": "699d4e12a3023b7abf540654", "team_id": "426", "team": "東京理科大学", "rank": 5, "points": 19, "played": 16, "goals_for": 24, "goals_against": 24, "shots": 171, "shots_per_game": 10.69, "conversion": 0.1404, "conceded_per_game": 1.5, "players_used": 22, "regulars": 10, "core_share": 0.7872, "youth_share": 0.0852, "mean_grade": 3.362, "second_half_share": 0.4503, "grades": {"1": {"players": 0, "minutes": 0, "goals": 0}, "2": {"players": 5, "minutes": 1349, "goals": 0}, "3": {"players": 7, "minutes": 7406, "goals": 3}, "4": {"players": 10, "minutes": 7085, "goals": 21}}, "axes": {"volume": 53.7, "finishing": 48.5, "defence": 58.8, "rotation": 24.6, "youth": 0.0, "late": 0.2}}, {"team_pk": "699d4e22c1efba0a054fe732", "team_id": "3165", "team": "芝浦工業大学", "rank": 6, "points": 16, "played": 16, "goals_for": 26, "goals_against": 30, "shots": 180, "shots_per_game": 11.25, "conversion": 0.1444, "conceded_per_game": 1.88, "players_used": 26, "regulars": 10, "core_share": 0.6682, "youth_share": 0.3025, "mean_grade": 3.083, "second_half_share": 0.45, "grades": {"1": {"players": 4, "minutes": 1692, "goals": 1}, "2": {"players": 6, "minutes": 3089, "goals": 6}, "3": {"players": 5, "minutes": 2704, "goals": 4}, "4": {"players": 10, "minutes": 8186, "goals": 15}}, "axes": {"volume": 61.0, "finishing": 52.5, "defence": 41.2, "rotation": 83.7, "youth": 29.3, "late": 0.0}}, {"team_pk": "699d4e27e3b43170e647cb03", "team_id": "427", "team": "東京都立大学", "rank": 7, "points": 14, "played": 16, "goals_for": 16, "goals_against": 22, "shots": 140, "shots_per_game": 8.75, "conversion": 0.1143, "conceded_per_game": 1.38, "players_used": 30, "regulars": 12, "core_share": 0.6985, "youth_share": 0.5667, "mean_grade": 2.526, "second_half_share": 0.5143, "grades": {"1": {"players": 5, "minutes": 1950, "goals": 2}, "2": {"players": 10, "minutes": 7027, "goals": 10}, "3": {"players": 7, "minutes": 3443, "goals": 0}, "4": {"players": 8, "minutes": 3420, "goals": 4}}, "axes": {"volume": 28.5, "finishing": 23.2, "defence": 64.7, "rotation": 68.6, "youth": 64.8, "late": 42.9}}, {"team_pk": "699d4e1bec4fe84b0d2faff3", "team_id": "429", "team": "創価大学", "rank": 8, "points": 14, "played": 16, "goals_for": 13, "goals_against": 30, "shots": 144, "shots_per_game": 9.0, "conversion": 0.0903, "conceded_per_game": 1.88, "players_used": 23, "regulars": 10, "core_share": 0.7133, "youth_share": 0.4684, "mean_grade": 2.315, "second_half_share": 0.5278, "grades": {"1": {"players": 7, "minutes": 3741, "goals": 2}, "2": {"players": 6, "minutes": 3639, "goals": 2}, "3": {"players": 4, "minutes": 3802, "goals": 5}, "4": {"players": 5, "minutes": 3513, "goals": 1}}, "axes": {"volume": 31.7, "finishing": 0.0, "defence": 41.2, "rotation": 61.3, "youth": 51.6, "late": 51.9}}, {"team_pk": "699d4e2c7620b315cb046963", "team_id": "5498", "team": "防衛大学校（神奈川県）", "rank": 9, "points": 13, "played": 16, "goals_for": 16, "goals_against": 44, "shots": 105, "shots_per_game": 6.56, "conversion": 0.1524, "conceded_per_game": 2.75, "players_used": 26, "regulars": 11, "core_share": 0.7645, "youth_share": 0.294, "mean_grade": 2.735, "second_half_share": 0.5143, "grades": {"1": {"players": 3, "minutes": 1340, "goals": 0}, "2": {"players": 4, "minutes": 3317, "goals": 0}, "3": {"players": 12, "minutes": 9385, "goals": 15}, "4": {"players": 7, "minutes": 1798, "goals": 1}}, "axes": {"volume": 0.0, "finishing": 60.1, "defence": 0.0, "rotation": 35.8, "youth": 28.1, "late": 42.9}}, {"team_pk": "699d4e15802136197678fce5", "team_id": "424", "team": "一橋大学", "rank": 10, "points": 11, "played": 16, "goals_for": 13, "goals_against": 29, "shots": 117, "shots_per_game": 7.31, "conversion": 0.1111, "conceded_per_game": 1.81, "players_used": 34, "regulars": 11, "core_share": 0.7433, "youth_share": 0.2338, "mean_grade": 3.183, "second_half_share": 0.5726, "grades": {"1": {"players": 5, "minutes": 747, "goals": 1}, "2": {"players": 8, "minutes": 2957, "goals": 1}, "3": {"players": 7, "minutes": 4785, "goals": 2}, "4": {"players": 14, "minutes": 7355, "goals": 9}}, "axes": {"volume": 9.8, "finishing": 20.2, "defence": 44.1, "rotation": 46.3, "youth": 20.0, "late": 81.8}}], "curve": [{"team_pk": "699d4e29b4bdc145815ea093", "team": "日本文化大學", "points": [[1, 3], [2, 6], [3, 9], [4, 10], [5, 10], [6, 13], [7, 16], [8, 19], [9, 22], [10, 25], [11, 25], [12, 28], [13, 31], [14, 32], [15, 35], [16, 38]]}, {"team_pk": "699d4e12a3023b7abf540654", "team": "東京理科大学", "points": [[1, 0], [2, 3], [3, 4], [4, 4], [5, 4], [6, 7], [7, 10], [8, 10], [9, 11], [10, 11], [11, 12], [12, 13], [13, 13], [14, 16], [15, 16], [16, 19]]}, {"team_pk": "699d4e27e3b43170e647cb03", "team": "東京都立大学", "points": [[1, 0], [2, 3], [3, 3], [4, 3], [5, 4], [6, 4], [7, 4], [8, 4], [9, 5], [10, 5], [11, 8], [12, 8], [13, 8], [14, 11], [15, 14], [16, 14]]}, {"team_pk": "699d4e0fd6d37f77dd6a8745", "team": "東京大学", "points": [[1, 3], [2, 6], [3, 9], [4, 12], [5, 15], [6, 18], [7, 21], [8, 22], [9, 25], [10, 28], [11, 31], [12, 32], [13, 35], [14, 36], [15, 39], [16, 42]]}, {"team_pk": "699d4e15802136197678fce5", "team": "一橋大学", "points": [[1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 3], [9, 6], [10, 6], [11, 7], [12, 7], [13, 7], [14, 10], [15, 10], [16, 11]]}, {"team_pk": "699d4e1844afb33c7e5892a3", "team": "成城大学", "points": [[1, 3], [2, 6], [3, 6], [4, 9], [5, 10], [6, 10], [7, 10], [8, 13], [9, 13], [10, 16], [11, 16], [12, 17], [13, 20], [14, 20], [15, 23], [16, 24]]}, {"team_pk": "699d4e22c1efba0a054fe732", "team": "芝浦工業大学", "points": [[1, 3], [2, 3], [3, 3], [4, 6], [5, 6], [6, 9], [7, 9], [8, 9], [9, 9], [10, 10], [11, 10], [12, 13], [13, 16], [14, 16], [15, 16], [16, 16]]}, {"team_pk": "699d4e1bec4fe84b0d2faff3", "team": "創価大学", "points": [[1, 0], [2, 0], [3, 1], [4, 2], [5, 5], [6, 5], [7, 5], [8, 5], [9, 6], [10, 7], [11, 10], [12, 11], [13, 11], [14, 11], [15, 14], [16, 14]]}, {"team_pk": "699d4e2c7620b315cb046963", "team": "防衛大学校（神奈川県）", "points": [[1, 0], [2, 0], [3, 3], [4, 3], [5, 6], [6, 6], [7, 9], [8, 12], [9, 12], [10, 12], [11, 12], [12, 12], [13, 12], [14, 12], [15, 12], [16, 13]]}, {"team_pk": "699d4e0c802136197678fce4", "team": "成蹊大学", "points": [[1, 3], [2, 3], [3, 6], [4, 9], [5, 12], [6, 15], [7, 18], [8, 19], [9, 20], [10, 23], [11, 26], [12, 29], [13, 32], [14, 35], [15, 35], [16, 36]]}], "opponents": [{"team_pk": "699d4e0fd6d37f77dd6a8745", "team": "東京大学", "rank": 1, "vs_top": 10, "vs_bottom": 20, "bottom_share": 0.6666666666666666}, {"team_pk": "699d4e29b4bdc145815ea093", "team": "日本文化大學", "rank": 2, "vs_top": 12, "vs_bottom": 24, "bottom_share": 0.6666666666666666}, {"team_pk": "699d4e0c802136197678fce4", "team": "成蹊大学", "rank": 3, "vs_top": 7, "vs_bottom": 23, "bottom_share": 0.7666666666666667}, {"team_pk": "699d4e1844afb33c7e5892a3", "team": "成城大学", "rank": 4, "vs_top": 8, "vs_bottom": 22, "bottom_share": 0.7333333333333333}, {"team_pk": "699d4e12a3023b7abf540654", "team": "東京理科大学", "rank": 5, "vs_top": 3, "vs_bottom": 21, "bottom_share": 0.875}, {"team_pk": "699d4e22c1efba0a054fe732", "team": "芝浦工業大学", "rank": 6, "vs_top": 12, "vs_bottom": 14, "bottom_share": 0.5384615384615384}, {"team_pk": "699d4e27e3b43170e647cb03", "team": "東京都立大学", "rank": 7, "vs_top": 8, "vs_bottom": 8, "bottom_share": 0.5}, {"team_pk": "699d4e1bec4fe84b0d2faff3", "team": "創価大学", "rank": 8, "vs_top": 9, "vs_bottom": 4, "bottom_share": 0.3076923076923077}, {"team_pk": "699d4e2c7620b315cb046963", "team": "防衛大学校（神奈川県）", "rank": 9, "vs_top": 7, "vs_bottom": 9, "bottom_share": 0.5625}, {"team_pk": "699d4e15802136197678fce5", "team": "一橋大学", "rank": 10, "vs_top": 3, "vs_bottom": 10, "bottom_share": 0.7692307692307693}], "matrix": {}, "squads": {}, "history": {"420": [{"year": "2021", "division": "1部リーグ", "series_id": "5fd5848a2e1c186d675570f2", "team_pk": "6016cbe9f08bd54868542783", "played": 24, "win": 2, "draw": 3, "lose": 19, "points": 9, "goals_for": 11, "goal_difference": -45, "points_per_game": 0.38, "label": "Div 1"}, {"year": "2022", "division": "2部リーグ", "series_id": "620e48cd7d3f91269a4a00c3", "team_pk": "620e49a513922966ac6ecf43", "played": 20, "win": 13, "draw": 4, "lose": 3, "points": 43, "goals_for": 43, "goal_difference": 29, "points_per_game": 2.15, "label": "Div 2"}, {"year": "2023", "division": "1部リーグ", "series_id": "6400aa00c53e26111125d602", "team_pk": "6413241c47bf2c2b121d5914", "played": 22, "win": 8, "draw": 8, "lose": 6, "points": 32, "goals_for": 26, "goal_difference": 5, "points_per_game": 1.45, "label": "Div 1"}, {"year": "2024", "division": "1部リーグ", "series_id": "65f83c0a6fc93115912bcc42", "team_pk": "65f8433e6fc93115912bcc48", "played": 22, "win": 5, "draw": 4, "lose": 13, "points": 19, "goals_for": 32, "goal_difference": -9, "points_per_game": 0.86, "label": "Div 1"}, {"year": "2025", "division": "1部リーグ", "series_id": "67dcd6b0801b5b07651cc9d3", "team_pk": "67e3c870ae6e4a284e08b3f4", "played": 22, "win": 1, "draw": 5, "lose": 16, "points": 8, "goals_for": 14, "goal_difference": -32, "points_per_game": 0.36, "label": "Div 1"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e0fd6d37f77dd6a8745", "played": 16, "win": 13, "draw": 3, "lose": 0, "points": 42, "goals_for": 30, "goal_difference": 20, "points_per_game": 2.62, "label": "Div 2"}], "445": [{"year": "2021", "division": "4部リーグ", "series_id": "5ff561a3fbecf610c83cc563", "team_pk": "6016c933ff087b6516010388", "played": 5, "win": 5, "draw": 0, "lose": 0, "points": 15, "goals_for": 18, "goal_difference": 13, "points_per_game": 3.0, "label": "Div 4"}, {"year": "2022", "division": "チャレンジリーグ", "series_id": "620e49fb070ea926283e8164", "team_pk": "620e4aa2070ea926283e8168", "played": 15, "win": 7, "draw": 1, "lose": 7, "points": 22, "goals_for": 41, "goal_difference": 3, "points_per_game": 1.47, "label": "Challenge"}, {"year": "2023", "division": "チャレンジリーグ", "series_id": "643a56a768e803243b3763d2", "team_pk": "643a6fad1724c73ce46ae7a3", "played": 13, "win": 7, "draw": 2, "lose": 4, "points": 23, "goals_for": 47, "goal_difference": 16, "points_per_game": 1.77, "label": "Challenge"}, {"year": "2024", "division": "2部リーグ", "series_id": "65f83c296fc93115912bcc45", "team_pk": "65f8437f341ad239ff19a857", "played": 18, "win": 4, "draw": 4, "lose": 10, "points": 16, "goals_for": 28, "goal_difference": -14, "points_per_game": 0.89, "label": "Div 2"}, {"year": "2025", "division": "3部リーグ", "series_id": "67e0e3ee58be3f73be5e6212", "team_pk": "67e3c9796c43bf44e72369a4", "played": 16, "win": 14, "draw": 0, "lose": 2, "points": 42, "goals_for": 61, "goal_difference": 50, "points_per_game": 2.62, "label": "Div 3"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e29b4bdc145815ea093", "played": 16, "win": 12, "draw": 2, "lose": 2, "points": 38, "goals_for": 36, "goal_difference": 26, "points_per_game": 2.38, "label": "Div 2"}], "415": [{"year": "2021", "division": "1部リーグ", "series_id": "5fd5848a2e1c186d675570f2", "team_pk": "6016c892c275d503f9110123", "played": 24, "win": 8, "draw": 6, "lose": 10, "points": 30, "goals_for": 28, "goal_difference": -8, "points_per_game": 1.25, "label": "Div 1"}, {"year": "2022", "division": "1部リーグ", "series_id": "61d3bd844530a347032d76d2", "team_pk": "6204b65a30547923c97d3a33", "played": 22, "win": 9, "draw": 3, "lose": 10, "points": 30, "goals_for": 24, "goal_difference": -2, "points_per_game": 1.36, "label": "Div 1"}, {"year": "2023", "division": "1部リーグ", "series_id": "6400aa00c53e26111125d602", "team_pk": "6413220d7da0a974a63ad693", "played": 22, "win": 12, "draw": 3, "lose": 7, "points": 39, "goals_for": 35, "goal_difference": 13, "points_per_game": 1.77, "label": "Div 1"}, {"year": "2024", "division": "1部リーグ", "series_id": "65f83c0a6fc93115912bcc42", "team_pk": "65f843376fc93115912bcc47", "played": 22, "win": 9, "draw": 5, "lose": 8, "points": 32, "goals_for": 29, "goal_difference": 2, "points_per_game": 1.45, "label": "Div 1"}, {"year": "2025", "division": "1部リーグ", "series_id": "67dcd6b0801b5b07651cc9d3", "team_pk": "67e3c84033ae52706c0c01e2", "played": 22, "win": 4, "draw": 5, "lose": 13, "points": 17, "goals_for": 21, "goal_difference": -12, "points_per_game": 0.77, "label": "Div 1"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e0c802136197678fce4", "played": 16, "win": 11, "draw": 3, "lose": 2, "points": 36, "goals_for": 30, "goal_difference": 18, "points_per_game": 2.25, "label": "Div 2"}], "425": [{"year": "2021", "division": "2部リーグ", "series_id": "5ff5617ccbedce3fa248ff25", "team_pk": "6016c8c6cbd96e0bc14e13d3", "played": 18, "win": 1, "draw": 3, "lose": 14, "points": 6, "goals_for": 16, "goal_difference": -23, "points_per_game": 0.33, "label": "Div 2"}, {"year": "2022", "division": "2部リーグ", "series_id": "620e48cd7d3f91269a4a00c3", "team_pk": "620e49bfad12ad3e34073002", "played": 20, "win": 12, "draw": 1, "lose": 7, "points": 37, "goals_for": 60, "goal_difference": 22, "points_per_game": 1.85, "label": "Div 2"}, {"year": "2023", "division": "1部リーグ", "series_id": "6400aa00c53e26111125d602", "team_pk": "6413241e936efa0be84f4084", "played": 22, "win": 4, "draw": 6, "lose": 12, "points": 18, "goals_for": 28, "goal_difference": -20, "points_per_game": 0.82, "label": "Div 1"}, {"year": "2024", "division": "2部リーグ", "series_id": "65f83c296fc93115912bcc45", "team_pk": "65f84357e7c5e561e4582444", "played": 17, "win": 10, "draw": 2, "lose": 5, "points": 32, "goals_for": 46, "goal_difference": 20, "points_per_game": 1.88, "label": "Div 2"}, {"year": "2025", "division": "2部リーグ", "series_id": "67daa5543e40857258045ad2", "team_pk": "67e3c8e10a77dd0c0663e935", "played": 18, "win": 10, "draw": 2, "lose": 6, "points": 32, "goals_for": 43, "goal_difference": 18, "points_per_game": 1.78, "label": "Div 2"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e1844afb33c7e5892a3", "played": 16, "win": 7, "draw": 3, "lose": 6, "points": 24, "goals_for": 30, "goal_difference": 7, "points_per_game": 1.5, "label": "Div 2"}], "426": [{"year": "2021", "division": "2部リーグ", "series_id": "5ff5617ccbedce3fa248ff25", "team_pk": "6016c8c91870b5211f5ad8b3", "played": 18, "win": 7, "draw": 6, "lose": 5, "points": 27, "goals_for": 27, "goal_difference": -1, "points_per_game": 1.5, "label": "Div 2"}, {"year": "2022", "division": "2部リーグ", "series_id": "620e48cd7d3f91269a4a00c3", "team_pk": "620e49b552b35c572a7d32e5", "played": 20, "win": 11, "draw": 1, "lose": 8, "points": 34, "goals_for": 29, "goal_difference": 0, "points_per_game": 1.7, "label": "Div 2"}, {"year": "2023", "division": "1部リーグ", "series_id": "6400aa00c53e26111125d602", "team_pk": "641324217da0a974a63ad696", "played": 22, "win": 1, "draw": 3, "lose": 18, "points": 6, "goals_for": 13, "goal_difference": -50, "points_per_game": 0.27, "label": "Div 1"}, {"year": "2024", "division": "2部リーグ", "series_id": "65f83c296fc93115912bcc45", "team_pk": "65f84359b654a0318650e377", "played": 18, "win": 14, "draw": 3, "lose": 1, "points": 45, "goals_for": 45, "goal_difference": 30, "points_per_game": 2.5, "label": "Div 2"}, {"year": "2025", "division": "1部リーグ", "series_id": "67dcd6b0801b5b07651cc9d3", "team_pk": "67e3c87560ae2d2564408c64", "played": 22, "win": 2, "draw": 3, "lose": 17, "points": 9, "goals_for": 18, "goal_difference": -41, "points_per_game": 0.41, "label": "Div 1"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e12a3023b7abf540654", "played": 16, "win": 5, "draw": 4, "lose": 7, "points": 19, "goals_for": 24, "goal_difference": 0, "points_per_game": 1.19, "label": "Div 2"}], "3165": [{"year": "2022", "division": "チャレンジリーグ", "series_id": "620e49fb070ea926283e8164", "team_pk": "620e4abeda057444785e6386", "played": 15, "win": 12, "draw": 1, "lose": 2, "points": 37, "goals_for": 85, "goal_difference": 67, "points_per_game": 2.47, "label": "Challenge"}, {"year": "2023", "division": "2部リーグ", "series_id": "64131da448077f5ea6426cb2", "team_pk": "641329f189d3dc70757501d2", "played": 22, "win": 9, "draw": 1, "lose": 12, "points": 28, "goals_for": 47, "goal_difference": 3, "points_per_game": 1.27, "label": "Div 2"}, {"year": "2024", "division": "2部リーグ", "series_id": "65f83c296fc93115912bcc45", "team_pk": "65f8437163233664820b3605", "played": 18, "win": 10, "draw": 1, "lose": 7, "points": 31, "goals_for": 29, "goal_difference": 2, "points_per_game": 1.72, "label": "Div 2"}, {"year": "2025", "division": "2部リーグ", "series_id": "67daa5543e40857258045ad2", "team_pk": "67e3c8edae6e4a284e08b3f5", "played": 18, "win": 7, "draw": 4, "lose": 7, "points": 25, "goals_for": 27, "goal_difference": 0, "points_per_game": 1.39, "label": "Div 2"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e22c1efba0a054fe732", "played": 16, "win": 5, "draw": 1, "lose": 10, "points": 16, "goals_for": 26, "goal_difference": -4, "points_per_game": 1.0, "label": "Div 2"}], "427": [{"year": "2021", "division": "2部リーグ", "series_id": "5ff5617ccbedce3fa248ff25", "team_pk": "6016c8ef5fd2fc0b2b6e24e4", "played": 18, "win": 9, "draw": 1, "lose": 8, "points": 28, "goals_for": 35, "goal_difference": 11, "points_per_game": 1.56, "label": "Div 2"}, {"year": "2022", "division": "2部リーグ", "series_id": "620e48cd7d3f91269a4a00c3", "team_pk": "620e49b1fd7a7f76be1629e2", "played": 20, "win": 9, "draw": 5, "lose": 6, "points": 32, "goals_for": 44, "goal_difference": 18, "points_per_game": 1.6, "label": "Div 2"}, {"year": "2023", "division": "2部リーグ", "series_id": "64131da448077f5ea6426cb2", "team_pk": "641329d8b95c9c306d2edb82", "played": 22, "win": 14, "draw": 1, "lose": 7, "points": 43, "goals_for": 51, "goal_difference": 17, "points_per_game": 1.95, "label": "Div 2"}, {"year": "2024", "division": "2部リーグ", "series_id": "65f83c296fc93115912bcc45", "team_pk": "65f8435b341ad239ff19a856", "played": 18, "win": 5, "draw": 6, "lose": 7, "points": 21, "goals_for": 25, "goal_difference": -6, "points_per_game": 1.17, "label": "Div 2"}, {"year": "2025", "division": "2部リーグ", "series_id": "67daa5543e40857258045ad2", "team_pk": "67e3c9306c43bf44e72369a3", "played": 18, "win": 8, "draw": 1, "lose": 9, "points": 25, "goals_for": 22, "goal_difference": -6, "points_per_game": 1.39, "label": "Div 2"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e27e3b43170e647cb03", "played": 16, "win": 4, "draw": 2, "lose": 10, "points": 14, "goals_for": 16, "goal_difference": -6, "points_per_game": 0.88, "label": "Div 2"}], "429": [{"year": "2021", "division": "2部リーグ", "series_id": "5ff5617ccbedce3fa248ff25", "team_pk": "6016c8f5583df979320680c3", "played": 18, "win": 4, "draw": 8, "lose": 6, "points": 20, "goals_for": 23, "goal_difference": -7, "points_per_game": 1.11, "label": "Div 2"}, {"year": "2022", "division": "チャレンジリーグ", "series_id": "620e49fb070ea926283e8164", "team_pk": "620e4a6ead12ad3e34073004", "played": 15, "win": 11, "draw": 1, "lose": 3, "points": 34, "goals_for": 52, "goal_difference": 33, "points_per_game": 2.27, "label": "Challenge"}, {"year": "2023", "division": "チャレンジリーグ", "series_id": "643a56a768e803243b3763d2", "team_pk": "643a6f9402f019041c57bdc2", "played": 13, "win": 10, "draw": 2, "lose": 1, "points": 32, "goals_for": 52, "goal_difference": 42, "points_per_game": 2.46, "label": "Challenge"}, {"year": "2024", "division": "2部リーグ", "series_id": "65f83c296fc93115912bcc45", "team_pk": "65f8437db654a0318650e378", "played": 18, "win": 10, "draw": 2, "lose": 6, "points": 32, "goals_for": 36, "goal_difference": 15, "points_per_game": 1.78, "label": "Div 2"}, {"year": "2025", "division": "2部リーグ", "series_id": "67daa5543e40857258045ad2", "team_pk": "67e3c94586dfcc3d7051af63", "played": 18, "win": 8, "draw": 4, "lose": 6, "points": 28, "goals_for": 25, "goal_difference": 2, "points_per_game": 1.56, "label": "Div 2"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e1bec4fe84b0d2faff3", "played": 16, "win": 3, "draw": 5, "lose": 8, "points": 14, "goals_for": 13, "goal_difference": -17, "points_per_game": 0.88, "label": "Div 2"}], "5498": [{"year": "2023", "division": "2部リーグ", "series_id": "64131da448077f5ea6426cb2", "team_pk": "641329ec7adf3d078b595905", "played": 22, "win": 5, "draw": 3, "lose": 14, "points": 18, "goals_for": 27, "goal_difference": -34, "points_per_game": 0.82, "label": "Div 2"}, {"year": "2024", "division": "2部リーグ", "series_id": "65f83c296fc93115912bcc45", "team_pk": "65f8437763233664820b3606", "played": 18, "win": 6, "draw": 3, "lose": 9, "points": 21, "goals_for": 20, "goal_difference": -12, "points_per_game": 1.17, "label": "Div 2"}, {"year": "2025", "division": "3部リーグ", "series_id": "67e0e3ee58be3f73be5e6212", "team_pk": "67e3c9d386dfcc3d7051af65", "played": 16, "win": 11, "draw": 1, "lose": 4, "points": 34, "goals_for": 32, "goal_difference": 22, "points_per_game": 2.12, "label": "Div 3"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e2c7620b315cb046963", "played": 16, "win": 4, "draw": 1, "lose": 11, "points": 13, "goals_for": 16, "goal_difference": -28, "points_per_game": 0.81, "label": "Div 2"}], "424": [{"year": "2021", "division": "2部リーグ", "series_id": "5ff5617ccbedce3fa248ff25", "team_pk": "6016c8c273a52f156a3f9584", "played": 18, "win": 9, "draw": 4, "lose": 5, "points": 31, "goals_for": 28, "goal_difference": 9, "points_per_game": 1.72, "label": "Div 2"}, {"year": "2022", "division": "2部リーグ", "series_id": "620e48cd7d3f91269a4a00c3", "team_pk": "620e49a9da057444785e6384", "played": 20, "win": 9, "draw": 3, "lose": 8, "points": 30, "goals_for": 34, "goal_difference": 8, "points_per_game": 1.5, "label": "Div 2"}, {"year": "2023", "division": "2部リーグ", "series_id": "64131da448077f5ea6426cb2", "team_pk": "641329db3809eb1e5d164e63", "played": 22, "win": 17, "draw": 1, "lose": 4, "points": 52, "goals_for": 67, "goal_difference": 45, "points_per_game": 2.36, "label": "Div 2"}, {"year": "2024", "division": "1部リーグ", "series_id": "65f83c0a6fc93115912bcc42", "team_pk": "65f8434563233664820b3604", "played": 22, "win": 2, "draw": 3, "lose": 17, "points": 9, "goals_for": 20, "goal_difference": -58, "points_per_game": 0.41, "label": "Div 1"}, {"year": "2025", "division": "2部リーグ", "series_id": "67daa5543e40857258045ad2", "team_pk": "67e3c8960a77dd0c0663e934", "played": 18, "win": 7, "draw": 4, "lose": 7, "points": 25, "goals_for": 26, "goal_difference": -2, "points_per_game": 1.39, "label": "Div 2"}, {"year": "2026", "division": "2部リーグ", "series_id": "6996c3afc7491b5ed023c7e2", "team_pk": "699d4e15802136197678fce5", "played": 16, "win": 3, "draw": 2, "lose": 11, "points": 11, "goals_for": 13, "goal_difference": -16, "points_per_game": 0.69, "label": "Div 2"}]}, "fixtures": {"699d4e29b4bdc145815ea093": [{"section": "1", "date": "2026-04-05", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": null, "score": [3, 0]}, {"section": "2", "date": "2026-04-12", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成蹊大学サッカー場", "score": [2, 0]}, {"section": "3", "date": "2026-04-18", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": null, "score": [2, 1]}, {"section": "4", "date": "2026-04-26", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "創価大学 ビクトリーグラウンド", "score": [0, 0]}, {"section": "5", "date": "2026-05-02", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": null, "score": [0, 1]}, {"section": "6", "date": "2026-05-09", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [3, 0]}, {"section": "7", "date": "2026-05-16", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": null, "score": [5, 2]}, {"section": "8", "date": "2026-05-24", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [3, 1]}, {"section": "9", "date": "2026-05-30", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": null, "score": [4, 3]}, {"section": "10", "date": "2026-06-14", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": null, "score": [2, 0]}, {"section": "11", "date": "2026-06-20", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": null, "score": [0, 1]}, {"section": "12", "date": "2026-06-28", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [1, 0]}, {"section": "13", "date": "2026-09-05", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": null, "score": [3, 0]}, {"section": "14", "date": "2026-09-13", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "score": [1, 1]}, {"section": "15", "date": "2026-09-19", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [6, 0]}, {"section": "16", "date": "2026-09-26", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [1, 0]}, {"section": "17", "date": "2026-10-03", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": null, "odds": [0.7529, 0.1255, 0.1216]}, {"section": "18", "date": "2026-10-10", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": null, "odds": [0.611, 0.1723, 0.2167]}], "699d4e12a3023b7abf540654": [{"section": "1", "date": "2026-04-05", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [0, 3]}, {"section": "2", "date": "2026-04-12", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [6, 1]}, {"section": "3", "date": "2026-04-19", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "創価大学 ビクトリーグラウンド", "score": [0, 0]}, {"section": "4", "date": "2026-04-26", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "score": [2, 3]}, {"section": "5", "date": "2026-05-02", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [2, 3]}, {"section": "6", "date": "2026-05-10", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [2, 1]}, {"section": "7", "date": "2026-05-17", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [2, 1]}, {"section": "8", "date": "2026-05-23", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "成城学園第一グラウンド", "score": [0, 1]}, {"section": "9", "date": "2026-05-31", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成蹊大学サッカー場", "score": [0, 0]}, {"section": "10", "date": "2026-06-14", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [0, 2]}, {"section": "11", "date": "2026-06-21", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [0, 0]}, {"section": "12", "date": "2026-06-28", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "創価大学　ビクトリーグラウンド", "score": [3, 3]}, {"section": "13", "date": "2026-09-06", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "score": [1, 2]}, {"section": "14", "date": "2026-09-12", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [3, 1]}, {"section": "15", "date": "2026-09-19", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [1, 2]}, {"section": "16", "date": "2026-09-27", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [2, 1]}, {"section": "17", "date": "2026-10-04", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "東京都立大学南大沢キャンパス球技場", "odds": [0.3779, 0.1871, 0.435]}, {"section": "18", "date": "2026-10-10", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成蹊大学サッカー場", "odds": [0.1598, 0.1711, 0.6692]}], "699d4e27e3b43170e647cb03": [{"section": "1", "date": "2026-04-05", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京都立大学南大沢キャンパス球技場", "score": [0, 2]}, {"section": "3", "date": "2026-04-19", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成蹊大学サッカー場", "score": [0, 2]}, {"section": "4", "date": "2026-04-26", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [0, 2]}, {"section": "5", "date": "2026-05-03", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "東京都立大学南大沢キャンパス球技場", "score": [0, 0]}, {"section": "6", "date": "2026-05-10", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "東京都立大学南大沢キャンパス球技場", "score": [1, 2]}, {"section": "7", "date": "2026-05-16", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [2, 5]}, {"section": "8", "date": "2026-05-24", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "東京都立大学南大沢キャンパス球技場", "score": [0, 1]}, {"section": "9", "date": "2026-05-30", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "東京都立大学南大沢キャンパス球技場", "score": [0, 0]}, {"section": "2", "date": "2026-06-07", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": "東京都立大学南大沢キャンパス球技場", "score": [5, 0]}, {"section": "10", "date": "2026-06-14", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "score": [1, 2]}, {"section": "11", "date": "2026-06-20", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [2, 0]}, {"section": "12", "date": "2026-07-11", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "東京都立大学南大沢キャンパス球技場", "score": [0, 1]}, {"section": "13", "date": "2026-09-05", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "東京都立大学南大沢キャンパス球技場", "score": [1, 2]}, {"section": "14", "date": "2026-09-12", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "東京都立大学南大沢キャンパス球技場", "score": [2, 1]}, {"section": "15", "date": "2026-09-19", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "東京都立大学南大沢キャンパス球技場", "score": [2, 1]}, {"section": "16", "date": "2026-09-26", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": "東京都立大学南大沢キャンパス球技場", "score": [0, 1]}, {"section": "17", "date": "2026-10-04", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "odds": [0.3572, 0.2267, 0.4161]}, {"section": "18", "date": "2026-10-11", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "東京大学御殿下グラウンド", "odds": [0.4404, 0.2297, 0.3299]}], "699d4e0fd6d37f77dd6a8745": [{"section": "1", "date": "2026-04-05", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [2, 0]}, {"section": "2", "date": "2026-04-12", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "東京大学御殿下グラウンド", "score": [3, 2]}, {"section": "3", "date": "2026-04-19", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "成城学園第1グラウンド", "score": [2, 1]}, {"section": "4", "date": "2026-04-26", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "東京大学御殿下グラウンド", "score": [3, 2]}, {"section": "5", "date": "2026-05-02", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [1, 0]}, {"section": "6", "date": "2026-05-10", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "東京大学御殿下グラウンド", "score": [3, 0]}, {"section": "7", "date": "2026-05-17", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "東京大学御殿下グラウンド", "score": [3, 0]}, {"section": "8", "date": "2026-05-24", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "東京大学御殿下グラウンド", "score": [1, 1]}, {"section": "9", "date": "2026-05-30", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [3, 1]}, {"section": "10", "date": "2026-06-14", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京大学御殿下グラウンド", "score": [2, 1]}, {"section": "11", "date": "2026-06-21", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [1, 0]}, {"section": "12", "date": "2026-06-28", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "東京大学御殿下グラウンド", "score": [0, 0]}, {"section": "13", "date": "2026-09-06", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "東京大学御殿下グラウンド", "score": [2, 1]}, {"section": "14", "date": "2026-09-13", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": "東京大学御殿下グラウンド", "score": [1, 1]}, {"section": "15", "date": "2026-09-20", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [1, 0]}, {"section": "16", "date": "2026-09-27", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "創価大学 ビクトリーグラウンド", "score": [2, 0]}, {"section": "17", "date": "2026-10-04", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成蹊大学サッカー場", "odds": [0.2327, 0.229, 0.5382]}, {"section": "18", "date": "2026-10-11", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": "東京大学御殿下グラウンド", "odds": [0.8501, 0.0887, 0.0612]}], "699d4e15802136197678fce5": [{"section": "1", "date": "2026-04-05", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [0, 2]}, {"section": "2", "date": "2026-04-12", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [1, 6]}, {"section": "3", "date": "2026-04-18", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [1, 2]}, {"section": "4", "date": "2026-04-26", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [0, 3]}, {"section": "5", "date": "2026-05-03", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "創価大学　ビクトリーグラウンド", "score": [0, 1]}, {"section": "6", "date": "2026-05-10", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "score": [0, 3]}, {"section": "7", "date": "2026-05-17", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [2, 3]}, {"section": "8", "date": "2026-05-24", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [1, 0]}, {"section": "9", "date": "2026-05-31", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [2, 1]}, {"section": "10", "date": "2026-06-14", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "成城学園第1グラウンド", "score": [1, 4]}, {"section": "11", "date": "2026-06-21", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [0, 0]}, {"section": "12", "date": "2026-06-28", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [0, 1]}, {"section": "13", "date": "2026-09-05", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成蹊大学サッカー場", "score": [0, 1]}, {"section": "14", "date": "2026-09-13", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [4, 0]}, {"section": "15", "date": "2026-09-20", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [0, 1]}, {"section": "16", "date": "2026-09-26", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [1, 1]}, {"section": "17", "date": "2026-10-04", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "一橋大学小平国際キャンパスグラウンド", "odds": [0.4161, 0.2267, 0.3572]}, {"section": "18", "date": "2026-10-11", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "odds": [0.2204, 0.1684, 0.6112]}], "699d4e1844afb33c7e5892a3": [{"section": "1", "date": "2026-04-05", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [2, 0]}, {"section": "2", "date": "2026-04-12", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "創価大学 ビクトリーグラウンド", "score": [1, 0]}, {"section": "3", "date": "2026-04-19", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "成城学園第1グラウンド", "score": [1, 2]}, {"section": "4", "date": "2026-04-26", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": "成城学園第1グラウンド", "score": [4, 2]}, {"section": "5", "date": "2026-05-03", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [0, 0]}, {"section": "6", "date": "2026-05-10", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [2, 3]}, {"section": "7", "date": "2026-05-17", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成城学園第1グラウンド", "score": [1, 3]}, {"section": "8", "date": "2026-05-23", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "成城学園第一グラウンド", "score": [1, 0]}, {"section": "9", "date": "2026-05-30", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [3, 4]}, {"section": "10", "date": "2026-06-14", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "成城学園第1グラウンド", "score": [4, 1]}, {"section": "11", "date": "2026-06-21", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "成城学園第1グラウンド", "score": [2, 3]}, {"section": "12", "date": "2026-06-28", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "score": [0, 0]}, {"section": "13", "date": "2026-09-05", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [4, 0]}, {"section": "14", "date": "2026-09-12", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [1, 2]}, {"section": "15", "date": "2026-09-20", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [2, 1]}, {"section": "16", "date": "2026-09-27", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": null, "score": [2, 2]}, {"section": "17", "date": "2026-10-04", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "東京都立大学南大沢キャンパス球技場", "odds": [0.435, 0.1871, 0.3779]}, {"section": "18", "date": "2026-10-10", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "odds": [0.2167, 0.1723, 0.611]}], "699d4e22c1efba0a054fe732": [{"section": "1", "date": "2026-04-05", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [4, 0]}, {"section": "2", "date": "2026-04-12", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "score": [2, 3]}, {"section": "3", "date": "2026-04-19", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [1, 2]}, {"section": "4", "date": "2026-04-26", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [2, 0]}, {"section": "5", "date": "2026-05-03", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [1, 3]}, {"section": "6", "date": "2026-05-10", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [3, 2]}, {"section": "7", "date": "2026-05-17", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [1, 2]}, {"section": "8", "date": "2026-05-24", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [1, 3]}, {"section": "9", "date": "2026-05-31", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [1, 2]}, {"section": "10", "date": "2026-06-14", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "創価大学 ビクトリーグラウンド", "score": [2, 2]}, {"section": "11", "date": "2026-06-21", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [0, 1]}, {"section": "12", "date": "2026-06-28", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [2, 1]}, {"section": "13", "date": "2026-09-05", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [2, 1]}, {"section": "14", "date": "2026-09-13", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成蹊大学サッカー場", "score": [2, 4]}, {"section": "15", "date": "2026-09-20", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [1, 2]}, {"section": "16", "date": "2026-09-27", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [1, 2]}, {"section": "17", "date": "2026-10-03", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "odds": [0.1216, 0.1255, 0.7529]}, {"section": "18", "date": "2026-10-11", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "odds": [0.6112, 0.1684, 0.2204]}], "699d4e1bec4fe84b0d2faff3": [{"section": "1", "date": "2026-04-05", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [0, 4]}, {"section": "2", "date": "2026-04-12", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "創価大学 ビクトリーグラウンド", "score": [0, 1]}, {"section": "3", "date": "2026-04-19", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "創価大学 ビクトリーグラウンド", "score": [0, 0]}, {"section": "4", "date": "2026-04-26", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": "創価大学 ビクトリーグラウンド", "score": [0, 0]}, {"section": "5", "date": "2026-05-03", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "創価大学　ビクトリーグラウンド", "score": [1, 0]}, {"section": "6", "date": "2026-05-10", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成蹊大学サッカー場", "score": [1, 3]}, {"section": "7", "date": "2026-05-17", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "score": [0, 3]}, {"section": "8", "date": "2026-05-23", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [1, 2]}, {"section": "9", "date": "2026-05-30", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [0, 0]}, {"section": "10", "date": "2026-06-14", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "創価大学 ビクトリーグラウンド", "score": [2, 2]}, {"section": "11", "date": "2026-06-21", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "成城学園第1グラウンド", "score": [3, 2]}, {"section": "12", "date": "2026-06-28", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "創価大学　ビクトリーグラウンド", "score": [3, 3]}, {"section": "13", "date": "2026-09-05", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [0, 3]}, {"section": "14", "date": "2026-09-13", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [0, 4]}, {"section": "15", "date": "2026-09-20", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "創価大学 ビクトリーグラウンド", "score": [2, 1]}, {"section": "16", "date": "2026-09-27", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "創価大学 ビクトリーグラウンド", "score": [0, 2]}, {"section": "17", "date": "2026-10-04", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": "創価大学　ビクトリーグラウンド", "odds": [0.5766, 0.1882, 0.2352]}, {"section": "18", "date": "2026-10-11", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京大学御殿下グラウンド", "odds": [0.3299, 0.2297, 0.4404]}], "699d4e0c802136197678fce4": [{"section": "2", "date": "2026-04-12", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": "成蹊大学サッカー場", "score": [0, 2]}, {"section": "3", "date": "2026-04-19", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "成蹊大学サッカー場", "score": [2, 0]}, {"section": "4", "date": "2026-04-26", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [3, 0]}, {"section": "5", "date": "2026-05-03", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [3, 1]}, {"section": "6", "date": "2026-05-10", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "成蹊大学サッカー場", "score": [3, 1]}, {"section": "7", "date": "2026-05-17", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "成城学園第1グラウンド", "score": [3, 1]}, {"section": "8", "date": "2026-05-24", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "score": [1, 1]}, {"section": "9", "date": "2026-05-31", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "成蹊大学サッカー場", "score": [0, 0]}, {"section": "1", "date": "2026-06-06", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": null, "score": [4, 0]}, {"section": "10", "date": "2026-06-14", "opponent": "防衛大学校（神奈川県）", "opponent_pk": "699d4e2c7620b315cb046963", "venue": "成蹊大学サッカー場", "score": [1, 0]}, {"section": "11", "date": "2026-06-20", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [1, 0]}, {"section": "12", "date": "2026-07-11", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [1, 0]}, {"section": "13", "date": "2026-09-05", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "成蹊大学サッカー場", "score": [1, 0]}, {"section": "14", "date": "2026-09-13", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "成蹊大学サッカー場", "score": [4, 2]}, {"section": "15", "date": "2026-09-20", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "創価大学 ビクトリーグラウンド", "score": [1, 2]}, {"section": "16", "date": "2026-09-27", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": null, "score": [2, 2]}, {"section": "17", "date": "2026-10-04", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "成蹊大学サッカー場", "odds": [0.5382, 0.229, 0.2327]}, {"section": "18", "date": "2026-10-10", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": "成蹊大学サッカー場", "odds": [0.6692, 0.1711, 0.1598]}], "699d4e2c7620b315cb046963": [{"section": "3", "date": "2026-04-19", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": null, "score": [2, 1]}, {"section": "4", "date": "2026-04-26", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": "成城学園第1グラウンド", "score": [2, 4]}, {"section": "5", "date": "2026-05-02", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": null, "score": [3, 2]}, {"section": "6", "date": "2026-05-09", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [0, 3]}, {"section": "7", "date": "2026-05-17", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": "一橋大学小平国際キャンパスグラウンド", "score": [3, 2]}, {"section": "8", "date": "2026-05-23", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": null, "score": [2, 1]}, {"section": "9", "date": "2026-05-30", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": null, "score": [1, 3]}, {"section": "1", "date": "2026-06-06", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": null, "score": [0, 4]}, {"section": "2", "date": "2026-06-07", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": "東京都立大学南大沢キャンパス球技場", "score": [0, 5]}, {"section": "10", "date": "2026-06-14", "opponent": "成蹊大学", "opponent_pk": "699d4e0c802136197678fce4", "venue": "成蹊大学サッカー場", "score": [0, 1]}, {"section": "11", "date": "2026-06-20", "opponent": "東京都立大学", "opponent_pk": "699d4e27e3b43170e647cb03", "venue": null, "score": [0, 2]}, {"section": "12", "date": "2026-06-28", "opponent": "芝浦工業大学", "opponent_pk": "699d4e22c1efba0a054fe732", "venue": "芝浦工業大学大宮キャンパス総合グラウンド", "score": [1, 2]}, {"section": "13", "date": "2026-09-05", "opponent": "成城大学", "opponent_pk": "699d4e1844afb33c7e5892a3", "venue": null, "score": [0, 4]}, {"section": "14", "date": "2026-09-12", "opponent": "東京理科大学", "opponent_pk": "699d4e12a3023b7abf540654", "venue": null, "score": [1, 3]}, {"section": "15", "date": "2026-09-19", "opponent": "日本文化大學", "opponent_pk": "699d4e29b4bdc145815ea093", "venue": null, "score": [0, 6]}, {"section": "16", "date": "2026-09-26", "opponent": "一橋大学", "opponent_pk": "699d4e15802136197678fce5", "venue": null, "score": [1, 1]}, {"section": "17", "date": "2026-10-04", "opponent": "創価大学", "opponent_pk": "699d4e1bec4fe84b0d2faff3", "venue": "創価大学　ビクトリーグラウンド", "odds": [0.2352, 0.1882, 0.5766]}, {"section": "18", "date": "2026-10-11", "opponent": "東京大学", "opponent_pk": "699d4e0fd6d37f77dd6a8745", "venue": "東京大学御殿下グラウンド", "odds": [0.0612, 0.0887, 0.8501]}]}, "projection": {"asof": "2026-09-28", "runs": 10000, "teams": {"699d4e22c1efba0a054fe732": {"played": 16, "points": 16, "expected": 18.5, "places": [0.0, 0.0, 0.0, 0.0, 0.0675, 0.4879, 0.319, 0.1043, 0.0213, 0.0], "path": [[16.49, 16, 16, 19], [18.49, 16, 19, 20]]}, "699d4e0c802136197678fce4": {"played": 16, "points": 36, "expected": 40.0, "places": [0.0, 0.1449, 0.8551, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "path": [[37.84, 36, 39, 39], [40.02, 37, 40, 42]]}, "699d4e0fd6d37f77dd6a8745": {"played": 16, "points": 42, "expected": 45.6, "places": [0.9402, 0.0598, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "path": [[42.93, 42, 42, 45], [45.57, 44, 45, 48]]}, "699d4e15802136197678fce5": {"played": 16, "points": 11, "expected": 13.3, "places": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0107, 0.0643, 0.0427, 0.3858, 0.4965], "path": [[12.47, 11, 12, 14], [13.3, 11, 14, 15]]}, "699d4e1844afb33c7e5892a3": {"played": 16, "points": 24, "expected": 26.3, "places": [0.0, 0.0, 0.0, 0.9646, 0.0354, 0.0, 0.0, 0.0, 0.0, 0.0], "path": [[25.49, 24, 25, 27], [26.31, 24, 27, 28]]}, "699d4e12a3023b7abf540654": {"played": 16, "points": 19, "expected": 21.0, "places": [0.0, 0.0, 0.0, 0.0354, 0.8116, 0.1368, 0.0162, 0.0, 0.0, 0.0], "path": [[20.32, 19, 20, 22], [20.97, 19, 21, 23]]}, "699d4e27e3b43170e647cb03": {"played": 16, "points": 14, "expected": 16.8, "places": [0.0, 0.0, 0.0, 0.0, 0.0365, 0.1889, 0.3431, 0.3104, 0.1021, 0.019], "path": [[15.3, 14, 15, 17], [16.85, 14, 17, 20]]}, "699d4e1bec4fe84b0d2faff3": {"played": 16, "points": 14, "expected": 17.2, "places": [0.0, 0.0, 0.0, 0.0, 0.049, 0.1711, 0.2264, 0.3651, 0.1194, 0.069], "path": [[15.92, 14, 17, 17], [17.14, 14, 17, 20]]}, "699d4e29b4bdc145815ea093": {"played": 16, "points": 38, "expected": 42.4, "places": [0.0598, 0.7953, 0.1449, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "path": [[40.38, 38, 41, 41], [42.39, 41, 42, 44]]}, "699d4e2c7620b315cb046963": {"played": 16, "points": 13, "expected": 14.2, "places": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0046, 0.031, 0.1775, 0.3714, 0.4155], "path": [[13.89, 13, 13, 16], [14.17, 13, 14, 16]]}}}}</script>
+<script>
+const DATA = JSON.parse(document.getElementById("payload").textContent);
+const NS = "http://www.w3.org/2000/svg";
+const AXES = DATA.axes;
+const T = DATA.t;
+const fill = (template, values) =>
+  template.replace(/\{(\w+)\}/g, (_, key) => values[key] == null ? "" : values[key]);
+const fmt = (v, d = 1) => (v == null ? "-" : Number(v).toFixed(d));
+
+function el(name, attrs, text) {
+  const node = document.createElementNS(NS, name);
+  for (const key in attrs) node.setAttribute(key, attrs[key]);
+  if (text != null) node.textContent = text;
+  return node;
+}
+function svg(width, height, label) {
+  const node = el("svg", { viewBox: `0 0 ${width} ${height}`, role: "img" });
+  if (label) node.appendChild(el("title", {}, label));
+  return node;
+}
+
+/* Rank on x, shot volume on y, goals as area. Three axes at once, so a side
+   that shoots a lot without scoring separates from one that does not shoot. */
+function bubbles(host, teams, selected) {
+  const W = 620, H = 330, L = 72, R = 18, top = 26, B = 42;
+  const node = svg(W, H, T.bubbles_title);
+  const maxRank = teams.length;
+  const maxY = Math.max(...teams.map(t => t.shots_per_game)) * 1.12 || 1;
+  const maxGoals = Math.max(...teams.map(t => t.goals_for)) || 1;
+  const x = r => L + (W - L - R) * (r - 1) / Math.max(1, maxRank - 1);
+  const y = v => top + (H - top - B) * (1 - v / maxY);
+
+  node.appendChild(el("text", { x: 0, y: 12, "font-size": 11, fill: "currentColor",
+    "fill-opacity": .6 }, T.bubbles_y));
+  const ticks = [];
+  for (let i = 0; i <= 4; i++) {
+    const value = maxY * i / 4;
+    node.appendChild(el("line", { x1: L, x2: W - R, y1: y(value), y2: y(value),
+      stroke: "currentColor", "stroke-opacity": .12 }));
+    ticks.push([value, y(value)]);
+  }
+  for (const team of teams) {
+    const radius = 5 + 20 * Math.sqrt(team.goals_for / maxGoals);
+    const on = team.team_pk === selected;
+    const circle = el("circle", { cx: x(team.rank), cy: y(team.shots_per_game), r: radius,
+      fill: on ? "var(--warm)" : "var(--accent)", "fill-opacity": on ? .55 : .3,
+      stroke: on ? "var(--warm)" : "var(--accent)", "stroke-width": on ? 2 : 1, cursor: "pointer" });
+    circle.appendChild(el("title", {}, fill(T.bubbles_tip, { team: team.team,
+      rank: team.rank, shots: fmt(team.shots_per_game), goals: team.goals_for })));
+    circle.addEventListener("click", () => select(team.team_pk));
+    node.appendChild(circle);
+    node.appendChild(el("text", { x: x(team.rank), y: y(team.shots_per_game) + 3.5,
+      "font-size": 9.5, "text-anchor": "middle", fill: "currentColor", "fill-opacity": .8 }, team.rank));
+  }
+  /* Drawn last so a bubble sitting on the axis cannot hide its own scale. */
+  for (const [value, ty] of ticks) {
+    node.appendChild(el("text", { x: L - 7, y: ty + 4, "font-size": 10,
+      "text-anchor": "end", fill: "currentColor", "fill-opacity": .55 }, fmt(value)));
+  }
+  node.appendChild(el("text", { x: (L + W - R) / 2, y: H - 8, "font-size": 11,
+    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, T.bubbles_x));
+  node.appendChild(el("text", { x: W - R, y: H - 8, "font-size": 10, "text-anchor": "end",
+    fill: "currentColor", "fill-opacity": .5 }, T.bubbles_key));
+  host.replaceChildren(node);
+}
+
+function radar(team, size, selected) {
+  /* The labelled version needs room outside the circle for six axis names,
+     so it gets a wider box with the circle still centred in it. */
+  const big = size > 200;
+  const W = big ? Math.round(size * 1.45) : size;
+  const c = W / 2, cy = size / 2, radius = size * 0.34;
+  const node = svg(W, size, fill(T.radar_title, { team: team.team }));
+  const angleOf = i => -Math.PI / 2 + i * 2 * Math.PI / AXES.length;
+  const ringPoints = ring => AXES.map((_, i) => {
+    const angle = angleOf(i);
+    return `${c + radius * ring * Math.cos(angle)},${cy + radius * ring * Math.sin(angle)}`;
+  }).join(" ");
+  const shape = values => AXES.map((axis, i) => {
+    const angle = angleOf(i), value = (values[axis.key] || 0) / 100;
+    return `${c + radius * value * Math.cos(angle)},${cy + radius * value * Math.sin(angle)}`;
+  }).join(" ");
+  for (const ring of [.34, .67, 1]) {
+    node.appendChild(el("polygon", { points: ringPoints(ring),
+      fill: "none", stroke: "currentColor", "stroke-opacity": .13 }));
+  }
+  AXES.forEach((_, i) => {
+    const angle = angleOf(i);
+    node.appendChild(el("line", { x1: c, y1: cy,
+      x2: c + radius * Math.cos(angle), y2: cy + radius * Math.sin(angle),
+      stroke: "currentColor", "stroke-opacity": .1 }));
+  });
+  /* The league mean sits under every club, so a shape reads as a deviation
+     from the field rather than as an absolute score. */
+  node.appendChild(el("polygon", { points: shape(DATA.axis_means),
+    fill: "none", stroke: "currentColor", "stroke-opacity": .45,
+    "stroke-width": 1, "stroke-dasharray": "3 2" }));
+  const on = team.team_pk === selected;
+  node.appendChild(el("polygon", { points: shape(team.axes),
+    fill: on ? "var(--warm)" : "var(--accent)", "fill-opacity": .28,
+    stroke: on ? "var(--warm)" : "var(--accent)", "stroke-width": 1.6 }));
+  /* Numbers, not names: the small charts have no room for six axis labels,
+     and the number keys back to the list under the grid. */
+  AXES.forEach((axis, i) => {
+    const angle = angleOf(i), gap = big ? 10 : 9;
+    const dx = Math.cos(angle), anchor = big && Math.abs(dx) > .3
+      ? (dx > 0 ? "start" : "end") : "middle";
+    node.appendChild(el("text", {
+      x: c + (radius + gap) * dx, y: cy + (radius + gap) * Math.sin(angle) + 4,
+      "font-size": big ? 10.5 : 8.5, "text-anchor": anchor,
+      fill: "currentColor", "fill-opacity": big ? .7 : .55,
+    }, big ? `${i + 1}. ${axis.label} ${Math.round(team.axes[axis.key])}` : `${i + 1}`));
+  });
+  return node;
+}
+
+function radarGrid(host, teams, selected) {
+  host.replaceChildren();
+  for (const team of teams) {
+    const figure = document.createElement("figure");
+    if (team.team_pk === selected) figure.className = "on";
+    figure.appendChild(radar(team, 150, selected));
+    const caption = document.createElement("figcaption");
+    caption.textContent = `${team.rank}. ${team.team}`;
+    figure.appendChild(caption);
+    figure.style.cursor = "pointer";
+    figure.addEventListener("click", () => select(team.team_pk));
+    host.appendChild(figure);
+  }
+}
+
+function curve(host, selected) {
+  const W = 620, H = 300, L = 34, R = 96, top = 20, B = 32;
+  const node = svg(W, H, T.curve_title);
+  const maxSection = Math.max(...DATA.curve.flatMap(t => t.points.map(p => p[0])));
+  const maxPoints = Math.max(...DATA.curve.flatMap(t => t.points.map(p => p[1]))) || 1;
+  const x = s => L + (W - L - R) * (s - 1) / Math.max(1, maxSection - 1);
+  const y = p => top + (H - top - B) * (1 - p / maxPoints);
+
+  node.appendChild(el("line", { x1: L, x2: W - R, y1: y(0), y2: y(0),
+    stroke: "currentColor", "stroke-opacity": .2 }));
+  const ends = [];
+  for (const team of DATA.curve) {
+    const on = team.team_pk === selected;
+    node.appendChild(el("polyline", {
+      points: team.points.map(p => `${x(p[0])},${y(p[1])}`).join(" "),
+      fill: "none", stroke: on ? "var(--warm)" : "currentColor",
+      "stroke-opacity": on ? 1 : .22, "stroke-width": on ? 2.4 : 1.2 }));
+    const last = team.points[team.points.length - 1];
+    ends.push({ team, on, x: x(last[0]), y: y(last[1]) });
+  }
+  /* Teams that finish level land on the same pixel; push the labels apart so
+     every one stays readable. */
+  ends.sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) {
+    if (ends[i].y - ends[i - 1].y < 11) ends[i].y = ends[i - 1].y + 11;
+  }
+  for (const end of ends) {
+    node.appendChild(el("text", { x: end.x + 5, y: end.y + 3.5, "font-size": 9.5,
+      fill: "currentColor", "fill-opacity": end.on ? .95 : .4 }, end.team.team.slice(0, 8)));
+  }
+  node.appendChild(el("text", { x: (L + W - R) / 2, y: H - 6, "font-size": 11,
+    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, T.curve_x));
+  host.replaceChildren(node);
+}
+
+function stacked(host, rows, selected) {
+  const rowH = 21, L = 118, W = 560, top = 8;
+  const node = svg(W, top + rows.length * rowH + 6, T.opponents_title);
+  const peak = Math.max(...rows.map(r => r.vs_top + r.vs_bottom)) || 1;
+  const span = W - L - T.opponents_gap;
+  rows.forEach((row, i) => {
+    const y = top + i * rowH;
+    const on = row.team_pk === selected;
+    node.appendChild(el("text", { x: L - 6, y: y + 12, "font-size": 10.5, "text-anchor": "end",
+      fill: "currentColor", "fill-opacity": on ? 1 : .7 }, row.team.slice(0, 9)));
+    const topW = span * row.vs_top / peak, bottomW = span * row.vs_bottom / peak;
+    node.appendChild(el("rect", { x: L, y: y + 3, width: Math.max(topW, .5), height: 13, rx: 2,
+      fill: "var(--accent)", "fill-opacity": on ? .95 : .65 }));
+    node.appendChild(el("rect", { x: L + topW, y: y + 3, width: Math.max(bottomW, .5), height: 13, rx: 2,
+      fill: "var(--warm)", "fill-opacity": on ? .95 : .55 }));
+    node.appendChild(el("text", { x: L + topW + bottomW + 6, y: y + 13, "font-size": 10,
+      fill: "currentColor", "fill-opacity": .6 },
+      fill(T.opponents_row, { top: row.vs_top, bottom: row.vs_bottom,
+        share: Math.round(row.bottom_share * 100) + "%" })));
+  });
+  host.replaceChildren(node);
+}
+
+function heat(host, team) {
+  const matrix = DATA.matrix[team.team_pk];
+  if (!host) return;
+  if (!matrix || !matrix.players.length) { host.replaceChildren(); return; }
+  const table = document.createElement("table");
+  table.className = "heat";
+  const head = table.createTHead().insertRow();
+  head.appendChild(document.createElement("th")).className = "l";
+  for (const section of matrix.sections) {
+    const cell = document.createElement("th");
+    cell.textContent = section;
+    head.appendChild(cell);
+  }
+  const total = document.createElement("th");
+  total.textContent = T.heat_total;
+  head.appendChild(total);
+
+  const body = table.createTBody();
+  for (const player of matrix.players) {
+    const row = body.insertRow();
+    const name = row.insertCell();
+    name.className = "l";
+    name.textContent = `${player.label}${player.grade ? " " + player.grade + T.year_suffix : ""}`
+      + `${player.position ? " " + player.position : ""}`;
+    for (const section of matrix.sections) {
+      const minutes = player.minutes[section] || 0;
+      const cell = row.insertCell();
+      const box = document.createElement("div");
+      box.className = "cell";
+      box.style.background = minutes
+        ? `color-mix(in srgb, var(--accent) ${18 + 72 * minutes / 90}%, transparent)`
+        : "var(--panel)";
+      box.title = fill(T.heat_tip, { section, minutes });
+      cell.appendChild(box);
+    }
+    const sum = row.insertCell();
+    sum.textContent = player.total;
+    sum.style.fontSize = ".76rem";
+  }
+  host.replaceChildren(table);
+}
+
+function grades(host, team) {
+  const W = 380, H = 128, L = 30, top = 24, B = 26;
+  const node = svg(W, H, T.grades_title);
+  const entries = ["1", "2", "3", "4"].map(g => [g, team.grades[g] || { minutes: 0, goals: 0, players: 0 }]);
+  const peak = Math.max(...entries.map(e => e[1].minutes)) || 1;
+  const slot = (W - L - 12) / entries.length;
+  const plot = H - top - B;
+  entries.forEach(([grade, value], i) => {
+    const barH = plot * value.minutes / peak;
+    const x = L + i * slot;
+    node.appendChild(el("rect", { x: x + slot * .18, y: top + plot - barH, width: slot * .64,
+      height: Math.max(barH, 1), rx: 2, fill: "var(--plum)", "fill-opacity": .75 }));
+    node.appendChild(el("text", { x: x + slot / 2, y: top + plot - barH - 4, "font-size": 9.5,
+      "text-anchor": "middle", fill: "currentColor", "fill-opacity": .65 },
+      fill(T.grades_bar, { minutes: value.minutes, goals: value.goals })));
+    node.appendChild(el("text", { x: x + slot / 2, y: top + plot + 14, "font-size": 10.5,
+      "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 },
+      fill(T.grades_axis, { grade, players: value.players })));
+  });
+  node.appendChild(el("text", { x: 0, y: 12, "font-size": 11, "font-weight": 600,
+    fill: "currentColor" }, T.grades_title));
+  host.replaceChildren(node);
+}
+
+function table(host, headers, rows, leftColumns = 1) {
+  /* Aggregate mode omits the per-player sections entirely, so two of the four
+     callers below have no element to draw into. Without this guard the first
+     one threw and took every later call in select() down with it, which is how
+     the club history table came to be blank on every aggregate dashboard. */
+  if (!host) return;
+  const node = document.createElement("table");
+  const head = node.createTHead().insertRow();
+  headers.forEach((label, i) => {
+    const cell = document.createElement("th");
+    cell.textContent = label;
+    if (i < leftColumns) cell.className = "l";
+    head.appendChild(cell);
+  });
+  const body = node.createTBody();
+  for (const row of rows) {
+    const line = body.insertRow();
+    row.forEach((value, i) => {
+      const cell = line.insertCell();
+      cell.textContent = value == null ? "-" : value;
+      if (i < leftColumns) cell.className = "l";
+    });
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "scroll";
+  wrap.appendChild(node);
+  host.replaceChildren(wrap);
+}
+
+function cards(host, items) {
+  host.replaceChildren();
+  for (const [label, value] of items) {
+    const card = document.createElement("div");
+    card.className = "card";
+    const strong = document.createElement("b");
+    strong.textContent = value;
+    const span = document.createElement("span");
+    span.textContent = label;
+    card.append(strong, span);
+    host.appendChild(card);
+  }
+}
+
+const pct = v => (v * 100).toFixed(1) + "%";
+const topThree = places => places.slice(0, 3).reduce((a, b) => a + b, 0);
+
+/* One club's fixtures from its own side. The odds columns exist only on a page
+   built with a forecast. */
+function fixtureTable(host, team) {
+  const odds = !!DATA.projection;
+  const known = new Set(DATA.teams.map(t => t.team_pk));
+  const node = document.createElement("table");
+  const head = node.createTHead().insertRow();
+  T.cols_fixtures.concat(odds ? T.cols_odds : []).forEach((label, i) => {
+    const cell = document.createElement("th");
+    cell.textContent = label;
+    if (i < 4) cell.className = "l";
+    head.appendChild(cell);
+  });
+  const body = node.createTBody();
+  for (const row of DATA.fixtures[team.team_pk] || []) {
+    const line = body.insertRow();
+    const add = (value, left) => {
+      const cell = line.insertCell();
+      cell.textContent = value == null ? "-" : value;
+      if (left) cell.className = "l";
+      return cell;
+    };
+    add(row.section, true);
+    add(row.date || T.tbc, true);
+    const opponent = add(row.opponent, true);
+    if (known.has(row.opponent_pk)) {
+      opponent.classList.add("pick");
+      opponent.addEventListener("click", () => select(row.opponent_pk));
+    }
+    add(row.venue, true);
+    if (row.score) {
+      const [own, other] = row.score;
+      add(`${T.result_marks[own > other ? 0 : own === other ? 1 : 2]} ${own}-${other}`);
+    } else {
+      add(null);
+    }
+    if (!odds) continue;
+    if (!row.odds) {
+      for (let i = 0; i < T.cols_odds.length; i++) add("");
+      continue;
+    }
+    const bar = document.createElement("div");
+    bar.className = "odds";
+    ["var(--accent)", "var(--muted)", "var(--warm)"].forEach((colour, i) => {
+      const part = document.createElement("i");
+      part.style.width = `${row.odds[i] * 100}%`;
+      part.style.background = colour;
+      bar.appendChild(part);
+    });
+    line.insertCell().appendChild(bar);
+    row.odds.forEach(value => add(pct(value)));
+    add(fmt(3 * row.odds[0] + row.odds[1], 2));
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "scroll";
+  wrap.appendChild(node);
+  host.replaceChildren(wrap);
+}
+
+/* Points after each game a club has played, read off its own schedule rows so
+   the line and the table above it cannot disagree. */
+function taken(teamPk) {
+  const out = [[0, 0]];
+  for (const row of DATA.fixtures[teamPk] || []) {
+    if (!row.score) continue;
+    const [own, other] = row.score;
+    out.push([out.length, out[out.length - 1][1] + (own > other ? 3 : own === other ? 1 : 0)]);
+  }
+  return out;
+}
+
+function projection(host, selected) {
+  const W = 620, H = 320, L = 34, R = 124, top = 16, B = 32;
+  const node = svg(W, H, T.projection_title);
+  const clubs = DATA.teams.map(team => {
+    const done = taken(team.team_pk);
+    const start = done[done.length - 1];
+    const own = DATA.projection.teams[team.team_pk];
+    const ahead = own ? own.path.map((row, i) => [start[0] + i + 1, ...row]) : [];
+    return { team, done, start, ahead, on: team.team_pk === selected };
+  });
+  const last = club => club.ahead.length ? club.ahead[club.ahead.length - 1] : null;
+  const maxGames = Math.max(...clubs.map(c => last(c) ? last(c)[0] : c.start[0])) || 1;
+  const maxPoints = Math.max(...clubs.flatMap(c => [c.start[1], ...c.ahead.map(p => p[4])])) || 1;
+  const x = g => L + (W - L - R) * g / maxGames;
+  const y = p => top + (H - top - B) * (1 - p / maxPoints);
+  const line = (points, attrs) => el("polyline", Object.assign({
+    points: points.map(p => `${x(p[0])},${y(p[1])}`).join(" "), fill: "none" }, attrs));
+
+  const step = [5, 10, 20].find(s => maxPoints / s <= 6) || 30;
+  for (let value = 0; value <= maxPoints; value += step) {
+    node.appendChild(el("line", { x1: L, x2: W - R, y1: y(value), y2: y(value),
+      stroke: "currentColor", "stroke-opacity": .1 }));
+    node.appendChild(el("text", { x: L - 6, y: y(value) + 4, "font-size": 10,
+      "text-anchor": "end", fill: "currentColor", "fill-opacity": .55 }, value));
+  }
+  for (const club of clubs.filter(c => !c.on)) {
+    node.appendChild(line(club.done, { stroke: "currentColor", "stroke-opacity": .18,
+      "stroke-width": 1.1 }));
+    if (club.ahead.length) {
+      node.appendChild(line([club.start, ...club.ahead.map(p => [p[0], p[1]])],
+        { stroke: "currentColor", "stroke-opacity": .18, "stroke-width": 1.1,
+          "stroke-dasharray": "3 3" }));
+    }
+  }
+  const mine = clubs.find(c => c.on);
+  if (mine.ahead.length) {
+    const upper = [mine.start, ...mine.ahead.map(p => [p[0], p[4]])];
+    const lower = [mine.start, ...mine.ahead.map(p => [p[0], p[2]])].reverse();
+    node.appendChild(el("polygon", { points: upper.concat(lower)
+      .map(p => `${x(p[0])},${y(p[1])}`).join(" "), fill: "var(--warm)", "fill-opacity": .16 }));
+    node.appendChild(line([mine.start, ...mine.ahead.map(p => [p[0], p[1]])],
+      { stroke: "var(--warm)", "stroke-width": 2, "stroke-dasharray": "5 3" }));
+  }
+  node.appendChild(line(mine.done, { stroke: "var(--warm)", "stroke-width": 2.4 }));
+
+  /* Clubs projected level land on the same pixel; push the labels apart so
+     every one stays readable, as the points curve does. */
+  const ends = clubs.map(c => {
+    const end = last(c);
+    /* The selected club is named in the heading above, so its label has room
+       for the projection instead. */
+    const label = c.on && end
+      ? fill(T.projection_end, { mean: fmt(end[1]), low: end[2], high: end[4] })
+      : c.team.team.slice(0, 8);
+    return { on: c.on, label, x: x(end ? end[0] : c.start[0]), y: y(end ? end[1] : c.start[1]) };
+  }).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) {
+    if (ends[i].y - ends[i - 1].y < 11) ends[i].y = ends[i - 1].y + 11;
+  }
+  for (const end of ends) {
+    node.appendChild(el("text", { x: end.x + 5, y: end.y + 3.5, "font-size": 9.5,
+      fill: end.on ? "var(--warm)" : "currentColor", "fill-opacity": end.on ? 1 : .45,
+      "font-weight": end.on ? 600 : 400 }, end.label));
+  }
+  node.appendChild(el("text", { x: (L + W - R) / 2, y: H - 6, "font-size": 11,
+    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, T.projection_x));
+  host.replaceChildren(node);
+}
+
+function places(host, selected) {
+  const own = DATA.projection.teams[selected];
+  if (!own) { host.replaceChildren(); return; }
+  const W = 380, H = 170, L = 8, top = 20, B = 22;
+  const node = svg(W, H, T.places_title);
+  const slot = (W - 2 * L) / own.places.length, plot = H - top - B;
+  const peak = Math.max(...own.places) || 1;
+  own.places.forEach((share, i) => {
+    const barH = plot * share / peak, bx = L + i * slot;
+    const bar = el("rect", { x: bx + slot * .15, y: top + plot - barH, width: slot * .7,
+      height: share ? Math.max(barH, 1) : 0, rx: 2, fill: "var(--warm)", "fill-opacity": .75 });
+    bar.appendChild(el("title", {}, fill(T.places_tip, { place: i + 1, share: pct(share) })));
+    node.appendChild(bar);
+    if (share >= .005) {
+      node.appendChild(el("text", { x: bx + slot / 2, y: top + plot - barH - 4, "font-size": 9,
+        "text-anchor": "middle", fill: "currentColor", "fill-opacity": .7 },
+        `${Math.round(share * 100)}%`));
+    }
+    node.appendChild(el("text", { x: bx + slot / 2, y: H - 6, "font-size": 10,
+      "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, i + 1));
+  });
+  host.replaceChildren(node);
+}
+
+let current = DATA.teams[0].team_pk;
+
+function select(teamPk) {
+  current = teamPk;
+  const team = DATA.teams.find(t => t.team_pk === teamPk);
+  for (const button of document.querySelectorAll(".tabs button")) {
+    button.setAttribute("aria-pressed", String(button.dataset.team === teamPk));
+  }
+  document.getElementById("team-name").textContent = `${team.rank}. ${team.team}`;
+
+  bubbles(document.getElementById("bubbles"), DATA.teams, teamPk);
+  radarGrid(document.getElementById("radars"), DATA.teams, teamPk);
+  curve(document.getElementById("curve"), teamPk);
+  stacked(document.getElementById("opponents"), DATA.opponents, teamPk);
+
+  document.getElementById("radar-big").replaceChildren(radar(team, 300, teamPk));
+  cards(document.getElementById("team-cards"), [
+    [T.card_points, team.points], [T.card_scored, team.goals_for],
+    [T.card_conceded, team.goals_against],
+    [T.card_shots, fmt(team.shots_per_game)], [T.card_conversion, fmt(team.conversion, 3)],
+    [T.card_used, team.players_used],
+    [T.card_core, Math.round(team.core_share * 100) + "%"],
+    [T.card_grade, fmt(team.mean_grade, 2)],
+  ]);
+  grades(document.getElementById("grades"), team);
+  heat(document.getElementById("heat"), team);
+  fixtureTable(document.getElementById("fixtures"), team);
+
+  /* The forecast sections exist only on a page built with --forecast. */
+  if (DATA.projection) {
+    const own = DATA.projection.teams[teamPk];
+    const ranked = DATA.teams.filter(t => DATA.projection.teams[t.team_pk])
+      .map(t => [t, DATA.projection.teams[t.team_pk]])
+      .sort((a, b) => b[1].expected - a[1].expected);
+    table(document.getElementById("projected"), T.cols_projected,
+      ranked.map(([t, p]) => [t.team, p.played, p.points, fmt(p.expected), pct(p.places[0]),
+        pct(topThree(p.places)), pct(p.places[p.places.length - 1])]));
+    cards(document.getElementById("forecast-cards"), own ? [
+      [T.card_expected, fmt(own.expected)], [T.card_title, pct(own.places[0])],
+      [T.card_top3, pct(topThree(own.places))],
+      [T.card_last, pct(own.places[own.places.length - 1])],
+    ] : []);
+    projection(document.getElementById("projection"), teamPk);
+    places(document.getElementById("places"), teamPk);
+  }
+
+  table(document.getElementById("history"),
+    T.cols_history,
+    (DATA.history[team.team_id] || []).map(h =>
+      [h.year, h.label, h.played, `${h.win}-${h.draw}-${h.lose}`, h.points, fmt(h.points_per_game, 2)]),
+    2);
+
+  const squad = DATA.squads[teamPk] || [];
+  table(document.getElementById("squad"),
+    T.cols_squad,
+    squad.map(p => [p.label, p.grade ? p.grade + T.year_suffix : "-", p.position || "-",
+      p.apps, p.starts, p.minutes, p.shots, p.goals, fmt(p.shots_per_90, 2), fmt(p.conversion, 3)]), 3);
+}
+
+for (const button of document.querySelectorAll(".tabs button")) {
+  button.addEventListener("click", () => select(button.dataset.team));
+}
+select(current);
+</script>
+</body></html>
