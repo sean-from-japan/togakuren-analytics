@@ -2,8 +2,8 @@
 
 A season is too much for one static page: twelve teams, up to twenty-two
 matchdays and thirty players each. So the page carries the whole series as JSON
-and draws on demand — pick a team with a button, and the squad, the minutes grid
-and the club's history across divisions redraw in place.
+and draws on demand — pick a team with a button, and its fixtures, the squad,
+the minutes grid and the club's history across divisions redraw in place.
 
 Still one self-contained file with no external assets, because the interesting
 version of it contains names and must never need uploading to render.
@@ -17,7 +17,7 @@ import html
 import json
 from datetime import datetime, timezone
 
-from . import analysis, metrics, privacy
+from . import analysis, metrics, predict, privacy
 
 #: The federation's divisions, deepest last. The Challenge League has no number
 #: in its name and its level moved twice, so the order here is the order they
@@ -71,8 +71,12 @@ th { color:var(--muted); font-weight:600; font-size:.74rem; text-transform:upper
 tbody tr:hover { background:var(--panel); }
 svg { display:block; max-width:100%; height:auto; }
 #bubbles svg, #curve svg, #opponents svg, #grades svg,
-#goals-line svg, #shots-line svg, #conv-line svg, #trajectory svg, #moves svg
+#goals-line svg, #shots-line svg, #conv-line svg, #trajectory svg, #moves svg,
+#projection svg, #places svg
   { width:100%; max-width:640px; }
+.odds { display:flex; width:84px; height:9px; border-radius:2px; overflow:hidden; }
+.odds i { display:block; height:100%; }
+td.pick { cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px; }
 #radar-big svg { width:100%; max-width:440px; }
 .grid { display:grid; gap:1.4rem; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); }
 .cards { display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); margin:.8rem 0; }
@@ -150,6 +154,35 @@ TEXT = {
                       "one is mottled."),
         "h_squad": "Squad",
         "year_suffix": "",
+        "h_fixtures": "Fixtures and results",
+        "cols_fixtures": ["MD", "Date", "Opponent", "Venue", "Result"],
+        "cols_odds": ["", "Win", "Draw", "Loss", "Exp. pts"],
+        "result_marks": ["W", "D", "L"],
+        "tbc": "TBC",
+        "fixtures_note": ("Every league fixture this club has: results first, then what is left "
+                          "in date order, with the unscheduled ones last. Click an opponent to "
+                          "switch to them."),
+        "h_projected": "Projected final table",
+        "cols_projected": ["Club", "P", "Pts", "Proj.", "Title", "Top 3", "Last"],
+        "projected_note": ("A Poisson model fitted on every result up to {asof}, playing the "
+                           "fixtures left {runs} times over. Only outcomes are drawn, so clubs "
+                           "level on points are split by the goal difference they have now. "
+                           "One model's odds, not advice."),
+        "h_projection": "Points taken, and where they are heading",
+        "projection_title": "Points by games played, with the projection",
+        "projection_x": "games played →",
+        "projection_end": "{mean} ({low}–{high})",
+        "projection_note": ("Solid is points taken; dashed is the expected path through the "
+                            "fixtures left, in the order they are scheduled; the band is where "
+                            "the club ends up four times in five. Grey lines are the rest of "
+                            "the division."),
+        "h_places": "Where it finishes",
+        "places_title": "Chance of each finishing position",
+        "places_tip": "position {place}: {share}",
+        "card_expected": "projected points",
+        "card_title": "title",
+        "card_top3": "top 3",
+        "card_last": "last",
         "footer": ("Source: the Tokyo University Football Association's public content API. "
                    "Generated locally, and it holds nothing the federation's own site does not "
                    "already publish."),
@@ -206,6 +239,33 @@ TEXT = {
                       "ターンオーバーの多いチームはまだらになります。"),
         "h_squad": "選手一覧",
         "year_suffix": "年",
+        "h_fixtures": "日程と結果",
+        "cols_fixtures": ["節", "日付", "対戦相手", "会場", "結果"],
+        "cols_odds": ["", "勝", "分", "敗", "期待勝点"],
+        "result_marks": ["○", "△", "●"],
+        "tbc": "未定",
+        "fixtures_note": ("このチームのリーグ戦の全試合です。消化済みの試合、残り試合の順に日付で"
+                          "並べ、日程未定の試合は最後に置いています。対戦相手をクリックすると"
+                          "そのチームに切り替わります。"),
+        "h_projected": "最終順位の予測",
+        "cols_projected": ["チーム", "試合", "勝点", "予測勝点", "優勝", "3位以内", "最下位"],
+        "projected_note": ("{asof}までの全結果で推定したポアソンモデルで、残り試合を{runs}回"
+                           "シミュレーションした結果です。生成するのは勝ち・引き分け・負けだけ"
+                           "なので、勝点が並んだ場合は現時点の得失点差で順位を決めています。"
+                           "モデルが出した確率であり、助言ではありません。"),
+        "h_projection": "勝点の実績と予測",
+        "projection_title": "試合数ごとの勝点と予測",
+        "projection_x": "試合数 →",
+        "projection_end": "{mean}（{low}〜{high}）",
+        "projection_note": ("実線が獲得した勝点、破線が残り試合を日程順に消化したときの期待値、"
+                            "帯が80%の確率で収まる範囲です。灰色の線は同じ部の他チームです。"),
+        "h_places": "最終順位の分布",
+        "places_title": "各順位で終わる確率",
+        "places_tip": "{place}位: {share}",
+        "card_expected": "予測勝点",
+        "card_title": "優勝",
+        "card_top3": "3位以内",
+        "card_last": "最下位",
         "footer": ("出典: 東京都大学サッカー連盟 公開コンテンツAPI。ローカル生成のファイルであり、"
                    "連盟サイトが公開している以上の情報は含みません。"),
     },
@@ -509,6 +569,173 @@ function cards(host, items) {
   }
 }
 
+const pct = v => (v * 100).toFixed(1) + "%";
+const topThree = places => places.slice(0, 3).reduce((a, b) => a + b, 0);
+
+/* One club's fixtures from its own side. The odds columns exist only on a page
+   built with a forecast. */
+function fixtureTable(host, team) {
+  const odds = !!DATA.projection;
+  const known = new Set(DATA.teams.map(t => t.team_pk));
+  const node = document.createElement("table");
+  const head = node.createTHead().insertRow();
+  T.cols_fixtures.concat(odds ? T.cols_odds : []).forEach((label, i) => {
+    const cell = document.createElement("th");
+    cell.textContent = label;
+    if (i < 4) cell.className = "l";
+    head.appendChild(cell);
+  });
+  const body = node.createTBody();
+  for (const row of DATA.fixtures[team.team_pk] || []) {
+    const line = body.insertRow();
+    const add = (value, left) => {
+      const cell = line.insertCell();
+      cell.textContent = value == null ? "-" : value;
+      if (left) cell.className = "l";
+      return cell;
+    };
+    add(row.section, true);
+    add(row.date || T.tbc, true);
+    const opponent = add(row.opponent, true);
+    if (known.has(row.opponent_pk)) {
+      opponent.classList.add("pick");
+      opponent.addEventListener("click", () => select(row.opponent_pk));
+    }
+    add(row.venue, true);
+    if (row.score) {
+      const [own, other] = row.score;
+      add(`${T.result_marks[own > other ? 0 : own === other ? 1 : 2]} ${own}-${other}`);
+    } else {
+      add(null);
+    }
+    if (!odds) continue;
+    if (!row.odds) {
+      for (let i = 0; i < T.cols_odds.length; i++) add("");
+      continue;
+    }
+    const bar = document.createElement("div");
+    bar.className = "odds";
+    ["var(--accent)", "var(--muted)", "var(--warm)"].forEach((colour, i) => {
+      const part = document.createElement("i");
+      part.style.width = `${row.odds[i] * 100}%`;
+      part.style.background = colour;
+      bar.appendChild(part);
+    });
+    line.insertCell().appendChild(bar);
+    row.odds.forEach(value => add(pct(value)));
+    add(fmt(3 * row.odds[0] + row.odds[1], 2));
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "scroll";
+  wrap.appendChild(node);
+  host.replaceChildren(wrap);
+}
+
+/* Points after each game a club has played, read off its own schedule rows so
+   the line and the table above it cannot disagree. */
+function taken(teamPk) {
+  const out = [[0, 0]];
+  for (const row of DATA.fixtures[teamPk] || []) {
+    if (!row.score) continue;
+    const [own, other] = row.score;
+    out.push([out.length, out[out.length - 1][1] + (own > other ? 3 : own === other ? 1 : 0)]);
+  }
+  return out;
+}
+
+function projection(host, selected) {
+  const W = 620, H = 320, L = 34, R = 124, top = 16, B = 32;
+  const node = svg(W, H, T.projection_title);
+  const clubs = DATA.teams.map(team => {
+    const done = taken(team.team_pk);
+    const start = done[done.length - 1];
+    const own = DATA.projection.teams[team.team_pk];
+    const ahead = own ? own.path.map((row, i) => [start[0] + i + 1, ...row]) : [];
+    return { team, done, start, ahead, on: team.team_pk === selected };
+  });
+  const last = club => club.ahead.length ? club.ahead[club.ahead.length - 1] : null;
+  const maxGames = Math.max(...clubs.map(c => last(c) ? last(c)[0] : c.start[0])) || 1;
+  const maxPoints = Math.max(...clubs.flatMap(c => [c.start[1], ...c.ahead.map(p => p[4])])) || 1;
+  const x = g => L + (W - L - R) * g / maxGames;
+  const y = p => top + (H - top - B) * (1 - p / maxPoints);
+  const line = (points, attrs) => el("polyline", Object.assign({
+    points: points.map(p => `${x(p[0])},${y(p[1])}`).join(" "), fill: "none" }, attrs));
+
+  const step = [5, 10, 20].find(s => maxPoints / s <= 6) || 30;
+  for (let value = 0; value <= maxPoints; value += step) {
+    node.appendChild(el("line", { x1: L, x2: W - R, y1: y(value), y2: y(value),
+      stroke: "currentColor", "stroke-opacity": .1 }));
+    node.appendChild(el("text", { x: L - 6, y: y(value) + 4, "font-size": 10,
+      "text-anchor": "end", fill: "currentColor", "fill-opacity": .55 }, value));
+  }
+  for (const club of clubs.filter(c => !c.on)) {
+    node.appendChild(line(club.done, { stroke: "currentColor", "stroke-opacity": .18,
+      "stroke-width": 1.1 }));
+    if (club.ahead.length) {
+      node.appendChild(line([club.start, ...club.ahead.map(p => [p[0], p[1]])],
+        { stroke: "currentColor", "stroke-opacity": .18, "stroke-width": 1.1,
+          "stroke-dasharray": "3 3" }));
+    }
+  }
+  const mine = clubs.find(c => c.on);
+  if (mine.ahead.length) {
+    const upper = [mine.start, ...mine.ahead.map(p => [p[0], p[4]])];
+    const lower = [mine.start, ...mine.ahead.map(p => [p[0], p[2]])].reverse();
+    node.appendChild(el("polygon", { points: upper.concat(lower)
+      .map(p => `${x(p[0])},${y(p[1])}`).join(" "), fill: "var(--warm)", "fill-opacity": .16 }));
+    node.appendChild(line([mine.start, ...mine.ahead.map(p => [p[0], p[1]])],
+      { stroke: "var(--warm)", "stroke-width": 2, "stroke-dasharray": "5 3" }));
+  }
+  node.appendChild(line(mine.done, { stroke: "var(--warm)", "stroke-width": 2.4 }));
+
+  /* Clubs projected level land on the same pixel; push the labels apart so
+     every one stays readable, as the points curve does. */
+  const ends = clubs.map(c => {
+    const end = last(c);
+    /* The selected club is named in the heading above, so its label has room
+       for the projection instead. */
+    const label = c.on && end
+      ? fill(T.projection_end, { mean: fmt(end[1]), low: end[2], high: end[4] })
+      : c.team.team.slice(0, 8);
+    return { on: c.on, label, x: x(end ? end[0] : c.start[0]), y: y(end ? end[1] : c.start[1]) };
+  }).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) {
+    if (ends[i].y - ends[i - 1].y < 11) ends[i].y = ends[i - 1].y + 11;
+  }
+  for (const end of ends) {
+    node.appendChild(el("text", { x: end.x + 5, y: end.y + 3.5, "font-size": 9.5,
+      fill: end.on ? "var(--warm)" : "currentColor", "fill-opacity": end.on ? 1 : .45,
+      "font-weight": end.on ? 600 : 400 }, end.label));
+  }
+  node.appendChild(el("text", { x: (L + W - R) / 2, y: H - 6, "font-size": 11,
+    "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, T.projection_x));
+  host.replaceChildren(node);
+}
+
+function places(host, selected) {
+  const own = DATA.projection.teams[selected];
+  if (!own) { host.replaceChildren(); return; }
+  const W = 380, H = 170, L = 8, top = 20, B = 22;
+  const node = svg(W, H, T.places_title);
+  const slot = (W - 2 * L) / own.places.length, plot = H - top - B;
+  const peak = Math.max(...own.places) || 1;
+  own.places.forEach((share, i) => {
+    const barH = plot * share / peak, bx = L + i * slot;
+    const bar = el("rect", { x: bx + slot * .15, y: top + plot - barH, width: slot * .7,
+      height: share ? Math.max(barH, 1) : 0, rx: 2, fill: "var(--warm)", "fill-opacity": .75 });
+    bar.appendChild(el("title", {}, fill(T.places_tip, { place: i + 1, share: pct(share) })));
+    node.appendChild(bar);
+    if (share >= .005) {
+      node.appendChild(el("text", { x: bx + slot / 2, y: top + plot - barH - 4, "font-size": 9,
+        "text-anchor": "middle", fill: "currentColor", "fill-opacity": .7 },
+        `${Math.round(share * 100)}%`));
+    }
+    node.appendChild(el("text", { x: bx + slot / 2, y: H - 6, "font-size": 10,
+      "text-anchor": "middle", fill: "currentColor", "fill-opacity": .6 }, i + 1));
+  });
+  host.replaceChildren(node);
+}
+
 let current = DATA.teams[0].team_pk;
 
 function select(teamPk) {
@@ -535,6 +762,25 @@ function select(teamPk) {
   ]);
   grades(document.getElementById("grades"), team);
   heat(document.getElementById("heat"), team);
+  fixtureTable(document.getElementById("fixtures"), team);
+
+  /* The forecast sections exist only on a page built with --forecast. */
+  if (DATA.projection) {
+    const own = DATA.projection.teams[teamPk];
+    const ranked = DATA.teams.filter(t => DATA.projection.teams[t.team_pk])
+      .map(t => [t, DATA.projection.teams[t.team_pk]])
+      .sort((a, b) => b[1].expected - a[1].expected);
+    table(document.getElementById("projected"), T.cols_projected,
+      ranked.map(([t, p]) => [t.team, p.played, p.points, fmt(p.expected), pct(p.places[0]),
+        pct(topThree(p.places)), pct(p.places[p.places.length - 1])]));
+    cards(document.getElementById("forecast-cards"), own ? [
+      [T.card_expected, fmt(own.expected)], [T.card_title, pct(own.places[0])],
+      [T.card_top3, pct(topThree(own.places))],
+      [T.card_last, pct(own.places[own.places.length - 1])],
+    ] : []);
+    projection(document.getElementById("projection"), teamPk);
+    places(document.getElementById("places"), teamPk);
+  }
 
   table(document.getElementById("history"),
     T.cols_history,
@@ -560,8 +806,78 @@ def _e(value):
     return html.escape("" if value is None else str(value))
 
 
-def build(conn, series_id, mode="full", salt=None, min_minutes=0, lang="en"):
-    """Render the dashboard for one series and return the HTML source."""
+def fixtures(conn, series_id, profile, forecast=False, runs=10000):
+    """Each club's fixtures in the series, and optionally the forecast for the rest.
+
+    Returns ``(schedule, projection)``. ``schedule`` maps a team to its fixtures
+    from its own side: results first, then what is left in the order it is
+    scheduled, unscheduled ones last. ``projection`` is ``None`` unless a
+    forecast was asked for and something is left to play; its model, cut-off
+    and seed are the ``forecast`` command's, so the two agree to the digit.
+    """
+    matches = predict.load(conn)
+    cutoff = predict.as_of(matches)
+    pk_of = {row["team_id"]: row["team_pk"] for row in profile if row["team_id"]}
+    played = [m for m in matches if m["series_id"] == series_id and m["played"]]
+    remaining = predict.upcoming(matches, series_id)
+    model = None
+    if forecast and remaining:
+        model = predict.fit_through(predict.Poisson(), matches, cutoff)
+
+    schedule = {}
+    for match in played + remaining:
+        odds = model.predict(match) if model and not match["played"] else None
+        for side in (0, 1):
+            team_pk = pk_of.get(match["clubs"][side])
+            if not team_pk:
+                continue
+            other = 1 - side
+            row = {
+                "section": match["section"],
+                "date": None if not match["played"] and predict.undated(match, cutoff)
+                else match["date"].isoformat(),
+                "opponent": match["names"][other],
+                "opponent_pk": pk_of.get(match["clubs"][other]),
+                "venue": match["venue"],
+            }
+            if match["played"]:
+                row["score"] = [match["goals"][side], match["goals"][other]]
+            elif odds:
+                win, draw, loss = odds if side == 0 else odds[::-1]
+                row["odds"] = [round(win, 4), round(draw, 4), round(loss, 4)]
+            schedule.setdefault(team_pk, []).append(row)
+
+    if model is None:
+        return schedule, None
+    points, positions = predict.simulate(model, played, remaining, runs=runs)
+    start = predict.table(played)
+    teams = {}
+    for club, expected in points.items():
+        team_pk = pk_of.get(club)
+        if not team_pk:
+            continue
+        place = positions[club]
+        total = sum(place.values()) or 1
+        own = [m for m in remaining if club in m["clubs"]]
+        teams[team_pk] = {
+            "played": start[club][0],
+            "points": start[club][1],
+            "expected": round(expected, 1),
+            "places": [round(place[k] / total, 4) for k in range(1, len(points) + 1)],
+            "path": [[round(mean, 2), low, median, high] for mean, low, median, high
+                     in predict.points_path(model, club, start[club][1], own)],
+        }
+    return schedule, {"asof": cutoff.isoformat(), "runs": runs, "teams": teams}
+
+
+def build(conn, series_id, mode="full", salt=None, min_minutes=0, lang="en",
+          forecast=False):
+    """Render the dashboard for one series and return the HTML source.
+
+    ``forecast`` adds win/draw/loss probabilities to each club's remaining
+    fixtures, its projected points and finishing position, and a projected
+    table. All of it is team-level, so it is safe in every privacy mode.
+    """
     if lang not in TEXT:
         raise ValueError(f"unsupported language: {lang}")
     text = TEXT[lang]
@@ -670,6 +986,8 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0, lang="en"):
         "squads": squads,
         "history": history,
     }
+    payload["fixtures"], payload["projection"] = fixtures(conn, series_id, profile, forecast)
+    projection = payload["projection"]
 
     banner = ""
     if mode == "aggregate":
@@ -717,6 +1035,24 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0, lang="en"):
         else ""
     )
 
+    projected_section = projection_section = ""
+    if projection:
+        note = text["projected_note"].format(asof=projection["asof"],
+                                             runs=f"{projection['runs']:,}")
+        projected_section = f"""
+<h3>{_e(text['h_projected'])}</h3>
+<div id="projected"></div>
+<p class="note">{_e(note)}</p>
+"""
+        projection_section = f"""
+<div class="cards" id="forecast-cards"></div>
+<div class="grid">
+  <div><h3>{_e(text['h_projection'])}</h3><div id="projection"></div></div>
+  <div><h3>{_e(text['h_places'])}</h3><div id="places"></div></div>
+</div>
+<p class="note">{_e(text['projection_note'])}</p>
+"""
+
     generated = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M")
     division = series["short_name"] or series["name"]
     return f"""<!doctype html>
@@ -744,6 +1080,7 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0, lang="en"):
   <p class="note">{_e(text['opponents_note'])}</p></div>
 </div>
 
+{projected_section}
 <h3>{_e(text['h_radars'])}</h3>
 <div class="radars" id="radars"></div>
 <p class="note">{_e(text['radars_note'])}</p>
@@ -755,6 +1092,10 @@ def build(conn, series_id, mode="full", salt=None, min_minutes=0, lang="en"):
   <div><div class="cards" id="team-cards"></div><div id="grades"></div></div>
 </div>
 
+<h3>{_e(text['h_fixtures'])}</h3>
+<div id="fixtures"></div>
+<p class="note">{_e(text['fixtures_note'])}</p>
+{projection_section}
 <h3>{_e(text['h_history'])}</h3>
 <div id="history"></div>
 {player_sections}

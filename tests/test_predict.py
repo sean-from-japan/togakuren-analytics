@@ -260,6 +260,28 @@ class Projection(unittest.TestCase):
         self.assertEqual(sum(positions["alpha"].values()), 200)
         self.assertGreater(positions["alpha"][1] / 200, 0.9)
 
+    def test_the_points_path_is_exact_where_the_simulation_samples(self):
+        """One club's points need no simulation: the path's mean is the sum of
+        its own expected points, and its 80% range brackets the median."""
+        played = season("alpha", "beta", rounds=30)
+        model = predict.Poisson(home=False)
+        for fixture in played:
+            model.observe(fixture)
+        model.fit(datetime.date(2099, 5, 10))
+        remaining = [match("alpha", "beta", played=False, day=20, game_id="r1"),
+                     match("beta", "alpha", played=False, day=21, game_id="r2")]
+        path = predict.points_path(model, "alpha", 10, remaining)
+        self.assertEqual(len(path), 2)
+        expected = 10
+        for fixture in remaining:
+            first, draw, second = model.predict(fixture)
+            expected += 3 * (first if fixture["clubs"][0] == "alpha" else second) + draw
+        self.assertAlmostEqual(path[-1][0], expected)
+        for mean, low, median, high in path:
+            self.assertLessEqual(low, median)
+            self.assertLessEqual(median, high)
+            self.assertLessEqual(high, 10 + 6)
+
 
 if __name__ == "__main__":
     unittest.main()

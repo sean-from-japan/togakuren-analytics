@@ -1,6 +1,7 @@
 import unittest
+from unittest import mock
 
-from togakuren import analysis, dashboard, db, ingest, trends
+from togakuren import analysis, dashboard, db, ingest, predict, trends
 
 from . import fixtures
 
@@ -175,6 +176,82 @@ class Dashboard(Base):
     def test_an_unknown_language_is_refused_rather_than_defaulted(self):
         with self.assertRaises(ValueError):
             dashboard.build(self.conn, "series-1", lang="fr")
+
+    def test_each_club_sees_its_fixtures_from_its_own_side(self):
+        schedule, projection = dashboard.fixtures(self.conn, "series-1", self.profile)
+        alpha = schedule[self.by_team["Alpha"]["team_pk"]]
+        self.assertEqual([row["score"] for row in alpha], [[2, 0], [0, 1]])
+        self.assertEqual([row["opponent"] for row in alpha], ["Beta", "Beta"])
+        self.assertIsNone(projection)
+
+    def test_a_finished_season_has_nothing_to_forecast(self):
+        html = dashboard.build(self.conn, "series-1", mode="aggregate", forecast=True)
+        self.assertIn('id="fixtures"', html)
+        self.assertNotIn('id="projection"', html)
+
+
+class DashboardForecast(unittest.TestCase):
+    """A season with a fixture left, which is what the forecast sections are for."""
+
+    def setUp(self):
+        self.conn = db.connect(":memory:")
+        self.addCleanup(self.conn.close)
+        ingest.ingest_series(self.conn, fixtures.UnfinishedSeasonClient(), fixtures.SERIES)
+        self.profile = analysis.team_profile(self.conn, "series-1")
+        self.pk = {row["team"]: row["team_pk"] for row in self.profile}
+
+    def test_the_odds_are_asked_for_rather_than_shown_by_default(self):
+        schedule, projection = dashboard.fixtures(self.conn, "series-1", self.profile)
+        self.assertIsNone(projection)
+        self.assertNotIn("odds", schedule[self.pk["Alpha"]][-1])
+        self.assertEqual(schedule[self.pk["Alpha"]][-1]["date"], "2099-04-15")
+
+    def test_a_fixture_left_carries_odds_from_each_side(self):
+        """Three fixtures cannot fit a model, and an unfitted one gives both
+        sides the same odds, which would hide a side read the wrong way round.
+        So the model here is told who is stronger."""
+
+        class Lopsided:
+            def observe(self, match):
+                pass
+
+            def fit(self, asof):
+                pass
+
+            def predict(self, match):
+                return [0.6, 0.3, 0.1] if match["clubs"][0] == "100" else [0.1, 0.3, 0.6]
+
+        with mock.patch.object(dashboard.predict, "Poisson", Lopsided):
+            schedule, projection = dashboard.fixtures(self.conn, "series-1", self.profile,
+                                                      forecast=True)
+        self.assertEqual(schedule[self.pk["Alpha"]][-1]["odds"], [0.6, 0.3, 0.1])
+        self.assertEqual(schedule[self.pk["Beta"]][-1]["odds"], [0.1, 0.3, 0.6])
+        self.assertTrue(all("odds" not in row for row in schedule[self.pk["Alpha"]][:-1]))
+        alpha, beta = projection["teams"][self.pk["Alpha"]], projection["teams"][self.pk["Beta"]]
+        self.assertAlmostEqual(alpha["path"][0][0] - alpha["points"], 3 * 0.6 + 0.3)
+        self.assertAlmostEqual(beta["path"][0][0] - beta["points"], 3 * 0.1 + 0.3)
+
+    def test_the_projection_is_the_forecast_commands_to_the_digit(self):
+        _, projection = dashboard.fixtures(self.conn, "series-1", self.profile, forecast=True)
+        matches = predict.load(self.conn)
+        cutoff = predict.as_of(matches)
+        model = predict.fit_through(predict.Poisson(), matches, cutoff)
+        played = [m for m in matches if m["played"]]
+        points, _ = predict.simulate(model, played, predict.upcoming(matches, "series-1"))
+        self.assertEqual(projection["asof"], cutoff.isoformat())
+        for row in self.profile:
+            own = projection["teams"][row["team_pk"]]
+            self.assertEqual(own["expected"], round(points[row["team_id"]], 1))
+            self.assertAlmostEqual(sum(own["places"]), 1, places=3)
+            self.assertEqual(len(own["path"]), 1)
+
+    def test_the_page_carries_the_forecast_sections_in_every_privacy_mode(self):
+        html = dashboard.build(self.conn, "series-1", mode="aggregate", forecast=True)
+        for host in ("projected", "forecast-cards", "projection", "places"):
+            self.assertIn(f'id="{host}"', html)
+        self.assertNotIn("Alpha Player", html)
+        plain = dashboard.build(self.conn, "series-1", mode="aggregate")
+        self.assertNotIn('id="projection"', plain)
 
 
 class Seasons(Base):

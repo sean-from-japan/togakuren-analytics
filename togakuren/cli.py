@@ -131,11 +131,13 @@ def cmd_dashboard(args):
     if args.public:
         rows = metrics.player_season(conn, series_id, min_minutes=0)
         privacy.check_public_safe(args.privacy, rows)
-    html = dashboard.build(conn, series_id, mode=args.privacy, salt=salt, lang=args.lang)
+    html = dashboard.build(conn, series_id, mode=args.privacy, salt=salt, lang=args.lang,
+                           forecast=args.forecast)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
-    print(f"wrote {out} ({len(html):,} bytes, privacy={args.privacy}, lang={args.lang})")
+    print(f"wrote {out} ({len(html):,} bytes, privacy={args.privacy}, lang={args.lang}"
+          f"{', with forecast' if args.forecast else ''})")
 
 
 def cmd_trends(args):
@@ -262,7 +264,7 @@ def cmd_forecast(args):
     for club in sorted(points, key=lambda c: -points[c]):
         place = positions[club]
         total = sum(place.values()) or 1
-        last = max(place) if place else 0
+        last = len(points)
         print(f"{(names.get(club) or club)[:24]:24} {standing[club][0]:3} {standing[club][1]:4} "
               f"{points[club]:6.1f} {place[1]/total:7.1%} "
               f"{sum(place[p] for p in (1, 2, 3))/total:7.1%} {place[last]/total:7.1%}")
@@ -713,6 +715,10 @@ def build_parser():
         sub.add_argument("--min-minutes", type=int, default=270)
         if name == "dashboard":
             sub.add_argument("--lang", choices=sorted(dashboard.TEXT), default="en")
+            sub.add_argument(
+                "--forecast", action="store_true",
+                help="add win/draw/loss odds to the fixtures left, and projected points",
+            )
         if extra is not None:
             sub.add_argument(
                 "--privacy", choices=privacy.MODES,

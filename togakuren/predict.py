@@ -36,6 +36,7 @@ TAU_FLOOR = 0.01
 
 MATCHES = """
 SELECT g.id           AS game_id,
+       g.section      AS section,
        g.venue        AS venue,
        g.kickoff      AS kickoff,
        g.game_over    AS played,
@@ -128,6 +129,8 @@ def load(conn):
         matches.append(
             {
                 "game_id": first["game_id"],
+                "section": first["section"],
+                "venue": first["venue"],
                 "date": date,
                 "clubs": (first["club"], second["club"]),
                 "names": (first["club_name"], second["club_name"]),
@@ -582,3 +585,39 @@ def simulate(model, played, remaining, runs=10000, seed=0):
             positions[club][place] += 1
         total_points.update(points)
     return ({club: total_points[club] / runs for club in clubs}, positions)
+
+
+def points_path(model, club, points, fixtures):
+    """The spread of one club's points after each of ``fixtures``, exactly.
+
+    :func:`simulate` draws every fixture independently, so one club's total is
+    the sum of its own fixtures' outcomes and needs no simulation: convolving
+    them gives the whole distribution. The mean agrees with :func:`simulate` up
+    to its sampling error.
+
+    Returns one ``(mean, low, median, high)`` row per fixture, in the order
+    given, where ``low`` and ``high`` bound the middle 80%.
+    """
+    chances = {points: 1.0}
+    rows = []
+    for match in fixtures:
+        first, draw, second = model.predict(match)
+        win, loss = (first, second) if match["clubs"][0] == club else (second, first)
+        after = collections.defaultdict(float)
+        for total, chance in chances.items():
+            after[total + 3] += chance * win
+            after[total + 1] += chance * draw
+            after[total] += chance * loss
+        chances = after
+        mean = sum(total * chance for total, chance in chances.items())
+        rows.append((mean, *(_quantile(chances, q) for q in (0.1, 0.5, 0.9))))
+    return rows
+
+
+def _quantile(chances, q):
+    running = 0.0
+    for total in sorted(chances):
+        running += chances[total]
+        if running >= q - 1e-9:
+            return total
+    return max(chances)

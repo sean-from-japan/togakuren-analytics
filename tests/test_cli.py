@@ -8,6 +8,7 @@ that raises on a real invocation cannot pass.
 
 No network: ``_client`` is replaced with the fixture client.
 """
+import collections
 import contextlib
 import io
 import logging
@@ -233,6 +234,25 @@ class Forecasting(Command):
         output = self.run_cli("forecast", "--series", "latest", "--runs", "50")
         self.assertIn("Alpha", output)
         self.assertIn("Beta", output)
+
+    def test_the_dashboard_can_carry_the_forecast(self):
+        target = self.root / "dashboard.html"
+        output = self.run_cli("dashboard", "--forecast", "--privacy", "aggregate",
+                              "--out", str(target))
+        self.assertIn("with forecast", output)
+        self.assertIn('id="projection"', target.read_text(encoding="utf-8"))
+
+    def test_last_is_the_chance_of_finishing_bottom_of_the_table(self):
+        """It was each club's own worst finish, so a club that always won the
+        title was shown finishing last in every simulated season."""
+        rigged = ({"100": 6.0, "200": 0.0},
+                  {"100": collections.Counter({1: 50}),
+                   "200": collections.Counter({2: 50})})
+        with mock.patch.object(cli.predict, "simulate", lambda *a, **k: rigged):
+            output = self.run_cli("forecast", "--series", "latest", "--runs", "50")
+        rows = {line.split()[0]: line.split()[-1] for line in output.splitlines()
+                if line.startswith(("Alpha", "Beta"))}
+        self.assertEqual(rows, {"Alpha": "0.0%", "Beta": "100.0%"})
 
 
 class Compare(Command):
