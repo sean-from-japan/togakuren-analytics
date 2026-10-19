@@ -9,7 +9,7 @@
 
 Match records from the Tokyo University Football Association
 (東京都大学サッカー連盟), turned into a database and a set of measurements.
-**2,312 fixtures, 53 clubs, 2021–2026 (player-level records from 2022), no
+**Over 2,000 fixtures, 53 clubs, 2021–2026 (player-level records from 2022), no
 dependencies outside the standard library, and no collected data in the
 repository.**
 
