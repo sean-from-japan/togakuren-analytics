@@ -4,6 +4,20 @@ Dates are the day the work landed on `main`.
 
 ## Unreleased
 
+### Data refresh — 2026-11-10
+
+- Re-fetched all 34 published competitions (2,337 fixtures, 2,326 completed),
+  including cup results through 8 November. All 327 fixtures in the 2026
+  league divisions 1–3 are complete, adding 54 league results since the
+  September snapshot.
+- Regenerated both languages of the season profiles and cross-season analysis,
+  including the 2026 rows in older profiles' club histories, and refreshed the
+  dashboard and trend figures. Locally generated dashboards use aggregate mode;
+  completed divisions no longer show forecasts for remaining fixtures.
+- Documented `--no-cache ingest` for refreshing results. Existing forecast
+  experiments keep their original cut-offs. Collected data remains outside
+  the repository; no publishing step is included in this refresh.
+
 ### Added
 
 - **The dashboard now answers a club's own question: what is left, and what is

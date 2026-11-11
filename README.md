@@ -13,6 +13,10 @@ A standard-library-only Python toolkit that turns the Tokyo University Football 
 
 **公開ページ / Live pages: [sean-from-japan.github.io/togakuren-analytics](https://sean-from-japan.github.io/togakuren-analytics/)** — 2026年1〜3部のダッシュボード（勝率予測付き）とシーズン横断ページ / the 2026 dashboards with forecasts, and the cross-season page.
 
+**データ更新 / Data refresh: 2026-11-10.** 2026年1〜3部は全327試合終了。[シーズン別分析](docs/seasons/README.md)と[シーズン横断分析](docs/SEASON_TRENDS.ja.md)を最終成績に更新しました。公開中の全34大会・2,337試合を再取得し、カップ戦は11月8日までの結果を含みます。以下の予測・検証結果は各文書に記した時点の実験です。
+
+All 327 league fixtures in the 2026 divisions 1–3 are complete. [Season profiles](docs/seasons/README.md) and [cross-season analysis](docs/SEASON_TRENDS.en.md) now use the final results. The refresh covers all 34 published competitions and 2,337 fixtures, including cup results through 8 November. Forecast experiments below retain their documented cut-offs.
+
 ![The dashboard in aggregate mode](docs/example-dashboard.en.png)
 
 ## 主な結果

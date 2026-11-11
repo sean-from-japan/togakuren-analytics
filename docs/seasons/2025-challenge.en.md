@@ -21,7 +21,7 @@ Every club in the division, from the federation's published match records. Aggre
 
 ![Fingerprints](../figures/en/fig-fingerprints.png)
 
-Six indices, each scaled within this division. The vertices are numbered 1-6 clockwise from the top, in the order the indices are listed under each club below, and the dashed outline is the division mean. The chart is the same one the dashboard draws; the numbers under each club repeat it in text.
+Six indices, each scaled within this division. The vertices are numbered 1-6 clockwise from the top, in the order the indices are listed under each club below, and the dashed outline is the division mean. The image illustrates the dashboard's chart layout; use the indices under each club below for this season's values.
 
 ### 1. 東京都市大学
 
@@ -49,7 +49,7 @@ Six indices, each scaled within this division. The vertices are numbered 1-6 clo
 | 2023 | チャレンジリーグ | 13 | 3-4-6 | 13 | 1.0 | 14 | -8 |
 | 2024 | チャレンジリーグ | 16 | 10-2-4 | 32 | 2.0 | 43 | 16 |
 | 2025 | チャレンジリーグ | 10 | 9-0-1 | 27 | 2.7 | 29 | 18 |
-| 2026 | 3部リーグ | 12 | 5-1-6 | 16 | 1.33 | 18 | -13 |
+| 2026 | 3部リーグ | 14 | 7-1-6 | 22 | 1.57 | 25 | -8 |
 
 ### 2. 松蔭大学・横浜商科大学
 
@@ -73,7 +73,7 @@ Six indices, each scaled within this division. The vertices are numbered 1-6 clo
 | Season | Division | P | W-D-L | Pts | Pts/game | GF | GD |
 | --- | --- | --: | --: | --: | --: | --: | --: |
 | 2025 | チャレンジリーグ | 10 | 8-1-1 | 25 | 2.5 | 34 | 26 |
-| 2026 | 3部リーグ | 12 | 5-3-4 | 18 | 1.5 | 29 | 8 |
+| 2026 | 3部リーグ | 14 | 7-2-5 | 23 | 1.64 | 39 | 11 |
 
 ### 3. 和光大学
 
@@ -98,7 +98,7 @@ Six indices, each scaled within this division. The vertices are numbered 1-6 clo
 | --- | --- | --: | --: | --: | --: | --: | --: |
 | 2024 | チャレンジリーグ | 16 | 8-2-6 | 26 | 1.62 | 45 | 24 |
 | 2025 | チャレンジリーグ | 10 | 5-2-3 | 17 | 1.7 | 38 | 19 |
-| 2026 | 3部リーグ | 12 | 1-2-9 | 5 | 0.42 | 7 | -48 |
+| 2026 | 3部リーグ | 14 | 1-1-12 | 4 | 0.29 | 9 | -61 |
 
 ### 4. 東京薬科大学
 
@@ -126,7 +126,7 @@ Six indices, each scaled within this division. The vertices are numbered 1-6 clo
 | 2023 | チャレンジリーグ | 13 | 0-1-12 | 1 | 0.08 | 4 | -49 |
 | 2024 | チャレンジリーグ | 15 | 2-1-12 | 7 | 0.47 | 18 | -27 |
 | 2025 | チャレンジリーグ | 10 | 3-2-5 | 11 | 1.1 | 19 | -7 |
-| 2026 | 3部リーグ | 12 | 1-1-10 | 4 | 0.33 | 11 | -52 |
+| 2026 | 3部リーグ | 14 | 1-1-12 | 4 | 0.29 | 14 | -68 |
 
 ### 5. 北里大学
 
@@ -154,7 +154,7 @@ Six indices, each scaled within this division. The vertices are numbered 1-6 clo
 | 2023 | チャレンジリーグ | 13 | 0-3-10 | 3 | 0.23 | 13 | -67 |
 | 2024 | チャレンジリーグ | 13 | 1-0-12 | 3 | 0.23 | 15 | -38 |
 | 2025 | チャレンジリーグ | 10 | 2-0-8 | 6 | 0.6 | 8 | -29 |
-| 2026 | 3部リーグ | 12 | 1-1-10 | 4 | 0.33 | 10 | -27 |
+| 2026 | 3部リーグ | 14 | 1-1-12 | 4 | 0.29 | 10 | -42 |
 
 ### 6. 明星大学
 

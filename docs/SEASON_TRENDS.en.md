@@ -4,7 +4,7 @@
 
 Every completed season in one place. Seasons before 2026 are finished, so these tables are fixed: the same code over the same records reproduces them exactly. Aggregates only — no individual appears here.
 
-Snapshot of 2021–2026, generated 2026-09-28. Regenerate with `togakuren trends --format md --lang en`.
+Snapshot of 2021–2026, generated 2026-11-10. Regenerate with `togakuren trends --format md --lang en`.
 
 ## Seasons
 
@@ -27,9 +27,9 @@ Snapshot of 2021–2026, generated 2026-09-28. Regenerate with `togakuren trends
 | 2025 | 2部リーグ | 10 | 90 | - | 2.98 | 20.5 | 0.145 | 1.49 | 3 |
 | 2025 | 3部リーグ | 9 | 72 | - | 3.89 | 19.7 | 0.198 | 1.06 | 2 |
 | 2025 | チャレンジリーグ | 6 | 30 | - | 4.63 | 24.8 | 0.187 | 1.00 | 0 |
-| 2026 | 1部リーグ | 12 | 102 | 77% | 3.41 | 22.0 | 0.155 | 1.62 | 2 |
-| 2026 | 2部リーグ | 10 | 80 | 89% | 2.92 | 20.4 | 0.143 | 1.30 | 3 |
-| 2026 | 3部リーグ | 15 | 91 | 87% | 4.56 | 25.0 | 0.182 | 1.35 | 3 |
+| 2026 | 1部リーグ | 12 | 132 | - | 3.40 | 22.3 | 0.153 | 1.70 | 3 |
+| 2026 | 2部リーグ | 10 | 90 | - | 2.96 | 20.7 | 0.143 | 1.23 | 5 |
+| 2026 | 3部リーグ | 15 | 105 | - | 4.80 | 24.9 | 0.193 | 1.39 | 5 |
 
 Player-level recording begins in 2022. 2021 has results only, so shots and conversion are not computed for it rather than derived from a rounding error.
 
@@ -43,10 +43,10 @@ Player-level recording begins in 2022. 2021 has results only, so shots and conve
 
 | Season | Year | Players | Minutes | Share | Goals | Goals/90 |
 | --- | --- | --: | --: | --: | --: | --: |
-| 2026 | 1 | 72 | 23601 | 12% | 27 | 0.103 |
-| 2026 | 2 | 74 | 41310 | 21% | 77 | 0.168 |
-| 2026 | 3 | 89 | 64111 | 32% | 88 | 0.124 |
-| 2026 | 4 | 108 | 71960 | 36% | 146 | 0.183 |
+| 2026 | 1 | 82 | 33741 | 13% | 44 | 0.117 |
+| 2026 | 2 | 78 | 48028 | 19% | 94 | 0.176 |
+| 2026 | 3 | 91 | 80399 | 31% | 106 | 0.119 |
+| 2026 | 4 | 108 | 93882 | 37% | 178 | 0.171 |
 | 2025 | 1 | 39 | 15477 | 6% | 21 | 0.122 |
 | 2025 | 2 | 75 | 44819 | 18% | 37 | 0.074 |
 | 2025 | 3 | 114 | 90054 | 35% | 169 | 0.169 |
@@ -68,10 +68,10 @@ Player-level recording begins in 2022. 2021 has results only, so shots and conve
 
 | Season | Year | Players | Minutes | Share | Goals | Goals/90 |
 | --- | --- | --: | --: | --: | --: | --: |
-| 2026 | 1 | 49 | 18969 | 12% | 16 | 0.076 |
-| 2026 | 2 | 74 | 36159 | 23% | 56 | 0.139 |
-| 2026 | 3 | 74 | 52876 | 34% | 68 | 0.116 |
-| 2026 | 4 | 86 | 49086 | 31% | 87 | 0.160 |
+| 2026 | 1 | 49 | 22520 | 13% | 19 | 0.076 |
+| 2026 | 2 | 73 | 40528 | 23% | 68 | 0.151 |
+| 2026 | 3 | 72 | 57454 | 33% | 70 | 0.110 |
+| 2026 | 4 | 88 | 54919 | 31% | 100 | 0.164 |
 | 2025 | 1 | 43 | 15338 | 9% | 33 | 0.194 |
 | 2025 | 2 | 84 | 54052 | 30% | 54 | 0.090 |
 | 2025 | 3 | 67 | 46994 | 26% | 84 | 0.161 |
@@ -93,10 +93,10 @@ Player-level recording begins in 2022. 2021 has results only, so shots and conve
 
 | Season | Year | Players | Minutes | Share | Goals | Goals/90 |
 | --- | --- | --: | --: | --: | --: | --: |
-| 2026 | 1 | 77 | 23019 | 13% | 28 | 0.109 |
-| 2026 | 2 | 116 | 61810 | 34% | 112 | 0.163 |
-| 2026 | 3 | 113 | 64824 | 36% | 196 | 0.272 |
-| 2026 | 4 | 58 | 30366 | 17% | 71 | 0.210 |
+| 2026 | 1 | 76 | 21758 | 11% | 33 | 0.137 |
+| 2026 | 2 | 120 | 71177 | 35% | 136 | 0.172 |
+| 2026 | 3 | 113 | 75148 | 37% | 228 | 0.273 |
+| 2026 | 4 | 67 | 37695 | 18% | 93 | 0.222 |
 | 2025 | 1 | 73 | 25921 | 19% | 64 | 0.222 |
 | 2025 | 2 | 80 | 47451 | 35% | 114 | 0.216 |
 | 2025 | 3 | 57 | 40286 | 30% | 52 | 0.116 |
@@ -129,8 +129,8 @@ Share of minutes and goals per 90 minutes, within one division. Which year group
 
 ![Promotion and relegation](figures/en/fig-promotion.png)
 
-- Promoted: 32 cases, -0.97 points per game on average.
-- Relegated: 17 cases, +1.24 points per game on average.
+- Promoted: 41 cases, -0.98 points per game on average.
+- Relegated: 23 cases, +1.30 points per game on average.
 
 | From | Division | To | Division | Direction | Pts/game before | after | Change |
 | --- | --- | --- | --- | --- | --: | --: | --: |
@@ -183,21 +183,21 @@ Share of minutes and goals per 90 minutes, within one division. Which year group
 | 2024 | 2部リーグ | 2025 | 3部リーグ | Relegated | 0.78 | 1.81 | +1.03 |
 | 2024 | 2部リーグ | 2025 | 3部リーグ | Relegated | 1.17 | 0.81 | -0.35 |
 | 2024 | 2部リーグ | 2025 | 3部リーグ | Relegated | 1.17 | 2.12 | +0.96 |
-| 2025 | 2部リーグ | 2026 | 1部リーグ | Promoted (in progress) | 2.06 | 0.47 | -1.58 |
-| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted (in progress) | 0.60 | 0.33 | -0.27 |
-| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted (in progress) | 1.70 | 0.42 | -1.28 |
-| 2025 | 2部リーグ | 2026 | 3部リーグ | Relegated (in progress) | 0.56 | 2.69 | +2.14 |
-| 2025 | 1部リーグ | 2026 | 2部リーグ | Relegated (in progress) | 0.77 | 2.25 | +1.48 |
-| 2025 | 2部リーグ | 2026 | 3部リーグ | Relegated (in progress) | 1.00 | 2.33 | +1.33 |
-| 2025 | 3部リーグ | 2026 | 2部リーグ | Promoted (in progress) | 2.62 | 2.38 | -0.25 |
-| 2025 | 1部リーグ | 2026 | 2部リーグ | Relegated (in progress) | 0.36 | 2.62 | +2.26 |
-| 2025 | 1部リーグ | 2026 | 2部リーグ | Relegated (in progress) | 0.41 | 1.19 | +0.78 |
-| 2025 | 2部リーグ | 2026 | 3部リーグ | Relegated (in progress) | 0.94 | 2.25 | +1.31 |
-| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted (in progress) | 1.10 | 0.33 | -0.77 |
-| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted (in progress) | 2.70 | 1.33 | -1.37 |
-| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted (in progress) | 2.50 | 1.50 | -1.00 |
-| 2025 | 2部リーグ | 2026 | 1部リーグ | Promoted (in progress) | 1.94 | 0.35 | -1.59 |
-| 2025 | 3部リーグ | 2026 | 2部リーグ | Promoted (in progress) | 2.12 | 0.81 | -1.31 |
+| 2025 | 2部リーグ | 2026 | 1部リーグ | Promoted | 2.06 | 0.59 | -1.47 |
+| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted | 0.60 | 0.29 | -0.31 |
+| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted | 1.70 | 0.29 | -1.41 |
+| 2025 | 2部リーグ | 2026 | 3部リーグ | Relegated | 0.56 | 2.50 | +1.94 |
+| 2025 | 1部リーグ | 2026 | 2部リーグ | Relegated | 0.77 | 2.11 | +1.34 |
+| 2025 | 2部リーグ | 2026 | 3部リーグ | Relegated | 1.00 | 2.43 | +1.43 |
+| 2025 | 3部リーグ | 2026 | 2部リーグ | Promoted | 2.62 | 2.44 | -0.18 |
+| 2025 | 1部リーグ | 2026 | 2部リーグ | Relegated | 0.36 | 2.56 | +2.19 |
+| 2025 | 2部リーグ | 2026 | 3部リーグ | Relegated | 0.94 | 2.14 | +1.20 |
+| 2025 | 1部リーグ | 2026 | 2部リーグ | Relegated | 0.41 | 1.28 | +0.87 |
+| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted | 1.10 | 0.29 | -0.81 |
+| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted | 2.70 | 1.57 | -1.13 |
+| 2025 | チャレンジリーグ | 2026 | 3部リーグ | Promoted | 2.50 | 1.64 | -0.86 |
+| 2025 | 2部リーグ | 2026 | 1部リーグ | Promoted | 1.94 | 0.32 | -1.63 |
+| 2025 | 3部リーグ | 2026 | 2部リーグ | Promoted | 2.12 | 0.72 | -1.40 |
 
 Points per game in the season before a division change, and in the season after it. Seasons still in progress are marked and excluded from the averages.
 
@@ -225,8 +225,8 @@ Points per game in the season before a division change, and in the season after 
 | 上智大学 | 2部リーグ | 1部リーグ | 1部リーグ | 1部リーグ | 2部リーグ | 1部リーグ |
 | 創価大学 | 2部リーグ | チャレンジリーグ | チャレンジリーグ | 2部リーグ | 2部リーグ | 2部リーグ |
 | 成城大学 | 2部リーグ | 2部リーグ | 1部リーグ | 2部リーグ | 2部リーグ | 2部リーグ |
+| 東京工業大学 | 2部リーグ | 2部リーグ | 2部リーグ | 2部リーグ | 2部リーグ | 3部リーグ |
 | 東京理科大学 | 2部リーグ | 2部リーグ | 1部リーグ | 2部リーグ | 1部リーグ | 2部リーグ |
-| 東京科学大学 | 2部リーグ | 2部リーグ | 2部リーグ | 2部リーグ | 2部リーグ | 3部リーグ |
 | 東京都立大学 | 2部リーグ | 2部リーグ | 2部リーグ | 2部リーグ | 2部リーグ | 2部リーグ |
 | 松蔭大学（神奈川県） |  |  | 2部リーグ | チャレンジリーグ |  |  |
 | 桜美林大学 | 2部リーグ | チャレンジリーグ | チャレンジリーグ | 2部リーグ | 1部リーグ | 1部リーグ |

@@ -13,6 +13,8 @@ Match records from the Tokyo University Football Association
 dependencies outside the standard library, and no collected data in the
 repository.**
 
+**Refreshed 10 November 2026.** All 34 published competitions and 2,337 fixtures were fetched again. All 327 league fixtures in the 2026 divisions 1–3 are complete; [season profiles](docs/seasons/README.md) and [cross-season analysis](docs/SEASON_TRENDS.en.md) now use the final results. Cup results run through 8 November. Forecast experiments below retain their documented cut-offs.
+
 Those six seasons are not six seasons of one competition. The league merged with
 Kanagawa's in 2023 and was rebuilt three times, which is documented in
 [docs/LEAGUE_STRUCTURE.en.md](docs/LEAGUE_STRUCTURE.en.md) because getting it wrong
@@ -112,6 +114,9 @@ togakuren ingest
 
 # or just one year
 togakuren ingest --year 2026
+
+# Fetch updated results without reusing saved responses
+togakuren --no-cache ingest --year 2026
 
 togakuren list                                       # what is loaded
 togakuren dashboard --series "2026 1部"              # interactive, team selector

@@ -2,6 +2,8 @@
 
 *[日本語](FINDINGS.ja.md)*
 
+The measurements and figures here retain the records used when this analysis was written. Final results fetched on 10 November 2026 are in the [cross-season analysis](docs/SEASON_TRENDS.en.md) and [season profiles](docs/seasons/README.md).
+
 Six things the Tokyo University Football Association's own pages do not show,
 taken from its published match records: results from 2021 and player-level
 records for the five seasons from 2022.
@@ -199,7 +201,7 @@ togakuren intake --year 2026     # the preseason ranking
 
 ## 2. A club that changes division stops being described by its own table
 
-![Points per game before and after a division change](docs/figures/en/fig-promotion.png)
+![Points per game before and after a division change](docs/figures/en/fig-promotion-snapshot.png)
 
 Promotion and relegation are the one natural experiment this dataset offers: the
 same squad, one season later, against different opposition. Forty-nine completed
@@ -320,7 +322,7 @@ somebody else now does not have to repeat.*
 
 ## 4. Year groups have no structure beyond "fourth years score"
 
-![Minutes share and scoring rate by academic year](docs/figures/en/fig-grades.png)
+![Minutes share and scoring rate by academic year](docs/figures/en/fig-grades-snapshot.png)
 
 Goals per 90 minutes by academic year, first division only. Pooling divisions
 mixes populations, so this stays inside one of them.
@@ -348,7 +350,7 @@ One real change: first years took 9.5% of first-division minutes in 2026, agains
 
 ## 5. Conversion rises as the division falls, except in the second
 
-![Conversion by division over time](docs/figures/en/fig-conversion.png)
+![Conversion by division over time](docs/figures/en/fig-conversion-snapshot.png)
 
 | | 2022 | 2023 | 2024 | 2025 | 2026 |
 |---|---|---|---|---|---|
@@ -373,7 +375,7 @@ clubs, the same size it had been in most seasons. The claim is still open.
 
 ## 6. The table and the shot count disagree below third place
 
-![League position against shot volume](docs/figures/en/fig-bubbles.png)
+![League position against shot volume](docs/figures/en/fig-bubbles-snapshot.png)
 
 Rank on the x axis, shots per game on the y, total goals as circle area. Five of
 twelve first-division sides in 2026 sit at least three places away from their
@@ -392,7 +394,7 @@ that the table sorts on conversion, not volume. Yokohama National shoot as often
 as the third-placed side and convert at half the rate; Daito Bunka shoot least in
 the top half and finish at 0.204.
 
-![Team fingerprints](docs/figures/en/fig-fingerprints.png)
+![Team fingerprints](docs/figures/en/fig-fingerprints-snapshot.png)
 
 The same clubs on six indices, each scaled within the season: shot volume,
 finishing, defence, rotation (minutes spread beyond a settled eleven), youth
