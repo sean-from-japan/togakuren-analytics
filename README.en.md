@@ -125,7 +125,7 @@ togakuren report --series "2026 1部"                 # flat standalone HTML
 togakuren export --series "2026 1部" --out d1.csv    # per-player season rows
 togakuren trends                                     # every season at once
 togakuren intake --validate                          # what the squad list is worth before kick-off
-togakuren intake --year 2026                         # one division ranked from its squad lists
+togakuren intake --year 2026 --level 1               # preseason ranking for 2026 Division 1
 togakuren profiles --series "2026 1部"               # one division as Markdown
 togakuren profiles --all                             # every completed season
 togakuren sample                                     # player-level output, invented data
@@ -140,6 +140,17 @@ togakuren compare --reference docs/reference-leagues.json   # each division as a
 
 `--series` takes a series id or any set of search terms that narrows to one
 series, so `"2026 1部"` is enough.
+
+### Preseason rankings
+
+`intake --year 2026 --level 1` ranks first-division clubs using squad lists,
+previous-season performance, and division changes. It can run before the first
+match once the squad lists and fixtures are loaded. The model trains on results
+from other seasons and ranks clubs with a previous-season result.
+
+`actual` reports points per game standardised within the division. It shows
+`-` until a standardised result is available. `intake --validate` scores only
+clubs with a standardised result.
 
 ### report and dashboard are not the same view
 
@@ -314,7 +325,7 @@ as a club-level average and never on a per-player row, in any privacy mode.
 python3 -m unittest discover -s tests -t . -v
 ```
 
-296 tests, no network access, no fixtures taken from the federation — the test
+302 tests, no network access, no fixtures taken from the federation — the test
 data is invented clubs and invented people. CI runs them on Linux, macOS and
 Windows against Python 3.9 and 3.13, and fails the build if any collected data is
 ever committed.

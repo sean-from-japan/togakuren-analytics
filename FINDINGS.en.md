@@ -165,8 +165,9 @@ sorts them correctly anyway:
 *Share of the squad that came from a school which reached the All-Japan
 Championship. The order never breaks.*
 
-And the concrete version. Fitting on everything except 2026, then ranking the
-2026 first division from the squad lists alone, before the season started:
+We fitted the model on seasons other than 2026, then ranked the 2026 first
+division using the information available before kick-off: squad lists,
+previous-season performance, and division changes.
 
 | Club | Preseason | Actual (60% played) | Championship schools | Academy |
 |---|---|---|---|---|
@@ -195,9 +196,13 @@ enter that competition. The measure is blind to them by construction — section
 is what happened when that was chased.
 
 ```bash
-togakuren intake --validate      # every table above
-togakuren intake --year 2026     # the preseason ranking
+togakuren intake --validate              # validate against loaded results
+togakuren intake --year 2026 --level 1   # 2026 Division 1 preseason ranking
 ```
+
+The commands use the data currently loaded. The table's actual results are
+from the original analysis. When only squads and fixtures are available for the
+target season, the ranking shows `-` in the `actual` column.
 
 ## 2. A club that changes division stops being described by its own table
 
@@ -463,7 +468,7 @@ ship.
 pip install .
 togakuren ingest                                 # about 40 seconds
 togakuren intake --validate                      # section 1, and the split in section 2
-togakuren intake --year 2026                     # the preseason ranking in section 1
+togakuren intake --year 2026 --level 1           # the preseason ranking in section 1
 togakuren trends                                 # sections 2, 4 and 5
 togakuren dashboard --series "2026 1部"          # section 6
 togakuren privacy-check --series "2026 1部"      # the last section

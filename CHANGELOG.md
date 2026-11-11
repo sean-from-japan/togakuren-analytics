@@ -72,6 +72,9 @@ Dates are the day the work landed on `main`.
 
 ### Fixed
 
+- `intake` can now rank a division as soon as its squad lists and fixtures are
+  loaded, before any match is played. It shows `-` for unavailable actual
+  results and excludes those clubs from validation counts and scores.
 - **`forecast` printed the wrong chance of finishing last.** The *last* column
   took each club's own worst simulated finish instead of twelfth place, so a
   club that never fell below fourth had its chance of fourth place printed as

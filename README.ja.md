@@ -119,7 +119,7 @@ togakuren report --series "2026 1部"                 # 単体で完結するHTM
 togakuren export --series "2026 1部" --out d1.csv    # 選手×シーズンの行
 togakuren trends                                     # 全シーズンを一度に
 togakuren intake --validate                          # 開幕前の名簿にどれだけの価値があるか
-togakuren intake --year 2026                         # 1つの部を名簿だけで並べる
+togakuren intake --year 2026 --level 1               # 2026年1部の開幕前予測
 togakuren profiles --series "2026 1部"               # 1つの部をMarkdownで
 togakuren profiles --all                             # 終了した全シーズン
 togakuren sample                                     # 架空データでの選手単位の出力
@@ -134,6 +134,12 @@ togakuren compare --reference docs/reference-leagues.json   # 各部を1つの�
 
 `--series` はシリーズIDでも、1つに絞り込める検索語の並びでも受け付けます。
 `"2026 1部"` で足ります。
+
+### 開幕前の予測
+
+`intake --year 2026 --level 1` は、名簿、前年の成績、所属部の変化から2026年1部のクラブを予測順に並べます。対象シーズンの名簿と日程を取り込めば、初戦前でも実行できます。学習には対象シーズンを除いた試合結果が必要で、前年の成績があるクラブが順位表の対象です。
+
+`actual` は部内で標準化した1試合平均勝点です。実績を算出できるまでは `-` と表示します。`intake --validate` は、実績を算出できるクラブだけを検証の対象とします。
 
 ### report と dashboard は別のものです
 
@@ -282,7 +288,7 @@ togakuren compare --reference docs/reference-leagues.json   # 各部を1つの�
 python3 -m unittest discover -s tests -t . -v
 ```
 
-296件。ネットワークアクセスなし、連盟から取得したフィクスチャも使っていません（テストデータは
+302件。ネットワークアクセスなし、連盟から取得したフィクスチャも使っていません（テストデータは
 架空のクラブと架空の人物です）。CIは Linux・macOS・Windows × Python 3.9・3.13 で実行し、
 収集データがコミットされた場合はビルドを落とします。
 

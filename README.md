@@ -43,6 +43,11 @@ cd togakuren-analytics
 pip install .
 togakuren ingest                                   # about 40 seconds
 togakuren dashboard --series "2026 1部" --forecast
+togakuren intake --year 2026 --level 1              # preseason club ranking
 ```
+
+名簿と日程を取り込むと、初戦前でも `intake` で予測順位を出せます。使い方は[日本語README](README.ja.md#開幕前の予測)を参照してください。
+
+`intake` can rank clubs before the first match once their squads and fixtures are loaded. See the [English README](README.en.md#preseason-rankings) for details.
 
 Not affiliated with the Tokyo University Football Association. 東京都大学サッカー連盟とは無関係の個人プロジェクトです。
