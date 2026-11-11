@@ -68,17 +68,34 @@ def _standardise(values):
 def squad_rows(conn, reference=None):
     """One row per club-season: the squad list turned into numbers.
 
-    Only seasons with squad lists and a finished-enough table appear, and every
-    value is standardised inside its own division and year. That is deliberate:
-    an unstandardised pedigree score would mostly be measuring which division a
-    club is in, which is not a prediction of anything.
+    Every club-season with a squad list and a known division level appears,
+    whether or not it has a table yet: that is the one case the preseason model
+    exists for, since the whole point is to rank a division from its squad list
+    *before* there is a result to rank it by. ``result`` is present only once
+    the club has actually played, so a season with nothing played yet can be
+    ranked by :func:`preseason_table` but never scored by :func:`evaluate`,
+    which needs a true outcome to score against.
+
+    Every value is standardised inside its own division and year. That is
+    deliberate: an unstandardised pedigree score would mostly be measuring
+    which division a club is in, which is not a prediction of anything.
     """
     editions = championship_editions(reference)
     series = {s["id"]: s for s in analysis.league_series(conn)}
     ladder = analysis.season_ladder(conn)
-    club_of = {row["id"]: row["team_id"] for row in conn.execute("SELECT id, team_id FROM teams")}
     names = {row["team_id"]: row["short_name"] or row["name"] for row in conn.execute(
         "SELECT team_id, short_name, name FROM teams")}
+
+    # The division level a club sat in is fixed by its series membership, not
+    # by whether it has played yet, so it is looked up from every team rather
+    # than from the standings table below.
+    club_of, level = {}, {}
+    for row in conn.execute("SELECT id, series_id, team_id FROM teams"):
+        club_of[row["id"]] = row["team_id"]
+        season = series.get(row["series_id"])
+        if season:
+            level[(season["year"], row["team_id"])] = \
+                ladder.get(season["year"], {}).get(season["division"])
 
     squads = defaultdict(list)
     for row in conn.execute(
@@ -94,7 +111,7 @@ def squad_rows(conn, reference=None):
             "editions": editions.get(origins.match_key(school), 0) if school else 0,
         })
 
-    outcome, level, divisions = {}, {}, defaultdict(list)
+    outcome, divisions = {}, defaultdict(list)
     for row in conn.execute(
         """SELECT t.team_id, t.series_id, st.points, st.played
              FROM teams t JOIN standings st ON st.team_pk = t.id
@@ -105,7 +122,6 @@ def squad_rows(conn, reference=None):
             continue
         key = (season["year"], row["team_id"])
         outcome[key] = row["points"] / row["played"]
-        level[key] = ladder.get(season["year"], {}).get(season["division"])
         divisions[(season["year"], season["division"])].append(key)
 
     # A club's result is only comparable inside its own division and season, so
@@ -120,18 +136,20 @@ def squad_rows(conn, reference=None):
 
     rows = []
     for (year, club), squad in squads.items():
-        if (year, club) not in result_z or not squad:
+        if not squad:
             continue
         first_years = [p for p in squad if p["grade"] == "1"]
-        rows.append({
+        row = {
             "year": year, "club": club, "name": names.get(club, club),
             "level": level.get((year, club)), "size": len(squad),
-            "result": result_z[(year, club)],
             "pedigree": statistics.mean(p["editions"] for p in squad),
             "champions": sum(1 for p in squad if p["editions"]) / len(squad),
             "youth": sum(1 for p in squad if p["youth"]) / len(squad),
             "first_year_share": len(first_years) / len(squad),
-        })
+        }
+        if (year, club) in result_z:
+            row["result"] = result_z[(year, club)]
+        rows.append(row)
 
     years = sorted({row["year"] for row in rows})
     for row in rows:
@@ -193,8 +211,11 @@ def leave_one_season_out(rows, features):
     to say anything you like. Pooling every season's held-out predictions and
     scoring them once is the same amount of data with none of the choice about
     which year to report.
+
+    Only rows with a ``result`` can be scored. An unplayed season can be
+    ranked by :func:`preseason_table` as soon as its squad lists are available.
     """
-    usable = [r for r in rows if all(f in r for f in features)]
+    usable = [r for r in rows if "result" in r and all(f in r for f in features)]
     predictions, truth = [], []
     for year in sorted({r["year"] for r in usable}):
         train = [r for r in usable if r["year"] != year]
@@ -235,6 +256,7 @@ def evaluate(rows, models=None):
     club-seasons and exactly the case where a forecast is worth having.
     """
     models = models or MODELS
+    rows = [r for r in rows if "result" in r]
     with_previous = [r for r in rows if "previous" in r]
     scored = []
     for label, features in models:
@@ -257,9 +279,13 @@ def preseason_table(rows, year, level=1, features=("previous", "step", "pedigree
 
     The model is fitted without the season being ranked, so this is what the
     squad list said in advance rather than a description of what happened.
+    Training needs a true ``result`` to fit against; the season being ranked
+    does not, which is what lets a season with nothing played yet be ranked
+    at all.
     """
     features = list(features)
-    train = [r for r in rows if r["year"] != year and all(f in r for f in features)]
+    train = [r for r in rows
+             if r["year"] != year and "result" in r and all(f in r for f in features)]
     if not train:
         return []
     beta = fit(train, features)
@@ -281,7 +307,7 @@ def by_move(rows):
     groups = {1: "promoted", -1: "relegated", 0: "stayed"}
     out = []
     for step, label in groups.items():
-        group = [r for r in rows if r.get("step") == step]
+        group = [r for r in rows if r.get("step") == step and "result" in r]
         if len(group) < 5:
             continue
         out.append({

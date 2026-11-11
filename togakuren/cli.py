@@ -436,10 +436,15 @@ def cmd_intake(args):
     conn = _database(args)
     rows = intake.squad_rows(conn)
     if not rows:
-        raise SystemExit("no season has both a squad list and a table; run `ingest` first")
+        raise SystemExit("no season has a squad list; run `ingest` first")
     if args.completed_only:
         latest = max(row["year"] for row in rows)
         rows = [row for row in rows if row["year"] != latest]
+    if not any("result" in row for row in rows):
+        raise SystemExit(
+            "no standardised results in the selected seasons to train or validate "
+            "the squad list model; at least four clubs in a division must have played"
+        )
 
     if args.validate:
         scored = intake.evaluate(rows)
@@ -472,12 +477,17 @@ def cmd_intake(args):
     print(f"{year}, level {args.level}: ranked as the squad lists had it before kick-off")
     print(f"  {'club':<22}{'predicted':>10}{'actual':>9}{'champion school':>17}{'academy':>9}")
     for row in table:
-        print(f"  {row['name'][:20]:<22}{row['predicted']:+10.2f}{row['result']:+9.2f}"
+        actual = f"{row['result']:+9.2f}" if "result" in row else f"{'-':>9}"
+        print(f"  {row['name'][:20]:<22}{row['predicted']:+10.2f}{actual}"
               f"{row['champions']:16.0%}{row['youth']:9.0%}")
-    print(f"\n  correlation over the {len(table)} clubs: "
-          f"{intake.correlation([r['predicted'] for r in table], [r['result'] for r in table]):+.3f}")
-    print("  Both columns are standardised inside the division, so 0 is average and the\n"
-          "  units are its own standard deviations.")
+    scored = [row for row in table if "result" in row]
+    if scored:
+        print(f"\n  correlation over the {len(scored)} clubs with a result so far: "
+              f"{intake.correlation([r['predicted'] for r in scored], [r['result'] for r in scored]):+.3f}")
+        print("  Both columns are standardised inside the division, so 0 is average and the\n"
+              "  units are its own standard deviations.")
+    else:
+        print("\n  'actual' shows '-' while standardised results are unavailable.")
 
 
 def cmd_sample(args):

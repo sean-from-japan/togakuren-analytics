@@ -193,5 +193,42 @@ class AgainstADatabase(unittest.TestCase):
                          sorted((r["predicted"] for r in table), reverse=True))
 
 
+class ASeasonWithNothingPlayedYet(unittest.TestCase):
+    """The moment the whole module exists for: a season that has just opened.
+
+    Squads are public, the fixture list exists, and nobody has a result yet.
+    """
+
+    def setUp(self):
+        self.conn = fixtures.seed_preseason(
+            fixtures.seed_seasons(db.connect(":memory:")), year="2004"
+        )
+        self.addCleanup(self.conn.close)
+        self.rows = intake.squad_rows(self.conn)
+
+    def test_the_new_season_gets_a_row_per_club_without_a_result(self):
+        new = [row for row in self.rows if row["year"] == "2004"]
+        self.assertEqual(len(new), 6)
+        self.assertTrue(all("result" not in row for row in new))
+        # The level still comes through: it is fixed by the division, not by
+        # whether anyone has played.
+        self.assertTrue(all(row["level"] == 1 for row in new))
+
+    def test_it_can_still_be_ranked_from_the_squad_list_alone(self):
+        table = intake.preseason_table(self.rows, "2004", level=1)
+        self.assertEqual(len(table), 6)
+        self.assertTrue(all("result" not in row for row in table))
+        self.assertEqual([r["predicted"] for r in table],
+                         sorted((r["predicted"] for r in table), reverse=True))
+
+    def test_validation_is_unaffected_by_the_unplayed_season(self):
+        played = [row for row in self.rows if row["year"] != "2004"]
+        self.assertEqual(intake.evaluate(self.rows), intake.evaluate(played))
+
+    def test_by_move_never_sees_a_club_without_a_result(self):
+        played = [row for row in self.rows if row["year"] != "2004"]
+        self.assertEqual(intake.by_move(self.rows), intake.by_move(played))
+
+
 if __name__ == "__main__":
     unittest.main()

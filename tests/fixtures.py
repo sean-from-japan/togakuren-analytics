@@ -284,3 +284,53 @@ def seed_seasons(conn):
                     )
     conn.commit()
     return conn
+
+
+def seed_preseason(conn, year="2004", tier=1, division="1部リーグ", clubs=6):
+    """Add one more division to ``conn``: squads published, nothing played yet.
+
+    This is the moment ``intake`` exists for — a season has opened, the squad
+    list is public, and the fixture list exists but every match is still
+    scheduled rather than played. No standings, game results or appearances
+    rows are inserted, because none would exist yet on the real site either.
+
+    The clubs are the same ``club-{tier}{index}`` ids :func:`seed_seasons`
+    uses, continuing into the new year — the realistic case, where most of a
+    division is last year's clubs again rather than an entirely new pool.
+    """
+    series_id = f"s{year}-{tier}"
+    conn.execute(
+        "INSERT INTO series (id, year, name, short_name, type, division) "
+        "VALUES (?, ?, ?, ?, 'league', ?)",
+        (series_id, year, f"Example {year} {division}", division, division),
+    )
+    for index in range(clubs):
+        team_pk = f"{series_id}-t{index}"
+        club = f"club-{tier}{index}"
+        conn.execute(
+            "INSERT INTO teams (id, series_id, team_id, name, short_name) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (team_pk, series_id, club, f"Club {club}", f"Club {club}"),
+        )
+        game_id = f"{team_pk}-g"
+        conn.execute(
+            "INSERT INTO games (id, series_id, section, name, kickoff, venue, "
+            "game_over, length) VALUES (?, ?, '1', 'g', '', '', 0, 90)",
+            (game_id, series_id),
+        )
+        for player in range(12):
+            player_id = f"{team_pk}-p{player}"
+            conn.execute(
+                "INSERT INTO players (player_id, name, kana) VALUES (?, ?, '')",
+                (player_id, f"Player {player}"),
+            )
+            strong = player < index * 2
+            conn.execute(
+                "INSERT INTO squad_members (series_id, team_pk, player_id, number, "
+                "position, grade, former_team) VALUES (?, ?, ?, ?, 'MF', ?, ?)",
+                (series_id, team_pk, player_id, str(player + 1),
+                 str(player % 4 + 1),
+                 "青森山田高校" if strong else "架空第一高校"),
+            )
+    conn.commit()
+    return conn

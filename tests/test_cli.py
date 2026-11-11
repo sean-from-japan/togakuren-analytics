@@ -313,6 +313,26 @@ class Intake(Command):
         self.assertIn("2003", every)
         self.assertNotIn("2003", older)
 
+    def test_a_season_with_nothing_played_is_still_ranked_with_a_blank_actual(self):
+        conn = db.connect(self.seasons_db)
+        fixtures.seed_preseason(conn, year="2004")
+        conn.close()
+        out = self.seasons_cli("intake", "--year", "2004", "--level", "1")
+        self.assertIn("before kick-off", out)
+        self.assertNotIn("correlation over", out)
+        self.assertIn("standardised results are unavailable", out)
+        club_lines = [line.split() for line in out.splitlines() if line.startswith("  Club ")]
+        self.assertEqual(len(club_lines), 6)
+        self.assertTrue(all(fields[3] == "-" for fields in club_lines))
+
+    def test_a_season_with_nothing_played_does_not_break_validation(self):
+        before = self.seasons_cli("intake", "--validate").split("Championship and academy")[0]
+        conn = db.connect(self.seasons_db)
+        fixtures.seed_preseason(conn, year="2004")
+        conn.close()
+        out = self.seasons_cli("intake", "--validate")
+        self.assertEqual(out.split("Championship and academy")[0], before)
+
     def test_a_season_with_nothing_to_rank_says_so(self):
         with contextlib.redirect_stdout(io.StringIO()), \
                 self.assertRaises(SystemExit) as exit_:
